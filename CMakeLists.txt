@@ -20,7 +20,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 if(WIN32)
     if(MINGW)
         set(CMAKE_PREFIX_PATH "D:/Qt/6.6.1/mingw_64" CACHE PATH "Initial cache" FORCE)
-        set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};C:/vcpkg/installed/x64-mingw-dynamic/share")
+        set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};C:/vcpkg/installed/x64-mingw-dynamic")
     endif()
 endif()
 
@@ -231,3 +231,6 @@ elseif(UNIX)
     endif()
 
 endif()
+
+find_package(Nuspell CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE Nuspell::nuspell)

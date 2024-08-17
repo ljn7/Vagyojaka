@@ -21,6 +21,11 @@
 #include <QUndoStack>
 #include<QPrinter>
 
+#include <nuspell/dictionary.hxx>
+#include <string>
+#include <vector>
+#include <qtemporaryfile.h>
+
 Editor::Editor(QWidget *parent)
     : TextEditor(parent),
     m_speakerCompleter(makeCompleter()), m_textCompleter(makeCompleter()), m_transliterationCompleter(makeCompleter()),
@@ -74,8 +79,127 @@ Editor::Editor(QWidget *parent)
         "xml Files (*.xml)",
         "All Files (*)"
     };
+
+    QString persistentDir = QCoreApplication::applicationDirPath() + "/dictionaries";
+    QDir dir(persistentDir);
+    if (!dir.exists()) {
+        dir.mkpath(persistentDir); // Create directory if it does not exist
+    }
+
+    // Paths for dictionary files in the persistent directory
+    QString affPath = persistentDir + "/english.aff";
+    QString dicPath = persistentDir + "/english.dic";
+
+    // Copy dictionary files from Qt resource to the persistent directory
+    if (!copyFileToPersistentLocation(":/wordlists/hunspell/english.aff", affPath) ||
+        !copyFileToPersistentLocation(":/wordlists/hunspell/english.dic", dicPath)) {
+        std::cerr << "Failed to copy dictionary files to persistent location." << std::endl;
+    }
+
+
+
+    try {
+        // Load the dictionary from the persistent directory
+        dictionary.load_aff_dic(affPath.toStdString());
+        std::cerr << affPath.toStdString() << std::endl;
+
+    } catch (const nuspell::Dictionary_Loading_Error& e) {
+        std::cerr << "Error loading dictionary: " << e.what() << '\n';
+    }
+
+    std::string word = "capita";
+    std::vector<std::string> sugs;
+    if (dictionary.spell(word)) {
+        std::cerr << "Word \"" << word << "\" is correct.\n";
+    } else {
+        std::cerr << "Word \"" << word << "\" is incorrect.\n";
+        dictionary.suggest(word, sugs);
+        if (!sugs.empty()) {
+            std::cerr << "  Suggestions are: ";
+            for (const auto& sug : sugs) {
+                std::cerr << sug << ' ';
+            }
+            std::cerr << '\n';
+        }
+    }
+
+    QString affPathHi = persistentDir + "/hindi.aff";
+    QString dicPathHi = persistentDir + "/hindi.dic";
+
+    // Copy dictionary files from Qt resource to the persistent directory
+    if (!copyFileToPersistentLocation(":/wordlists/hunspell/hindi.aff", affPath) ||
+        !copyFileToPersistentLocation(":/wordlists/hunspell/hindi.dic", dicPath)) {
+        std::cerr << "Failed to copy dictionary files to persistent location." << std::endl;
+    }
+    try {
+        // Load the dictionary from the persistent directory
+        dictionary.load_aff_dic(affPathHi.toStdString());
+
+    } catch (const nuspell::Dictionary_Loading_Error& e) {
+        std::cerr << "Error loading dictionary: " << e.what() << '\n';
+    }
+    std::string word2 = "तत्वज्ञा ";
+    std::vector<std::string> sugs2;
+    if (dictionary.spell(word2)) {
+        std::cerr << "Word \"" << word2 << "\" is correct.\n";
+    } else {
+        std::cerr << "Word \"" << word2 << "\" is incorrect.\n";
+        dictionary.suggest(word2, sugs2);
+        if (!sugs2.empty()) {
+            std::cerr << "  Suggestions are: ";
+            for (const auto& sug : sugs2) {
+                std::cerr << sug << ' ';
+            }
+            std::cerr << '\n';
+        }
+    }
+
+    try {
+        // Load the dictionary from the persistent directory
+        dictionary.load_aff_dic(affPath.toStdString());
+        std::cerr << affPath.toStdString() << std::endl;
+
+    } catch (const nuspell::Dictionary_Loading_Error& e) {
+        std::cerr << "Error loading dictionary: " << e.what() << '\n';
+    }
+
+    std::string word3 = "historgra";
+    std::vector<std::string> sugs3;
+    if (dictionary.spell(word3)) {
+        std::cerr << "Word \"" << word3 << "\" is correct.\n";
+    } else {
+        std::cerr << "Word \"" << word3 << "\" is incorrect.\n";
+        dictionary.suggest(word3, sugs3);
+        if (!sugs.empty()) {
+            std::cerr << "  Suggestions are: ";
+            for (const auto& sug : sugs3) {
+                std::cerr << sug << ' ';
+            }
+            std::cerr << '\n';
+        }
+    }
+
 }
 
+bool Editor::copyFileToPersistentLocation(const QString &resourcePath, const QString &destinationPath) {
+    QFile resourceFile(resourcePath);
+    if (!resourceFile.open(QIODevice::ReadOnly)) {
+        qWarning() << "Failed to open resource file:" << resourcePath;
+        return false;
+    }
+
+    QFile destinationFile(destinationPath);
+    if (!destinationFile.open(QIODevice::WriteOnly)) {
+        qWarning() << "Failed to open destination file:" << destinationPath;
+        return false;
+    }
+
+    destinationFile.write(resourceFile.readAll());
+    destinationFile.close();
+    resourceFile.close();
+
+    return true;
+}
 
 int countwords = 0;
 int speakercount = 0;

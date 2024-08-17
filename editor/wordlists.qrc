@@ -5,5 +5,11 @@
         <file>wordlists/hindi.txt</file>
         <file>wordlists/gujarati.txt</file>
         <file>wordlists/tamil.txt</file>
+        <file>wordlists/hunspell/hindi.aff</file>
+        <file>wordlists/hunspell/hindi.dic</file>
+        <file>wordlists/hunspell/hindi.txt</file>
+        <file>wordlists/wordlists.qrc</file>
+        <file>wordlists/hunspell/english.aff</file>
+        <file>wordlists/hunspell/english.dic</file>
     </qresource>
 </RCC>

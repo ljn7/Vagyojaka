@@ -1,6 +1,7 @@
 #pragma once
 
 #include "blockandword.h"
+#include "nuspell/dictionary.hxx"
 #include "texteditor.h"
 #include "wordeditor.h"
 #include "utilities/changespeakerdialog.h"
@@ -124,11 +125,13 @@ private:
     static QTime getTime(const QString& text);
     static word makeWord(const QTime& t, const QString& s, const QStringList& tagList, const QString& isEdited);
     QCompleter* makeCompleter();
-    QSettings* settings;
+    void processContentChanges();
 
     void saveXml(QFile* file);
     void helpJumpToPlayer();
     void loadDictionary();
+    bool copyFileToPersistentLocation(const QString &resourcePath, const QString &destinationPath);
+
 
     block fromEditor(qint64 blockNumber) const;
     static QStringList listFromFile(const QString& fileName) ;
@@ -165,6 +168,9 @@ private:
     int lastHighlightedBlock=-1;
     bool moveAlongTimeStamps=true;
     QStringList supportedFormats;
+    QTimer debounceTimer;
+    QSettings* settings;
+    nuspell::Dictionary dictionary;
 
 public:
 
