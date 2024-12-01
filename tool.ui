@@ -871,7 +871,7 @@
    </widget>
    <widget class="QMenu" name="menuTTS">
     <property name="title">
-     <string>TTS</string>
+     <string>ASR Validation</string>
     </property>
     <addaction name="actionOpen"/>
    </widget>
@@ -1227,7 +1227,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Version 5.5.6-1</string>
+    <string>Version 5.5.7-1</string>
    </property>
    <property name="toolTip">
     <string>Version</string>

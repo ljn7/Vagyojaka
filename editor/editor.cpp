@@ -1389,15 +1389,11 @@ void Editor::loadDictionary()
             if (wordText != "" && m_punctuation.contains(wordText.back()))
                 wordText = wordText.left(wordText.size() - 1);
 
-            if (!std::binary_search(m_dictionary.begin(),
-                                    m_dictionary.end(),
-                                    wordText)
-                ) {
-                if (m_transcriptLang != "english" && !std::binary_search(m_english_dictionary.begin(),
-                                                                         m_english_dictionary.end(),
-                                                                         wordText)) {
-                    invalidWords.insert(i, j);
-                }
+            if (!isWordValid(wordText,
+                             m_dictionary,
+                             m_english_dictionary,
+                             m_transcriptLang)) {
+                invalidWords.insert(i, j);
             }
         }
     }
@@ -1582,16 +1578,11 @@ void Editor::setContent()
                         continue;
                         // the string is a valid time in the format "HH:MM:SS.f"
                     }
-
-                    if (!std::binary_search(m_dictionary.begin(),
-                                            m_dictionary.end(),
-                                            wordText)
-                        ){
-                        if (m_transcriptLang != "english" || !std::binary_search(m_english_dictionary.begin(),
-                                                                                 m_english_dictionary.end(),
-                                                                                 wordText)) {
-                            invalidWords.insert(i, j);
-                        }
+                    if (!isWordValid(wordText,
+                                     m_dictionary,
+                                     m_english_dictionary,
+                                     m_transcriptLang)) {
+                        invalidWords.insert(i, j);
                     }
                     if(!m_blocks[i].words[j].tagList.empty()){
                         taggedWords.insert(i,j);
@@ -1899,16 +1890,11 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
                     continue;
                     // the string is a valid time in the format "HH:MM:SS.f"
                 }
-
-                if (!std::binary_search(m_dictionary.begin(),
-                                        m_dictionary.end(),
-                                        wordText)
-                    ) {
-                    if (m_transcriptLang != "english" && !std::binary_search(m_english_dictionary.begin(),
-                                                                             m_english_dictionary.end(),
-                                                                             wordText)) {
-                        invalidWords.insert(i, j);
-                    }
+                if (!isWordValid(wordText,
+                                 m_dictionary,
+                                 m_english_dictionary,
+                                 m_transcriptLang)) {
+                    invalidWords.insert(i, j);
                 }
                 if(!m_blocks[i].words[j].tagList.empty()){
                     taggedWords.insert(i,j);
@@ -1928,6 +1914,26 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
         transcriptSave();
     }
 }
+
+bool Editor::isWordValid(const QString& wordText,
+                 const QStringList& primaryDict,
+                 const QStringList& englishDict,
+                 const QString& transcriptLang) {
+
+    bool inPrimaryDict = std::binary_search(primaryDict.begin(),
+                                            primaryDict.end(),
+                                            wordText);
+    if (inPrimaryDict) return true;
+
+    if (transcriptLang != "english") {
+        return std::binary_search(englishDict.begin(),
+                                  englishDict.end(),
+                                  wordText);
+    }
+
+    return false;
+}
+
 
 void Editor::jumpToHighlightedLine()
 {
@@ -2612,17 +2618,9 @@ void Editor::markWordAsCorrect(int blockNumber, int wordNumber)
     if (textToInsert.trimmed() == "")
         return;
 
-    if (std::binary_search(m_dictionary.begin(),
-                           m_dictionary.end(),
-                           textToInsert))
-    {
-        if (m_transcriptLang != "english" && !std::binary_search(m_english_dictionary.begin(),
-                                                                 m_english_dictionary.end(),
-                                                                 textToInsert)) {
-            emit message("Word is already correct.");
-            return;
-        }
-
+    if (isWordValid(textToInsert, m_dictionary, m_english_dictionary, m_transcriptLang)) {
+        emit message("Word is already correct.");
+        return;
     }
 
     m_dictionary.insert
@@ -2643,15 +2641,11 @@ void Editor::markWordAsCorrect(int blockNumber, int wordNumber)
             if (wordText != "" && m_punctuation.contains(wordText.back()))
                 wordText = wordText.left(wordText.size() - 1);
 
-            if (!std::binary_search(m_dictionary.begin(),
-                                    m_dictionary.end(),
-                                    wordText)
-                ) {
-                if (m_transcriptLang != "english" && !std::binary_search(m_english_dictionary.begin(),
-                                                                         m_english_dictionary.end(),
-                                                                         wordText)) {
-                    invalidWords.insert(i, j);
-                }
+            if (!isWordValid(wordText,
+                             m_dictionary,
+                             m_english_dictionary,
+                             m_transcriptLang)) {
+                invalidWords.insert(i, j);
             }
         }
     }
