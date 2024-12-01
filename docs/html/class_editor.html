@@ -102,6 +102,9 @@ $(function(){ initResizable(false); });
 </div><!--header-->
 <div class="contents">
 
+<p>Manages the editing functionalities of transcripts, including time stamps, speaker changes, and file exports.  
+ <a href="#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="editor_8h_source.html">editor.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for Editor:</div>
@@ -116,58 +119,85 @@ Inheritance diagram for Editor:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-slots" name="pub-slots"></a>
 Public Slots</h2></td></tr>
 <tr class="memitem:a17bd1ec05085a33782c1f60c207ee84a" id="r_a17bd1ec05085a33782c1f60c207ee84a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a17bd1ec05085a33782c1f60c207ee84a">transcriptOpen</a> ()</td></tr>
+<tr class="memdesc:a17bd1ec05085a33782c1f60c207ee84a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Opens a transcript file, allowing the user to select a file from the file dialog.  <br /></td></tr>
 <tr class="separator:a17bd1ec05085a33782c1f60c207ee84a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4ccce7b8ce6103062557db556d66d2f8" id="r_a4ccce7b8ce6103062557db556d66d2f8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4ccce7b8ce6103062557db556d66d2f8">transcriptSave</a> ()</td></tr>
+<tr class="memdesc:a4ccce7b8ce6103062557db556d66d2f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the current transcript.  <br /></td></tr>
 <tr class="separator:a4ccce7b8ce6103062557db556d66d2f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade6bcd1472fc571c3de64faf5cda80ae" id="r_ade6bcd1472fc571c3de64faf5cda80ae"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ade6bcd1472fc571c3de64faf5cda80ae">transcriptSaveAs</a> ()</td></tr>
+<tr class="memdesc:ade6bcd1472fc571c3de64faf5cda80ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the current transcript with a new file name.  <br /></td></tr>
 <tr class="separator:ade6bcd1472fc571c3de64faf5cda80ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae339c80e9e49d773b16ea4e86935edc" id="r_aae339c80e9e49d773b16ea4e86935edc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aae339c80e9e49d773b16ea4e86935edc">transcriptClose</a> ()</td></tr>
+<tr class="memdesc:aae339c80e9e49d773b16ea4e86935edc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Closes the current transcript file.  <br /></td></tr>
 <tr class="separator:aae339c80e9e49d773b16ea4e86935edc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a51d62ac4a2336f3ebef54a1dc9d00ce9" id="r_a51d62ac4a2336f3ebef54a1dc9d00ce9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a51d62ac4a2336f3ebef54a1dc9d00ce9">highlightTranscript</a> (const QTime &amp;elapsedTime)</td></tr>
+<tr class="memdesc:a51d62ac4a2336f3ebef54a1dc9d00ce9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Highlights a transcript block and word based on the provided elapsed time.  <br /></td></tr>
 <tr class="separator:a51d62ac4a2336f3ebef54a1dc9d00ce9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45bb58baa1668ceae3eb76ad805d12eb" id="r_a45bb58baa1668ceae3eb76ad805d12eb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a45bb58baa1668ceae3eb76ad805d12eb">addCustomDictonary</a> ()</td></tr>
+<tr class="memdesc:a45bb58baa1668ceae3eb76ad805d12eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Opens a file dialog to add a custom dictionary.  <br /></td></tr>
 <tr class="separator:a45bb58baa1668ceae3eb76ad805d12eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad266af87ea3ba852caf6953d9099f4a5" id="r_ad266af87ea3ba852caf6953d9099f4a5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad266af87ea3ba852caf6953d9099f4a5">showBlocksFromData</a> ()</td></tr>
+<tr class="memdesc:ad266af87ea3ba852caf6953d9099f4a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Displays all blocks and their content in the QDebug (Saved in Logfile). Iterates through each block and prints its timestamp, speaker, text, and associated tags, followed by printing word details within each block.  <br /></td></tr>
 <tr class="separator:ad266af87ea3ba852caf6953d9099f4a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ee5b8ce3bfaf3075a712f8c8aa8b83a" id="r_a0ee5b8ce3bfaf3075a712f8c8aa8b83a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0ee5b8ce3bfaf3075a712f8c8aa8b83a">jumpToHighlightedLine</a> ()</td></tr>
+<tr class="memdesc:a0ee5b8ce3bfaf3075a712f8c8aa8b83a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Moves the cursor to the highlighted line in the editor. If no block is highlighted, the function returns immediately.  <br /></td></tr>
 <tr class="separator:a0ee5b8ce3bfaf3075a712f8c8aa8b83a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ec3692475db293adda642da72605e79" id="r_a7ec3692475db293adda642da72605e79"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7ec3692475db293adda642da72605e79">splitLine</a> (const QTime &amp;elapsedTime)</td></tr>
+<tr class="memdesc:a7ec3692475db293adda642da72605e79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Splits the current text line at the cursor's position. Divides the block into two based on cursor position, creating a new block and adjusting the timestamp and word list of each. Updates the editor content accordingly.  <br /></td></tr>
 <tr class="separator:a7ec3692475db293adda642da72605e79"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a59ca58da7e10388fc0ee5835b16b7955" id="r_a59ca58da7e10388fc0ee5835b16b7955"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a59ca58da7e10388fc0ee5835b16b7955">mergeUp</a> ()</td></tr>
+<tr class="memdesc:a59ca58da7e10388fc0ee5835b16b7955"><td class="mdescLeft">&#160;</td><td class="mdescRight">Merges the current block with the previous one, combining text and word lists. Only merges if the speaker of the current and previous block match.  <br /></td></tr>
 <tr class="separator:a59ca58da7e10388fc0ee5835b16b7955"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a007458330654c1d6a1aea0eb821a5cfd" id="r_a007458330654c1d6a1aea0eb821a5cfd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a007458330654c1d6a1aea0eb821a5cfd">mergeDown</a> ()</td></tr>
+<tr class="memdesc:a007458330654c1d6a1aea0eb821a5cfd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Merges the current block with the next block, transferring word list and text. Only merges if the speakers match for both blocks.  <br /></td></tr>
 <tr class="separator:a007458330654c1d6a1aea0eb821a5cfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2fda8c6653268dd35d58032ce152f3c3" id="r_a2fda8c6653268dd35d58032ce152f3c3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2fda8c6653268dd35d58032ce152f3c3">createChangeSpeakerDialog</a> ()</td></tr>
+<tr class="memdesc:a2fda8c6653268dd35d58032ce152f3c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Opens a dialog to select a new speaker for the highlighted block. Displays a modal dialog with a list of existing speakers. Updates the selected speaker in the block upon confirmation.  <br /></td></tr>
 <tr class="separator:a2fda8c6653268dd35d58032ce152f3c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab73209f498c8bd25eb4965c6b0656e5d" id="r_ab73209f498c8bd25eb4965c6b0656e5d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab73209f498c8bd25eb4965c6b0656e5d">createTimePropagationDialog</a> ()</td></tr>
+<tr class="memdesc:ab73209f498c8bd25eb4965c6b0656e5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Opens a dialog for propagating time across a range of blocks. Sets up a dialog allowing users to select a time range and optionally negate it. On confirmation, the specified time is propagated to the selected block range.  <br /></td></tr>
 <tr class="separator:ab73209f498c8bd25eb4965c6b0656e5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a769a7433bb11da5993dc746f8ae9c6cd" id="r_a769a7433bb11da5993dc746f8ae9c6cd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a769a7433bb11da5993dc746f8ae9c6cd">createTagSelectionDialog</a> ()</td></tr>
+<tr class="memdesc:a769a7433bb11da5993dc746f8ae9c6cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Opens a dialog for selecting and marking tags in the current block. Allows users to add tags to a block, showing existing tags initially.  <br /></td></tr>
 <tr class="separator:a769a7433bb11da5993dc746f8ae9c6cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a306a2ae72f55d5d402066a4554a593b6" id="r_a306a2ae72f55d5d402066a4554a593b6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a306a2ae72f55d5d402066a4554a593b6">insertTimeStamp</a> (const QTime &amp;elapsedTime)</td></tr>
+<tr class="memdesc:a306a2ae72f55d5d402066a4554a593b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inserts a timestamp at the current cursor position within a block. Updates the timestamp associated with the block and positions the cursor at the end.  <br /></td></tr>
 <tr class="separator:a306a2ae72f55d5d402066a4554a593b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad0204fb24d8eac15583fdd62282e9e30" id="r_ad0204fb24d8eac15583fdd62282e9e30"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad0204fb24d8eac15583fdd62282e9e30">changeTranscriptLang</a> ()</td></tr>
+<tr class="memdesc:ad0204fb24d8eac15583fdd62282e9e30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Changes the language of the transcript. Prompts the user to enter a new language, then loads the relevant dictionary.  <br /></td></tr>
 <tr class="separator:ad0204fb24d8eac15583fdd62282e9e30"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adc6a4fbf2678239f06adcd248cb7ed96" id="r_adc6a4fbf2678239f06adcd248cb7ed96"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adc6a4fbf2678239f06adcd248cb7ed96">speakerWiseJump</a> (const QString &amp;jumpDirection)</td></tr>
+<tr class="memdesc:adc6a4fbf2678239f06adcd248cb7ed96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Navigates to the next or previous block by the same speaker. Searches for the closest block in the specified direction with the same speaker, then jumps to that block's timestamp if found.  <br /></td></tr>
 <tr class="separator:adc6a4fbf2678239f06adcd248cb7ed96"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afee2ed4cc711ab754aee828400a88983" id="r_afee2ed4cc711ab754aee828400a88983"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afee2ed4cc711ab754aee828400a88983">wordWiseJump</a> (const QString &amp;jumpDirection)</td></tr>
+<tr class="memdesc:afee2ed4cc711ab754aee828400a88983"><td class="mdescLeft">&#160;</td><td class="mdescRight">Jumps to the next or previous word in the highlighted block. Adjusts position based on direction and ensures cursor remains within block limits.  <br /></td></tr>
 <tr class="separator:afee2ed4cc711ab754aee828400a88983"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab9de63d35ebe3d7c0e815e1d86e7fbac" id="r_ab9de63d35ebe3d7c0e815e1d86e7fbac"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab9de63d35ebe3d7c0e815e1d86e7fbac">blockWiseJump</a> (const QString &amp;jumpDirection)</td></tr>
+<tr class="memdesc:ab9de63d35ebe3d7c0e815e1d86e7fbac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Jumps to the next or previous block. Moves the cursor up or down to adjacent blocks and jumps to the appropriate timestamp.  <br /></td></tr>
 <tr class="separator:ab9de63d35ebe3d7c0e815e1d86e7fbac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a71024e620cbcfba79d52da5f8e74f5b5" id="r_a71024e620cbcfba79d52da5f8e74f5b5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a71024e620cbcfba79d52da5f8e74f5b5">useTransliteration</a> (bool value, const QString &amp;langCode=&quot;en&quot;)</td></tr>
+<tr class="memdesc:a71024e620cbcfba79d52da5f8e74f5b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enables or disables transliteration for the editor. Sets the transliteration state and language code.  <br /></td></tr>
 <tr class="separator:a71024e620cbcfba79d52da5f8e74f5b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a368365081ef10148332d82114362bb9c" id="r_a368365081ef10148332d82114362bb9c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a368365081ef10148332d82114362bb9c">useAutoSave</a> (bool value)</td></tr>
+<tr class="memdesc:a368365081ef10148332d82114362bb9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enables or disables the auto-save feature for the editor.  <br /></td></tr>
 <tr class="separator:a368365081ef10148332d82114362bb9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac99b5ce9a861da191af702d55bffaa40" id="r_ac99b5ce9a861da191af702d55bffaa40"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac99b5ce9a861da191af702d55bffaa40">suggest</a> (QString suggest)</td></tr>
+<tr class="memdesc:ac99b5ce9a861da191af702d55bffaa40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides word suggestions and replaces the selected word. Highlights the current word under the cursor and replaces it with the suggested text.  <br /></td></tr>
 <tr class="separator:ac99b5ce9a861da191af702d55bffaa40"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a880401ab2c46d4d82e2fe48cce0fc0be" id="r_a880401ab2c46d4d82e2fe48cce0fc0be"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a880401ab2c46d4d82e2fe48cce0fc0be">realTimeDataSavingToggle</a> ()</td></tr>
+<tr class="memdesc:a880401ab2c46d4d82e2fe48cce0fc0be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Toggles real-time data saving on or off. Enables or disables the data-saving feature in real-time.  <br /></td></tr>
 <tr class="separator:a880401ab2c46d4d82e2fe48cce0fc0be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a36217e691f9c16bd11acdbe0e72252f7" id="r_a36217e691f9c16bd11acdbe0e72252f7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a36217e691f9c16bd11acdbe0e72252f7">saveAsPDF</a> ()</td></tr>
+<tr class="memdesc:a36217e691f9c16bd11acdbe0e72252f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exports the transcript as a PDF file.  <br /></td></tr>
 <tr class="separator:a36217e691f9c16bd11acdbe0e72252f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4571912707a204f088e87688555747a9" id="r_a4571912707a204f088e87688555747a9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4571912707a204f088e87688555747a9">saveAsTXT</a> ()</td></tr>
+<tr class="memdesc:a4571912707a204f088e87688555747a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exports the transcript as a text file.  <br /></td></tr>
 <tr class="separator:a4571912707a204f088e87688555747a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeedf90bec8d94936d399b817a76bf42c" id="r_aeedf90bec8d94936d399b817a76bf42c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeedf90bec8d94936d399b817a76bf42c">updateTimeStamp</a> (int block_num, QTime endTime)</td></tr>
+<tr class="memdesc:aeedf90bec8d94936d399b817a76bf42c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the current block's timestamp with a new value.  <br /></td></tr>
 <tr class="separator:aeedf90bec8d94936d399b817a76bf42c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8aa95a47fc87b1d6a385b354f02b58d1" id="r_a8aa95a47fc87b1d6a385b354f02b58d1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8aa95a47fc87b1d6a385b354f02b58d1">updateTimeStampsBlock</a> (QVector&lt; int &gt; blks)</td></tr>
+<tr class="memdesc:a8aa95a47fc87b1d6a385b354f02b58d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates timestamps for a range of blocks based on a provided vector of seconds.  <br /></td></tr>
 <tr class="separator:a8aa95a47fc87b1d6a385b354f02b58d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_slots_class_text_editor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_slots_class_text_editor')"><img src="closed.png" alt="-"/>&#160;Public Slots inherited from <a class="el" href="class_text_editor.html">TextEditor</a></td></tr>
 <tr class="memitem:aa4383e48c58da9085ca25e9d6061111c inherit pub_slots_class_text_editor" id="r_aa4383e48c58da9085ca25e9d6061111c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_text_editor.html#aa4383e48c58da9085ca25e9d6061111c">findReplace</a> ()</td></tr>
@@ -176,16 +206,22 @@ Public Slots</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="signals" name="signals"></a>
 Signals</h2></td></tr>
 <tr class="memitem:a3da746fcf7ac8bc359a179bcb90b5c30" id="r_a3da746fcf7ac8bc359a179bcb90b5c30"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3da746fcf7ac8bc359a179bcb90b5c30">jumpToPlayer</a> (const QTime &amp;time)</td></tr>
+<tr class="memdesc:a3da746fcf7ac8bc359a179bcb90b5c30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signal emitted to jump to a specific time in the <code><a class="el" href="class_media_player.html">MediaPlayer</a></code>.  <br /></td></tr>
 <tr class="separator:a3da746fcf7ac8bc359a179bcb90b5c30"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b27bc0b54f3a75116c74bf215390e33" id="r_a7b27bc0b54f3a75116c74bf215390e33"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7b27bc0b54f3a75116c74bf215390e33">refreshTagList</a> (const QStringList &amp;tagList)</td></tr>
+<tr class="memdesc:a7b27bc0b54f3a75116c74bf215390e33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signal emitted to refresh the tag list display in the UI.  <br /></td></tr>
 <tr class="separator:a7b27bc0b54f3a75116c74bf215390e33"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aef36284240475a01dac7ffc5de89b85d" id="r_aef36284240475a01dac7ffc5de89b85d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aef36284240475a01dac7ffc5de89b85d">replyCame</a> ()</td></tr>
+<tr class="memdesc:aef36284240475a01dac7ffc5de89b85d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signal emitted when a reply is received from an external source.  <br /></td></tr>
 <tr class="separator:aef36284240475a01dac7ffc5de89b85d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a793252611de853b275658302aaf8412f" id="r_a793252611de853b275658302aaf8412f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a793252611de853b275658302aaf8412f">openMessage</a> (const QString &amp;text)</td></tr>
+<tr class="memdesc:a793252611de853b275658302aaf8412f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signal emitted to open a message box or display a message in the UI.  <br /></td></tr>
 <tr class="separator:a793252611de853b275658302aaf8412f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0bd4e214815f33b3291fc615f0fa7ff" id="r_af0bd4e214815f33b3291fc615f0fa7ff"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af0bd4e214815f33b3291fc615f0fa7ff">sendBlockTime</a> (QVector&lt; QTime &gt; timeArray)</td></tr>
+<tr class="memdesc:af0bd4e214815f33b3291fc615f0fa7ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signal emitted to send a vector of block timestamps for display in the <code><a class="el" href="class_audio_wave_form.html">AudioWaveForm</a></code>.  <br /></td></tr>
 <tr class="separator:af0bd4e214815f33b3291fc615f0fa7ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abcf3a8f01992978d5aaa028aba398cd2" id="r_abcf3a8f01992978d5aaa028aba398cd2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abcf3a8f01992978d5aaa028aba398cd2">sendBlockText</a> (QString blockText)</td></tr>
+<tr class="memdesc:abcf3a8f01992978d5aaa028aba398cd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signal emitted to send the text content of a specific block.  <br /></td></tr>
 <tr class="separator:abcf3a8f01992978d5aaa028aba398cd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header signals_class_text_editor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('signals_class_text_editor')"><img src="closed.png" alt="-"/>&#160;Signals inherited from <a class="el" href="class_text_editor.html">TextEditor</a></td></tr>
 <tr class="memitem:a6a176f079bd6267e1af8598342310228 inherit signals_class_text_editor" id="r_a6a176f079bd6267e1af8598342310228"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_text_editor.html#a6a176f079bd6267e1af8598342310228">message</a> (const QString &amp;text, int timeout=5000)</td></tr>
@@ -196,26 +232,37 @@ Signals</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:aae507cc6a63a5b43aab9eb45c989989a" id="r_aae507cc6a63a5b43aab9eb45c989989a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aae507cc6a63a5b43aab9eb45c989989a">Editor</a> (QWidget *parent=nullptr)</td></tr>
+<tr class="memdesc:aae507cc6a63a5b43aab9eb45c989989a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs an <a class="el" href="class_editor.html" title="Manages the editing functionalities of transcripts, including time stamps, speaker changes,...">Editor</a> instance.  <br /></td></tr>
 <tr class="separator:aae507cc6a63a5b43aab9eb45c989989a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5083df7af800967437dabcb53b55fdff" id="r_a5083df7af800967437dabcb53b55fdff"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5083df7af800967437dabcb53b55fdff">setWordEditor</a> (<a class="el" href="class_word_editor.html">WordEditor</a> *wordEditor)</td></tr>
+<tr class="memdesc:a5083df7af800967437dabcb53b55fdff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the word editor for the current <a class="el" href="class_editor.html" title="Manages the editing functionalities of transcripts, including time stamps, speaker changes,...">Editor</a> instance.  <br /></td></tr>
 <tr class="separator:a5083df7af800967437dabcb53b55fdff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a84f94de261c0c92e85c5c6ad30fdfd35" id="r_a84f94de261c0c92e85c5c6ad30fdfd35"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a84f94de261c0c92e85c5c6ad30fdfd35">setEditorFont</a> (const QFont &amp;font)</td></tr>
+<tr class="memdesc:a84f94de261c0c92e85c5c6ad30fdfd35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the font for the editor.  <br /></td></tr>
 <tr class="separator:a84f94de261c0c92e85c5c6ad30fdfd35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa97597555742469db6febc91e3861654" id="r_aa97597555742469db6febc91e3861654"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa97597555742469db6febc91e3861654">setMoveAlongTimeStamps</a> ()</td></tr>
+<tr class="memdesc:aa97597555742469db6febc91e3861654"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configures the editor to move along timestamps.  <br /></td></tr>
 <tr class="separator:aa97597555742469db6febc91e3861654"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0fc2d4af3315bbbb6c6eac1e6a750412" id="r_a0fc2d4af3315bbbb6c6eac1e6a750412"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0fc2d4af3315bbbb6c6eac1e6a750412">setShowTimeStamp</a> ()</td></tr>
+<tr class="memdesc:a0fc2d4af3315bbbb6c6eac1e6a750412"><td class="mdescLeft">&#160;</td><td class="mdescRight">Toggles the visibility of timestamps in the editor.  <br /></td></tr>
 <tr class="separator:a0fc2d4af3315bbbb6c6eac1e6a750412"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a973d00c32b2461a7f848376baeb819d7" id="r_a973d00c32b2461a7f848376baeb819d7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a973d00c32b2461a7f848376baeb819d7">loadTranscriptData</a> (QFile &amp;file)</td></tr>
+<tr class="memdesc:a973d00c32b2461a7f848376baeb819d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads transcript data from a given file.  <br /></td></tr>
 <tr class="separator:a973d00c32b2461a7f848376baeb819d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3be9bbf00c2409f719f2b1f91232d636" id="r_a3be9bbf00c2409f719f2b1f91232d636"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3be9bbf00c2409f719f2b1f91232d636">setContent</a> ()</td></tr>
+<tr class="memdesc:a3be9bbf00c2409f719f2b1f91232d636"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the content of the editor.  <br /></td></tr>
 <tr class="separator:a3be9bbf00c2409f719f2b1f91232d636"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63fda28b1d256edcf6a2487bb47893aa" id="r_a63fda28b1d256edcf6a2487bb47893aa"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a63fda28b1d256edcf6a2487bb47893aa">timestampVisibility</a> ()</td></tr>
+<tr class="memdesc:a63fda28b1d256edcf6a2487bb47893aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks the visibility status of timestamps.  <br /></td></tr>
 <tr class="separator:a63fda28b1d256edcf6a2487bb47893aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af326b0501d4974b2ff052560ba6618d0" id="r_af326b0501d4974b2ff052560ba6618d0"><td class="memItemLeft" align="right" valign="top">QList&lt; QTime &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af326b0501d4974b2ff052560ba6618d0">getTimeStamps</a> ()</td></tr>
+<tr class="memdesc:af326b0501d4974b2ff052560ba6618d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves timestamps from the blocks.  <br /></td></tr>
 <tr class="separator:af326b0501d4974b2ff052560ba6618d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5051a55800334eeb59491b3d002792ed" id="r_a5051a55800334eeb59491b3d002792ed"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5051a55800334eeb59491b3d002792ed">loadTranscriptFromUrl</a> (QUrl *fileUrl)</td></tr>
+<tr class="memdesc:a5051a55800334eeb59491b3d002792ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads transcript data from a given URL.  <br /></td></tr>
 <tr class="separator:a5051a55800334eeb59491b3d002792ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a875bbf46c31f55ccc136a689831f436a" id="r_a875bbf46c31f55ccc136a689831f436a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a875bbf46c31f55ccc136a689831f436a">showWaveform</a> ()</td></tr>
+<tr class="memdesc:a875bbf46c31f55ccc136a689831f436a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shows the waveform based on the current blocks.  <br /></td></tr>
 <tr class="separator:a875bbf46c31f55ccc136a689831f436a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_text_editor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_text_editor')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_text_editor.html">TextEditor</a></td></tr>
 <tr class="memitem:a01bf807b388aeb46fae36d32910eede0 inherit pub_methods_class_text_editor" id="r_a01bf807b388aeb46fae36d32910eede0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_text_editor.html#a01bf807b388aeb46fae36d32910eede0">TextEditor</a> (QWidget *parent=nullptr)</td></tr>
@@ -230,23 +277,31 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a751b05346e1fd6dc1331dd9e52d3d5f7" id="r_a751b05346e1fd6dc1331dd9e52d3d5f7"><td class="memItemLeft" align="right" valign="top">QRegularExpression&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a751b05346e1fd6dc1331dd9e52d3d5f7">timeStampExp</a></td></tr>
+<tr class="memdesc:a751b05346e1fd6dc1331dd9e52d3d5f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regular expression for timestamps.  <br /></td></tr>
 <tr class="separator:a751b05346e1fd6dc1331dd9e52d3d5f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0417cb474b2c9cf803c9a8b04bf9fb9" id="r_af0417cb474b2c9cf803c9a8b04bf9fb9"><td class="memItemLeft" align="right" valign="top">QRegularExpression&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af0417cb474b2c9cf803c9a8b04bf9fb9">speakerExp</a></td></tr>
+<tr class="memdesc:af0417cb474b2c9cf803c9a8b04bf9fb9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regular expression for speaker identification.  <br /></td></tr>
 <tr class="separator:af0417cb474b2c9cf803c9a8b04bf9fb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa5e3e8b40229746deeadb2d979680486" id="r_aa5e3e8b40229746deeadb2d979680486"><td class="memItemLeft" align="right" valign="top">QVector&lt; <a class="el" href="structblock.html">block</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa5e3e8b40229746deeadb2d979680486">m_blocks</a></td></tr>
+<tr class="memdesc:aa5e3e8b40229746deeadb2d979680486"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores the blocks of text and their associated data.  <br /></td></tr>
 <tr class="separator:aa5e3e8b40229746deeadb2d979680486"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee2ba47c334616aca2f76e2cdf57f27c" id="r_aee2ba47c334616aca2f76e2cdf57f27c"><td class="memItemLeft" align="right" valign="top">QUrl&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aee2ba47c334616aca2f76e2cdf57f27c">m_transcriptUrl</a></td></tr>
+<tr class="memdesc:aee2ba47c334616aca2f76e2cdf57f27c"><td class="mdescLeft">&#160;</td><td class="mdescRight">URL of the loaded transcript.  <br /></td></tr>
 <tr class="separator:aee2ba47c334616aca2f76e2cdf57f27c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abf4cca9cfb55cb8427d74d8628540cfe" id="r_abf4cca9cfb55cb8427d74d8628540cfe"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abf4cca9cfb55cb8427d74d8628540cfe">showTimeStamp</a> =false</td></tr>
+<tr class="memdesc:abf4cca9cfb55cb8427d74d8628540cfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag indicating whether to show timestamps.  <br /></td></tr>
 <tr class="separator:abf4cca9cfb55cb8427d74d8628540cfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:ac959f240581319896b09ec70703e57a9" id="r_ac959f240581319896b09ec70703e57a9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac959f240581319896b09ec70703e57a9">mousePressEvent</a> (QMouseEvent *e) override</td></tr>
+<tr class="memdesc:ac959f240581319896b09ec70703e57a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handles mouse press events, enabling specific behavior with Ctrl key.  <br /></td></tr>
 <tr class="separator:ac959f240581319896b09ec70703e57a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afc82ba4223b9d37396169fa305f8d77f" id="r_afc82ba4223b9d37396169fa305f8d77f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afc82ba4223b9d37396169fa305f8d77f">keyPressEvent</a> (QKeyEvent *event) override</td></tr>
+<tr class="memdesc:afc82ba4223b9d37396169fa305f8d77f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handles key press events and provides custom shortcuts and suggestions.  <br /></td></tr>
 <tr class="separator:afc82ba4223b9d37396169fa305f8d77f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac23be1b244bd2041efa179fd8347dbff" id="r_ac23be1b244bd2041efa179fd8347dbff"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac23be1b244bd2041efa179fd8347dbff">contextMenuEvent</a> (QContextMenuEvent *event) override</td></tr>
+<tr class="memdesc:ac23be1b244bd2041efa179fd8347dbff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates and displays a customized context menu with additional options.  <br /></td></tr>
 <tr class="separator:ac23be1b244bd2041efa179fd8347dbff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_class_text_editor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_class_text_editor')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_text_editor.html">TextEditor</a></td></tr>
 <tr class="memitem:a1f6888aadc3171dda706aa702dfbc63b inherit pro_methods_class_text_editor" id="r_a1f6888aadc3171dda706aa702dfbc63b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_text_editor.html#a1f6888aadc3171dda706aa702dfbc63b">resizeEvent</a> (QResizeEvent *event) override</td></tr>
@@ -261,131 +316,189 @@ Private Slots</h2></td></tr>
 <tr class="memitem:a516b4761355810036b8b6fa96565f8c0" id="r_a516b4761355810036b8b6fa96565f8c0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a516b4761355810036b8b6fa96565f8c0">wordEditorChanged</a> ()</td></tr>
 <tr class="separator:a516b4761355810036b8b6fa96565f8c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac4f5c7aa6c7f3c4647d153199632f8a1" id="r_ac4f5c7aa6c7f3c4647d153199632f8a1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac4f5c7aa6c7f3c4647d153199632f8a1">updateWordEditor</a> ()</td></tr>
+<tr class="memdesc:ac4f5c7aa6c7f3c4647d153199632f8a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the word editor with the current block's words.  <br /></td></tr>
 <tr class="separator:ac4f5c7aa6c7f3c4647d153199632f8a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad7b7a1e4f3a809057c218b874a39371a" id="r_ad7b7a1e4f3a809057c218b874a39371a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad7b7a1e4f3a809057c218b874a39371a">changeSpeaker</a> (const QString &amp;newSpeaker, bool replaceAllOccurrences)</td></tr>
+<tr class="memdesc:ad7b7a1e4f3a809057c218b874a39371a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Changes the speaker's name in the transcript.  <br /></td></tr>
 <tr class="separator:ad7b7a1e4f3a809057c218b874a39371a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35ef78a01a540105f57933cd08d59c83" id="r_a35ef78a01a540105f57933cd08d59c83"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a35ef78a01a540105f57933cd08d59c83">propagateTime</a> (const QTime &amp;time, int start, int end, bool negateTime)</td></tr>
+<tr class="memdesc:a35ef78a01a540105f57933cd08d59c83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Propagates a specified time adjustment to a range of blocks.  <br /></td></tr>
 <tr class="separator:a35ef78a01a540105f57933cd08d59c83"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d6b6693ce0c3afe56b3b119c9645d82" id="r_a3d6b6693ce0c3afe56b3b119c9645d82"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3d6b6693ce0c3afe56b3b119c9645d82">selectTags</a> (const QStringList &amp;newTagList)</td></tr>
+<tr class="memdesc:a3d6b6693ce0c3afe56b3b119c9645d82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Selects tags for the current block.  <br /></td></tr>
 <tr class="separator:a3d6b6693ce0c3afe56b3b119c9645d82"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a962c0c995c8b05fe63460dd5291bffcf" id="r_a962c0c995c8b05fe63460dd5291bffcf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a962c0c995c8b05fe63460dd5291bffcf">markWordAsCorrect</a> (int blockNumber, int wordNumber)</td></tr>
+<tr class="memdesc:a962c0c995c8b05fe63460dd5291bffcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Marks a word as correct and updates the dictionary.  <br /></td></tr>
 <tr class="separator:a962c0c995c8b05fe63460dd5291bffcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5197ec29714db0eeba22bd18ae9f9e4c" id="r_a5197ec29714db0eeba22bd18ae9f9e4c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5197ec29714db0eeba22bd18ae9f9e4c">insertSpeakerCompletion</a> (const QString &amp;completion)</td></tr>
+<tr class="memdesc:a5197ec29714db0eeba22bd18ae9f9e4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inserts speaker name completion into the editor.  <br /></td></tr>
 <tr class="separator:a5197ec29714db0eeba22bd18ae9f9e4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a562aa205fc3ea3fd7927f505525e11" id="r_a7a562aa205fc3ea3fd7927f505525e11"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7a562aa205fc3ea3fd7927f505525e11">insertTextCompletion</a> (const QString &amp;completion)</td></tr>
+<tr class="memdesc:a7a562aa205fc3ea3fd7927f505525e11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inserts text completion into the editor.  <br /></td></tr>
 <tr class="separator:a7a562aa205fc3ea3fd7927f505525e11"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8da047cf633fed02e2411b1c5f8f8c19" id="r_a8da047cf633fed02e2411b1c5f8f8c19"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8da047cf633fed02e2411b1c5f8f8c19">insertTransliterationCompletion</a> (const QString &amp;completion)</td></tr>
+<tr class="memdesc:a8da047cf633fed02e2411b1c5f8f8c19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inserts transliteration completion into the editor.  <br /></td></tr>
 <tr class="separator:a8da047cf633fed02e2411b1c5f8f8c19"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a715c722adcc1663b36233db5b1ead553" id="r_a715c722adcc1663b36233db5b1ead553"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a715c722adcc1663b36233db5b1ead553">handleReply</a> ()</td></tr>
+<tr class="memdesc:a715c722adcc1663b36233db5b1ead553"><td class="mdescLeft">&#160;</td><td class="mdescRight">Processes the response received from a network reply and extracts tokens.  <br /></td></tr>
 <tr class="separator:a715c722adcc1663b36233db5b1ead553"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab25ed0561ed99993a3a99d137e401e49" id="r_ab25ed0561ed99993a3a99d137e401e49"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab25ed0561ed99993a3a99d137e401e49">sendRequest</a> (const QString &amp;input, const QString &amp;langCode)</td></tr>
+<tr class="memdesc:ab25ed0561ed99993a3a99d137e401e49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sends a request to an external service for text completion.  <br /></td></tr>
 <tr class="separator:ab25ed0561ed99993a3a99d137e401e49"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
 <tr class="memitem:a04e223cd7f1bf600bba0dc9e1104af21" id="r_a04e223cd7f1bf600bba0dc9e1104af21"><td class="memItemLeft" align="right" valign="top">QCompleter *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a04e223cd7f1bf600bba0dc9e1104af21">makeCompleter</a> ()</td></tr>
+<tr class="memdesc:a04e223cd7f1bf600bba0dc9e1104af21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates and configures a QCompleter for use in the editor.  <br /></td></tr>
 <tr class="separator:a04e223cd7f1bf600bba0dc9e1104af21"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1cace496a058b135dda3eade0f2ed883" id="r_a1cace496a058b135dda3eade0f2ed883"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1cace496a058b135dda3eade0f2ed883">saveXml</a> (QFile *file)</td></tr>
+<tr class="memdesc:a1cace496a058b135dda3eade0f2ed883"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the current transcript data to an XML file.  <br /></td></tr>
 <tr class="separator:a1cace496a058b135dda3eade0f2ed883"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6a4bc9c1349158e184345ac483cb81f4" id="r_a6a4bc9c1349158e184345ac483cb81f4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6a4bc9c1349158e184345ac483cb81f4">helpJumpToPlayer</a> ()</td></tr>
+<tr class="memdesc:a6a4bc9c1349158e184345ac483cb81f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sends the current text block to the <code><a class="el" href="class_media_player.html">MediaPlayer</a></code>, allowing a jump to the relevant timestamp with <code><a class="el" href="class_media_player.html#a613c967ba6b40063b420a8609d034f8f">MediaPlayer::setPositionToTime</a></code>.  <br /></td></tr>
 <tr class="separator:a6a4bc9c1349158e184345ac483cb81f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a003e0b8bfd41eeb5884eedf1459189f7" id="r_a003e0b8bfd41eeb5884eedf1459189f7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a003e0b8bfd41eeb5884eedf1459189f7">loadDictionary</a> ()</td></tr>
+<tr class="memdesc:a003e0b8bfd41eeb5884eedf1459189f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a dictionary for the editor to use for word suggestions and spell-checking.  <br /></td></tr>
 <tr class="separator:a003e0b8bfd41eeb5884eedf1459189f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:add67d2c3c51b56487b725767352751b3" id="r_add67d2c3c51b56487b725767352751b3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structblock.html">block</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#add67d2c3c51b56487b725767352751b3">fromEditor</a> (qint64 blockNumber) const</td></tr>
+<tr class="memdesc:add67d2c3c51b56487b725767352751b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a block number into a block structure containing the timestamp, text, speaker, and a list of words.  <br /></td></tr>
 <tr class="separator:add67d2c3c51b56487b725767352751b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-methods" name="pri-static-methods"></a>
 Static Private Member Functions</h2></td></tr>
 <tr class="memitem:afac99b1554c18edcc5447ee226ef05e9" id="r_afac99b1554c18edcc5447ee226ef05e9"><td class="memItemLeft" align="right" valign="top">static QTime&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afac99b1554c18edcc5447ee226ef05e9">getTime</a> (const QString &amp;text)</td></tr>
+<tr class="memdesc:afac99b1554c18edcc5447ee226ef05e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a time string and converts it into a QTime object.  <br /></td></tr>
 <tr class="separator:afac99b1554c18edcc5447ee226ef05e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab51dcc40eba14ca5100f9a7522ea1727" id="r_ab51dcc40eba14ca5100f9a7522ea1727"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structword.html">word</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab51dcc40eba14ca5100f9a7522ea1727">makeWord</a> (const QTime &amp;t, const QString &amp;s, const QStringList &amp;tagList, const QString &amp;isEdited)</td></tr>
+<tr class="memdesc:ab51dcc40eba14ca5100f9a7522ea1727"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a word object with the given attributes.  <br /></td></tr>
 <tr class="separator:ab51dcc40eba14ca5100f9a7522ea1727"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac2711c50d22aca01ea5b2b32cd588c8d" id="r_ac2711c50d22aca01ea5b2b32cd588c8d"><td class="memItemLeft" align="right" valign="top">static QStringList&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac2711c50d22aca01ea5b2b32cd588c8d">listFromFile</a> (const QString &amp;fileName)</td></tr>
+<tr class="memdesc:ac2711c50d22aca01ea5b2b32cd588c8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads transcript data from an XML file into the editor.  <br /></td></tr>
 <tr class="separator:ac2711c50d22aca01ea5b2b32cd588c8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:a47127a7b15cd2adee71d85932b3b3db0" id="r_a47127a7b15cd2adee71d85932b3b3db0"><td class="memItemLeft" align="right" valign="top">QSettings *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a47127a7b15cd2adee71d85932b3b3db0">settings</a></td></tr>
-<tr class="separator:a47127a7b15cd2adee71d85932b3b3db0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4939a8e9e6f7243df0442787fce38df8" id="r_a4939a8e9e6f7243df0442787fce38df8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4939a8e9e6f7243df0442787fce38df8">settingContent</a> {false}</td></tr>
+<tr class="memdesc:a4939a8e9e6f7243df0442787fce38df8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates if the editor is currently in a setting content mode.  <br /></td></tr>
 <tr class="separator:a4939a8e9e6f7243df0442787fce38df8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a34cffb2f58c764d8185e49031e7c0d67" id="r_a34cffb2f58c764d8185e49031e7c0d67"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a34cffb2f58c764d8185e49031e7c0d67">updatingWordEditor</a> {false}</td></tr>
+<tr class="memdesc:a34cffb2f58c764d8185e49031e7c0d67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates if the word editor is being updated.  <br /></td></tr>
 <tr class="separator:a34cffb2f58c764d8185e49031e7c0d67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5cf3fefce070568655dc513b17874f8e" id="r_a5cf3fefce070568655dc513b17874f8e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5cf3fefce070568655dc513b17874f8e">dontUpdateWordEditor</a> {false}</td></tr>
+<tr class="memdesc:a5cf3fefce070568655dc513b17874f8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag to prevent updates to the word editor.  <br /></td></tr>
 <tr class="separator:a5cf3fefce070568655dc513b17874f8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa31860aa49fcf48a020fba4d6793e6cb" id="r_aa31860aa49fcf48a020fba4d6793e6cb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa31860aa49fcf48a020fba4d6793e6cb">m_transliterate</a> {false}</td></tr>
+<tr class="memdesc:aa31860aa49fcf48a020fba4d6793e6cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates if transliteration is enabled.  <br /></td></tr>
 <tr class="separator:aa31860aa49fcf48a020fba4d6793e6cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afbcb3688407dd942e9ea70cc932cefb0" id="r_afbcb3688407dd942e9ea70cc932cefb0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afbcb3688407dd942e9ea70cc932cefb0">m_autoSave</a> {false}</td></tr>
+<tr class="memdesc:afbcb3688407dd942e9ea70cc932cefb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates if auto-save functionality is enabled.  <br /></td></tr>
 <tr class="separator:afbcb3688407dd942e9ea70cc932cefb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4dacecbaaf1d29e12e0c62e548e4c305" id="r_a4dacecbaaf1d29e12e0c62e548e4c305"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4dacecbaaf1d29e12e0c62e548e4c305">m_transcriptLang</a></td></tr>
+<tr class="memdesc:a4dacecbaaf1d29e12e0c62e548e4c305"><td class="mdescLeft">&#160;</td><td class="mdescRight">Language of the transcript.  <br /></td></tr>
 <tr class="separator:a4dacecbaaf1d29e12e0c62e548e4c305"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a746927ca46fcb7125563f54274eebb37" id="r_a746927ca46fcb7125563f54274eebb37"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a746927ca46fcb7125563f54274eebb37">m_punctuation</a> {&quot;,.!;:?&quot;}</td></tr>
+<tr class="memdesc:a746927ca46fcb7125563f54274eebb37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default punctuation characters used in the editor.  <br /></td></tr>
 <tr class="separator:a746927ca46fcb7125563f54274eebb37"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47127a7b15cd2adee71d85932b3b3db0" id="r_a47127a7b15cd2adee71d85932b3b3db0"><td class="memItemLeft" align="right" valign="top">QSettings *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a47127a7b15cd2adee71d85932b3b3db0">settings</a></td></tr>
+<tr class="memdesc:a47127a7b15cd2adee71d85932b3b3db0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to application settings.  <br /></td></tr>
+<tr class="separator:a47127a7b15cd2adee71d85932b3b3db0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a075c07d9fea80e35344b5edd9217c224" id="r_a075c07d9fea80e35344b5edd9217c224"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_highlighter.html">Highlighter</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a075c07d9fea80e35344b5edd9217c224">m_highlighter</a> = nullptr</td></tr>
+<tr class="memdesc:a075c07d9fea80e35344b5edd9217c224"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the syntax highlighter.  <br /></td></tr>
 <tr class="separator:a075c07d9fea80e35344b5edd9217c224"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a41edfe02df569558dacf491c05522c36" id="r_a41edfe02df569558dacf491c05522c36"><td class="memItemLeft" align="right" valign="top">qint64&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a41edfe02df569558dacf491c05522c36">highlightedBlock</a> = -1</td></tr>
+<tr class="memdesc:a41edfe02df569558dacf491c05522c36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the currently highlighted block in the editor.  <br /></td></tr>
 <tr class="separator:a41edfe02df569558dacf491c05522c36"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a060bb789c6d35df37f1b0d9b30b59f32" id="r_a060bb789c6d35df37f1b0d9b30b59f32"><td class="memItemLeft" align="right" valign="top">qint64&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a060bb789c6d35df37f1b0d9b30b59f32">highlightedWord</a> = -1</td></tr>
+<tr class="memdesc:a060bb789c6d35df37f1b0d9b30b59f32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the currently highlighted word in the editor.  <br /></td></tr>
 <tr class="separator:a060bb789c6d35df37f1b0d9b30b59f32"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa379e74b32feb526a221f8668725f101" id="r_aa379e74b32feb526a221f8668725f101"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_word_editor.html">WordEditor</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa379e74b32feb526a221f8668725f101">m_wordEditor</a> = nullptr</td></tr>
+<tr class="memdesc:aa379e74b32feb526a221f8668725f101"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the word editor instance.  <br /></td></tr>
 <tr class="separator:aa379e74b32feb526a221f8668725f101"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a02ab9918baf4023427924f5c81ff0e8e" id="r_a02ab9918baf4023427924f5c81ff0e8e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_change_speaker_dialog.html">ChangeSpeakerDialog</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a02ab9918baf4023427924f5c81ff0e8e">m_changeSpeaker</a> = nullptr</td></tr>
+<tr class="memdesc:a02ab9918baf4023427924f5c81ff0e8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dialog for changing speakers.  <br /></td></tr>
 <tr class="separator:a02ab9918baf4023427924f5c81ff0e8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afb39a83f58999d181c704d464a199410" id="r_afb39a83f58999d181c704d464a199410"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_time_propagation_dialog.html">TimePropagationDialog</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afb39a83f58999d181c704d464a199410">m_propagateTime</a> = nullptr</td></tr>
+<tr class="memdesc:afb39a83f58999d181c704d464a199410"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dialog for propagating time changes.  <br /></td></tr>
 <tr class="separator:afb39a83f58999d181c704d464a199410"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42f718c515edb7f49c99a4e824bcbef4" id="r_a42f718c515edb7f49c99a4e824bcbef4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_tag_selection_dialog.html">TagSelectionDialog</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a42f718c515edb7f49c99a4e824bcbef4">m_selectTag</a> = nullptr</td></tr>
+<tr class="memdesc:a42f718c515edb7f49c99a4e824bcbef4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dialog for selecting tags.  <br /></td></tr>
 <tr class="separator:a42f718c515edb7f49c99a4e824bcbef4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7607928103aed67bdd3d169e02318fda" id="r_a7607928103aed67bdd3d169e02318fda"><td class="memItemLeft" align="right" valign="top">QCompleter *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7607928103aed67bdd3d169e02318fda">m_speakerCompleter</a> = nullptr</td></tr>
+<tr class="memdesc:a7607928103aed67bdd3d169e02318fda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Completer for speaker names.  <br /></td></tr>
 <tr class="separator:a7607928103aed67bdd3d169e02318fda"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a680bffc3b5a25afe382b8115a30977f8" id="r_a680bffc3b5a25afe382b8115a30977f8"><td class="memItemLeft" align="right" valign="top">QCompleter *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a680bffc3b5a25afe382b8115a30977f8">m_textCompleter</a> = nullptr</td></tr>
-<tr class="separator:a680bffc3b5a25afe382b8115a30977f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a125bfdb39a2a08f5449bfc5cfd417cac" id="r_a125bfdb39a2a08f5449bfc5cfd417cac"><td class="memItemLeft" align="right" valign="top">QCompleter *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a125bfdb39a2a08f5449bfc5cfd417cac">m_transliterationCompleter</a> = nullptr</td></tr>
-<tr class="separator:a125bfdb39a2a08f5449bfc5cfd417cac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61708085a872204b105d45dc5422a622" id="r_a61708085a872204b105d45dc5422a622"><td class="memItemLeft" align="right" valign="top">QCompleter *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a61708085a872204b105d45dc5422a622">m_textCompleter</a> = nullptr</td></tr>
+<tr class="memdesc:a61708085a872204b105d45dc5422a622"><td class="mdescLeft">&#160;</td><td class="mdescRight">Completer for text suggestions.  <br /></td></tr>
+<tr class="separator:a61708085a872204b105d45dc5422a622"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1422a3a243976cba6adb324434997b3" id="r_af1422a3a243976cba6adb324434997b3"><td class="memItemLeft" align="right" valign="top">QCompleter *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af1422a3a243976cba6adb324434997b3">m_transliterationCompleter</a> = nullptr</td></tr>
+<tr class="memdesc:af1422a3a243976cba6adb324434997b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Completer for transliteration suggestions.  <br /></td></tr>
+<tr class="separator:af1422a3a243976cba6adb324434997b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a869c719ad7528520dccf754393e43f31" id="r_a869c719ad7528520dccf754393e43f31"><td class="memItemLeft" align="right" valign="top">QStringList&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a869c719ad7528520dccf754393e43f31">m_dictionary</a></td></tr>
+<tr class="memdesc:a869c719ad7528520dccf754393e43f31"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of user-defined dictionary entries.  <br /></td></tr>
 <tr class="separator:a869c719ad7528520dccf754393e43f31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7bc2d8241124b94ab717905675c4dba9" id="r_a7bc2d8241124b94ab717905675c4dba9"><td class="memItemLeft" align="right" valign="top">QStringList&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7bc2d8241124b94ab717905675c4dba9">m_english_dictionary</a></td></tr>
+<tr class="memdesc:a7bc2d8241124b94ab717905675c4dba9"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of English dictionary entries.  <br /></td></tr>
 <tr class="separator:a7bc2d8241124b94ab717905675c4dba9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a91c5f82791fb1e99654352b2ca89581e" id="r_a91c5f82791fb1e99654352b2ca89581e"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a91c5f82791fb1e99654352b2ca89581e">m_customDictonaryPath</a> =NULL</td></tr>
+<tr class="memitem:a91c5f82791fb1e99654352b2ca89581e" id="r_a91c5f82791fb1e99654352b2ca89581e"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a91c5f82791fb1e99654352b2ca89581e">m_customDictonaryPath</a> = nullptr</td></tr>
+<tr class="memdesc:a91c5f82791fb1e99654352b2ca89581e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Path to the custom dictionary file.  <br /></td></tr>
 <tr class="separator:a91c5f82791fb1e99654352b2ca89581e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01c9f5eb6a05e88a744f82f758b6fa82" id="r_a01c9f5eb6a05e88a744f82f758b6fa82"><td class="memItemLeft" align="right" valign="top">std::set&lt; QString &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a01c9f5eb6a05e88a744f82f758b6fa82">m_correctedWords</a></td></tr>
+<tr class="memdesc:a01c9f5eb6a05e88a744f82f758b6fa82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set of words that have been corrected.  <br /></td></tr>
 <tr class="separator:a01c9f5eb6a05e88a744f82f758b6fa82"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8cec672b0b47a5bb248cfac3f2b78515" id="r_a8cec672b0b47a5bb248cfac3f2b78515"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8cec672b0b47a5bb248cfac3f2b78515">m_transliterateLangCode</a></td></tr>
+<tr class="memdesc:a8cec672b0b47a5bb248cfac3f2b78515"><td class="mdescLeft">&#160;</td><td class="mdescRight">Language code for transliteration.  <br /></td></tr>
 <tr class="separator:a8cec672b0b47a5bb248cfac3f2b78515"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a616423117562b14237a8050d83db713d" id="r_a616423117562b14237a8050d83db713d"><td class="memItemLeft" align="right" valign="top">QStringList&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a616423117562b14237a8050d83db713d">m_lastReplyList</a></td></tr>
+<tr class="memdesc:a616423117562b14237a8050d83db713d"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of the last replies from network requests.  <br /></td></tr>
 <tr class="separator:a616423117562b14237a8050d83db713d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9249a5c3964f160221370ed024676564" id="r_a9249a5c3964f160221370ed024676564"><td class="memItemLeft" align="right" valign="top">QNetworkAccessManager&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9249a5c3964f160221370ed024676564">m_manager</a></td></tr>
+<tr class="memdesc:a9249a5c3964f160221370ed024676564"><td class="mdescLeft">&#160;</td><td class="mdescRight">Network manager for handling requests.  <br /></td></tr>
 <tr class="separator:a9249a5c3964f160221370ed024676564"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa9b1598f56af611f7e67ab5f0db63cbb" id="r_aa9b1598f56af611f7e67ab5f0db63cbb"><td class="memItemLeft" align="right" valign="top">QNetworkReply *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa9b1598f56af611f7e67ab5f0db63cbb">m_reply</a> = nullptr</td></tr>
+<tr class="memdesc:aa9b1598f56af611f7e67ab5f0db63cbb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the current network reply.  <br /></td></tr>
 <tr class="separator:aa9b1598f56af611f7e67ab5f0db63cbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba3965567765fc564efa87e5d877a540" id="r_aba3965567765fc564efa87e5d877a540"><td class="memItemLeft" align="right" valign="top">QTimer *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aba3965567765fc564efa87e5d877a540">m_saveTimer</a> = nullptr</td></tr>
+<tr class="memdesc:aba3965567765fc564efa87e5d877a540"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timer for managing save intervals.  <br /></td></tr>
 <tr class="separator:aba3965567765fc564efa87e5d877a540"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab2de1bdc6d3d4ec9b8a0c3790cfd10c2" id="r_ab2de1bdc6d3d4ec9b8a0c3790cfd10c2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab2de1bdc6d3d4ec9b8a0c3790cfd10c2">m_saveInterval</a> {20}</td></tr>
+<tr class="memdesc:ab2de1bdc6d3d4ec9b8a0c3790cfd10c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interval in seconds for auto-saving documents.  <br /></td></tr>
 <tr class="separator:ab2de1bdc6d3d4ec9b8a0c3790cfd10c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a38f2fee47a798894abce424bac3bb0bf" id="r_a38f2fee47a798894abce424bac3bb0bf"><td class="memItemLeft" align="right" valign="top">QStringList&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a38f2fee47a798894abce424bac3bb0bf">clipboardTexts</a></td></tr>
+<tr class="memdesc:a38f2fee47a798894abce424bac3bb0bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of text items in the clipboard.  <br /></td></tr>
 <tr class="separator:a38f2fee47a798894abce424bac3bb0bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0e971fe4539dd1f05e3dffe989a3c87b" id="r_a0e971fe4539dd1f05e3dffe989a3c87b"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0e971fe4539dd1f05e3dffe989a3c87b">fileBeforeSave</a> =&quot;initial.txt&quot;</td></tr>
+<tr class="memitem:a0e971fe4539dd1f05e3dffe989a3c87b" id="r_a0e971fe4539dd1f05e3dffe989a3c87b"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0e971fe4539dd1f05e3dffe989a3c87b">fileBeforeSave</a> = &quot;initial.txt&quot;</td></tr>
+<tr class="memdesc:a0e971fe4539dd1f05e3dffe989a3c87b"><td class="mdescLeft">&#160;</td><td class="mdescRight">File path for the initial state before saving.  <br /></td></tr>
 <tr class="separator:a0e971fe4539dd1f05e3dffe989a3c87b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab6cd7d998604c2a73776e458fdfed2c7" id="r_ab6cd7d998604c2a73776e458fdfed2c7"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab6cd7d998604c2a73776e458fdfed2c7">fileAfterSave</a> =&quot;final.txt&quot;</td></tr>
+<tr class="memitem:ab6cd7d998604c2a73776e458fdfed2c7" id="r_ab6cd7d998604c2a73776e458fdfed2c7"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab6cd7d998604c2a73776e458fdfed2c7">fileAfterSave</a> = &quot;final.txt&quot;</td></tr>
+<tr class="memdesc:ab6cd7d998604c2a73776e458fdfed2c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">File path for the final state after saving.  <br /></td></tr>
 <tr class="separator:ab6cd7d998604c2a73776e458fdfed2c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae6e38997f4bba84322369bc51abe5998" id="r_ae6e38997f4bba84322369bc51abe5998"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae6e38997f4bba84322369bc51abe5998">ComparedOutputFile</a> =&quot;ComparedDictonary.json&quot;</td></tr>
+<tr class="memitem:ae6e38997f4bba84322369bc51abe5998" id="r_ae6e38997f4bba84322369bc51abe5998"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae6e38997f4bba84322369bc51abe5998">ComparedOutputFile</a> = &quot;ComparedDictonary.json&quot;</td></tr>
+<tr class="memdesc:ae6e38997f4bba84322369bc51abe5998"><td class="mdescLeft">&#160;</td><td class="mdescRight">File path for compared dictionary output.  <br /></td></tr>
 <tr class="separator:ae6e38997f4bba84322369bc51abe5998"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0fb2471bf57521f417b4b3ffa0a99320" id="r_a0fb2471bf57521f417b4b3ffa0a99320"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0fb2471bf57521f417b4b3ffa0a99320">realTimeDataSaver</a> =false</td></tr>
+<tr class="memitem:a0fb2471bf57521f417b4b3ffa0a99320" id="r_a0fb2471bf57521f417b4b3ffa0a99320"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0fb2471bf57521f417b4b3ffa0a99320">realTimeDataSaver</a> = false</td></tr>
+<tr class="memdesc:a0fb2471bf57521f417b4b3ffa0a99320"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag to indicate if real-time data saving is enabled.  <br /></td></tr>
 <tr class="separator:a0fb2471bf57521f417b4b3ffa0a99320"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4bb835e2e630e7729a775ce9710e09bd" id="r_a4bb835e2e630e7729a775ce9710e09bd"><td class="memItemLeft" align="right" valign="top">QStringList&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4bb835e2e630e7729a775ce9710e09bd">allClips</a></td></tr>
+<tr class="memdesc:a4bb835e2e630e7729a775ce9710e09bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of all clipboard contents.  <br /></td></tr>
 <tr class="separator:a4bb835e2e630e7729a775ce9710e09bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a493fbfe6a83ab6720eaa3e0fe1e03756" id="r_a493fbfe6a83ab6720eaa3e0fe1e03756"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a493fbfe6a83ab6720eaa3e0fe1e03756">lastHighlightedBlock</a> =-1</td></tr>
+<tr class="memitem:a493fbfe6a83ab6720eaa3e0fe1e03756" id="r_a493fbfe6a83ab6720eaa3e0fe1e03756"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a493fbfe6a83ab6720eaa3e0fe1e03756">lastHighlightedBlock</a> = -1</td></tr>
+<tr class="memdesc:a493fbfe6a83ab6720eaa3e0fe1e03756"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the last highlighted block.  <br /></td></tr>
 <tr class="separator:a493fbfe6a83ab6720eaa3e0fe1e03756"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aadc5203a274f5b6b0d67bf3921a4e31c" id="r_aadc5203a274f5b6b0d67bf3921a4e31c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aadc5203a274f5b6b0d67bf3921a4e31c">moveAlongTimeStamps</a> =true</td></tr>
+<tr class="memitem:aadc5203a274f5b6b0d67bf3921a4e31c" id="r_aadc5203a274f5b6b0d67bf3921a4e31c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aadc5203a274f5b6b0d67bf3921a4e31c">moveAlongTimeStamps</a> = true</td></tr>
+<tr class="memdesc:aadc5203a274f5b6b0d67bf3921a4e31c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag to determine if the editor should move along timestamps.  <br /></td></tr>
 <tr class="separator:aadc5203a274f5b6b0d67bf3921a4e31c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9043b2e47e49786250df64f5001399d5" id="r_a9043b2e47e49786250df64f5001399d5"><td class="memItemLeft" align="right" valign="top">QStringList&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9043b2e47e49786250df64f5001399d5">supportedFormats</a></td></tr>
+<tr class="memdesc:a9043b2e47e49786250df64f5001399d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of supported file formats.  <br /></td></tr>
 <tr class="separator:a9043b2e47e49786250df64f5001399d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
 Friends</h2></td></tr>
 <tr class="memitem:a314e534bb52ced3f5f6d4d9a7098099e" id="r_a314e534bb52ced3f5f6d4d9a7098099e"><td class="memItemLeft" align="right" valign="top">class&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a314e534bb52ced3f5f6d4d9a7098099e">Highlighter</a></td></tr>
+<tr class="memdesc:a314e534bb52ced3f5f6d4d9a7098099e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grants <a class="el" href="class_highlighter.html">Highlighter</a> access to private members.  <br /></td></tr>
 <tr class="separator:a314e534bb52ced3f5f6d4d9a7098099e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Manages the editing functionalities of transcripts, including time stamps, speaker changes, and file exports. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aae507cc6a63a5b43aab9eb45c989989a" name="aae507cc6a63a5b43aab9eb45c989989a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aae507cc6a63a5b43aab9eb45c989989a">&#9670;&#160;</a></span>Editor()</h2>
 
@@ -408,6 +521,14 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Constructs an <a class="el" href="class_editor.html" title="Manages the editing functionalities of transcripts, including time stamps, speaker changes,...">Editor</a> instance. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parent</td><td>The parent widget. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -435,6 +556,9 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Opens a file dialog to add a custom dictionary. </p>
+<p>Opens a dialog to select a custom dictionary file (in .txt format). Sets the path and loads the dictionary if the file is successfully opened. </p>
+
 </div>
 </div>
 <a id="ab9de63d35ebe3d7c0e815e1d86e7fbac" name="ab9de63d35ebe3d7c0e815e1d86e7fbac"></a>
@@ -459,6 +583,14 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Jumps to the next or previous block. Moves the cursor up or down to adjacent blocks and jumps to the appropriate timestamp. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">jumpDirection</td><td>Direction to jump ("up" or "down"). </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -489,6 +621,16 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Changes the speaker's name in the transcript. </p>
+<p>This function updates the speaker's name for the current block or replaces all occurrences of the old speaker name with the new one, based on the specified flag.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">newSpeaker</td><td>The new speaker's name. </td></tr>
+    <tr><td class="paramname">replaceAllOccurrences</td><td>Flag indicating whether to replace all occurrences or just the current block. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="ad0204fb24d8eac15583fdd62282e9e30" name="ad0204fb24d8eac15583fdd62282e9e30"></a>
@@ -513,6 +655,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Changes the language of the transcript. Prompts the user to enter a new language, then loads the relevant dictionary. </p>
 
 </div>
 </div>
@@ -573,6 +717,19 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Creates and displays a customized context menu with additional options. </p>
+<p>Enhances the default context menu with:</p><ul>
+<li>"Mark As Correct" action: Marks the current word as correct if it’s under the cursor.</li>
+<li>Suggestions sub-menu: Reads from a JSON file (<code>replacedTextDictionary.json</code>) to offer word replacements based on the selected word's content.</li>
+<li>Clipboard sub-menu: Displays a list of clipboard items stored in <code>allClips</code> for easy reuse.</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">event</td><td>Pointer to the QContextMenuEvent containing details of the context menu event. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a2fda8c6653268dd35d58032ce152f3c3" name="a2fda8c6653268dd35d58032ce152f3c3"></a>
@@ -597,6 +754,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Opens a dialog to select a new speaker for the highlighted block. Displays a modal dialog with a list of existing speakers. Updates the selected speaker in the block upon confirmation. </p>
 
 </div>
 </div>
@@ -623,6 +782,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Opens a dialog for selecting and marking tags in the current block. Allows users to add tags to a block, showing existing tags initially. </p>
+
 </div>
 </div>
 <a id="ab73209f498c8bd25eb4965c6b0656e5d" name="ab73209f498c8bd25eb4965c6b0656e5d"></a>
@@ -647,6 +808,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Opens a dialog for propagating time across a range of blocks. Sets up a dialog allowing users to select a time range and optionally negate it. On confirmation, the specified time is propagated to the selected block range. </p>
 
 </div>
 </div>
@@ -673,6 +836,16 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Converts a block number into a block structure containing the timestamp, text, speaker, and a list of words. </p>
+<p>This method processes the block text to extract a timestamp, speaker, and the corresponding text. It uses regular expressions to match the timestamp and speaker formats, and splits the text accordingly. The extracted words are stored in a QVector of word structures.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blockNumber</td><td>The block number to convert into a block structure. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>block A block structure containing the extracted data. </dd></dl>
+
 </div>
 </div>
 <a id="afac99b1554c18edcc5447ee226ef05e9" name="afac99b1554c18edcc5447ee226ef05e9"></a>
@@ -698,6 +871,16 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Parses a time string and converts it into a QTime object. </p>
+<p>The function checks the format of the provided time string <code>text</code> to determine whether it includes fractional seconds ('.') and whether it has hours included (based on the number of colons). Based on these characteristics, it applies the appropriate format for parsing.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">text</td><td>A QString containing the time string to be converted. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A QTime object representing the parsed time, or an invalid QTime if parsing fails. </dd></dl>
+
 </div>
 </div>
 <a id="af326b0501d4974b2ff052560ba6618d0" name="af326b0501d4974b2ff052560ba6618d0"></a>
@@ -714,6 +897,10 @@ Friends</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Retrieves timestamps from the blocks. </p>
+<p>This function collects and returns a list of timestamps from all the blocks in the editor.</p>
+<dl class="section return"><dt>Returns</dt><dd>QList&lt;QTime&gt; A list of timestamps from the blocks. </dd></dl>
 
 </div>
 </div>
@@ -740,6 +927,13 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Processes the response received from a network reply and extracts tokens. </p>
+<p>Reads the data from <code>m_reply</code>, parses the response string to extract meaningful tokens, and stores them in <code>m_lastReplyList</code>. The function expects the response to follow a specific format: it splits on a predefined delimiter pattern (<code>[\"&lt;/tt&gt;)
+to access the content, extracts the token list, and removes extraneous characters.
+
+@note If the response format does not meet the expected structure
+(less than four sections when split by &lt;tt&gt;"[""</code>), the function will exit early. </p>
+
 </div>
 </div>
 <a id="a6a4bc9c1349158e184345ac483cb81f4" name="a6a4bc9c1349158e184345ac483cb81f4"></a>
@@ -764,6 +958,9 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Sends the current text block to the <code><a class="el" href="class_media_player.html">MediaPlayer</a></code>, allowing a jump to the relevant timestamp with <code><a class="el" href="class_media_player.html#a613c967ba6b40063b420a8609d034f8f">MediaPlayer::setPositionToTime</a></code>. </p>
+<p>This function emits the text of the current block to the player and calculates the appropriate timestamp to jump to, based on the cursor’s position within the block. If the timestamp of the exact word under the cursor is valid, it is used; otherwise, the function defaults to the nearest preceding valid timestamp. </p>
 
 </div>
 </div>
@@ -790,6 +987,15 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Highlights a transcript block and word based on the provided elapsed time. </p>
+<p>Finds the block and word that match the provided elapsed time and highlights them in the transcript view. Sends the block text as a signal and updates the highlighter to display the highlighted block and word.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">elapsedTime</td><td>The time used to find and highlight the appropriate block and word. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a5197ec29714db0eeba22bd18ae9f9e4c" name="a5197ec29714db0eeba22bd18ae9f9e4c"></a>
@@ -814,6 +1020,15 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Inserts speaker name completion into the editor. </p>
+<p>This function inserts the selected speaker name completion at the current cursor position.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">completion</td><td>The completed speaker name to insert. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -840,6 +1055,15 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Inserts text completion into the editor. </p>
+<p>This function inserts the selected text completion at the current cursor position.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">completion</td><td>The completed text to insert. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a306a2ae72f55d5d402066a4554a593b6" name="a306a2ae72f55d5d402066a4554a593b6"></a>
@@ -864,6 +1088,14 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Inserts a timestamp at the current cursor position within a block. Updates the timestamp associated with the block and positions the cursor at the end. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">elapsedTime</td><td>The timestamp to set for the block. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -890,6 +1122,15 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Inserts transliteration completion into the editor. </p>
+<p>This function inserts the selected transliteration at the current cursor position.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">completion</td><td>The completed transliteration to insert. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a0ee5b8ce3bfaf3075a712f8c8aa8b83a" name="a0ee5b8ce3bfaf3075a712f8c8aa8b83a"></a>
@@ -914,6 +1155,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Moves the cursor to the highlighted line in the editor. If no block is highlighted, the function returns immediately. </p>
 
 </div>
 </div>
@@ -940,6 +1183,14 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Signal emitted to jump to a specific time in the <code><a class="el" href="class_media_player.html">MediaPlayer</a></code>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">time</td><td>The QTime object representing the time to jump to in the <code><a class="el" href="class_media_player.html#a613c967ba6b40063b420a8609d034f8f">MediaPlayer::setPositionToTime</a></code>. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="afc82ba4223b9d37396169fa305f8d77f" name="afc82ba4223b9d37396169fa305f8d77f"></a>
@@ -964,6 +1215,21 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Handles key press events and provides custom shortcuts and suggestions. </p>
+<p>Intercepts keyboard input, performing specific actions for various Ctrl + Key shortcuts.</p><ul>
+<li><b>Ctrl+R</b>: Opens the Change Speaker dialog.</li>
+<li><b>Ctrl+T</b>: Opens the Time Propagation dialog.</li>
+<li><b>Ctrl+M</b>: Marks a word as correct if conditions are met.</li>
+<li><b>Ctrl+I</b>: Centers and focuses on the cursor for doubtful words.</li>
+</ul>
+<p>Additionally, the method integrates multiple completers (text, speaker, and transliteration) to assist with typing. Uses JSON to retrieve and suggest replacements, populating a popup menu if suggestions are available.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">event</td><td>Pointer to the QKeyEvent containing details of the key press event. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -990,6 +1256,16 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Loads transcript data from an XML file into the editor. </p>
+<p>This method reads an XML file containing transcript data, extracts the language, and populates the internal block structure with information about each line of the transcript. It handles timestamps, speakers, and individual words along with their properties.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">file</td><td>A reference to the QFile object from which the transcript data is loaded.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>This method will raise an error if the file structure is incorrect. </dd></dl>
+
 </div>
 </div>
 <a id="a003e0b8bfd41eeb5884eedf1459189f7" name="a003e0b8bfd41eeb5884eedf1459189f7"></a>
@@ -1015,6 +1291,9 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Loads a dictionary for the editor to use for word suggestions and spell-checking. </p>
+<p>This function checks if a language-specific dictionary file exists locally. If found, it reads the dictionary and any custom words into <code>m_dictionary</code>. If corrected words exist in a saved file, it includes them for spell-checking in the editor. </p>
+
 </div>
 </div>
 <a id="a973d00c32b2461a7f848376baeb819d7" name="a973d00c32b2461a7f848376baeb819d7"></a>
@@ -1032,6 +1311,14 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Loads transcript data from a given file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">file</td><td>Reference to the QFile containing the transcript data. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a5051a55800334eeb59491b3d002792ed" name="a5051a55800334eeb59491b3d002792ed"></a>
@@ -1048,6 +1335,14 @@ Friends</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Loads transcript data from a given URL. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fileUrl</td><td>Pointer to the QUrl containing the transcript URL. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1073,6 +1368,10 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Creates and configures a QCompleter for use in the editor. </p>
+<p>This function initializes a QCompleter with case-insensitive, non-wrapping, popup-style completion, sets its widget to the current editor, and returns it.</p>
+<dl class="section return"><dt>Returns</dt><dd>A pointer to the configured QCompleter. </dd></dl>
 
 </div>
 </div>
@@ -1113,6 +1412,19 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Creates a word object with the given attributes. </p>
+<p>This function initializes and returns a <code>word</code> struct populated with the provided time, string content, list of tags, and edit status.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">t</td><td>The QTime representing the timestamp of the word. </td></tr>
+    <tr><td class="paramname">s</td><td>The QString representing the content of the word. </td></tr>
+    <tr><td class="paramname">tagList</td><td>A QStringList containing any tags associated with the word. </td></tr>
+    <tr><td class="paramname">isEdited</td><td>A QString indicating the edit status of the word. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code>word</code> struct initialized with the provided parameters. </dd></dl>
+
 </div>
 </div>
 <a id="a962c0c995c8b05fe63460dd5291bffcf" name="a962c0c995c8b05fe63460dd5291bffcf"></a>
@@ -1142,6 +1454,16 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Marks a word as correct and updates the dictionary. </p>
+<p>This function adds the specified word to the dictionary if it is not already present and updates the highlighting for invalid words.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blockNumber</td><td>The index of the block containing the word (0-indexed). </td></tr>
+    <tr><td class="paramname">wordNumber</td><td>The index of the word to mark as correct (0-indexed). </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a007458330654c1d6a1aea0eb821a5cfd" name="a007458330654c1d6a1aea0eb821a5cfd"></a>
@@ -1166,6 +1488,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Merges the current block with the next block, transferring word list and text. Only merges if the speakers match for both blocks. </p>
 
 </div>
 </div>
@@ -1192,6 +1516,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Merges the current block with the previous one, combining text and word lists. Only merges if the speaker of the current and previous block match. </p>
+
 </div>
 </div>
 <a id="ac959f240581319896b09ec70703e57a9" name="ac959f240581319896b09ec70703e57a9"></a>
@@ -1217,6 +1543,15 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Handles mouse press events, enabling specific behavior with Ctrl key. </p>
+<p>Overrides the default QPlainTextEdit mouse press event to provide custom behavior. If the Ctrl key is held down and there are blocks in <code>m_blocks</code>, the method invokes <code><a class="el" href="#a6a4bc9c1349158e184345ac483cb81f4" title="Sends the current text block to the MediaPlayer, allowing a jump to the relevant timestamp with Media...">helpJumpToPlayer()</a></code>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">e</td><td>Pointer to the QMouseEvent containing details of the mouse press event. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a793252611de853b275658302aaf8412f" name="a793252611de853b275658302aaf8412f"></a>
@@ -1241,6 +1576,14 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Signal emitted to open a message box or display a message in the UI. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">text</td><td>The text message to display. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1281,6 +1624,18 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Propagates a specified time adjustment to a range of blocks. </p>
+<p>This function adjusts the timestamps of the selected blocks based on the specified time, either adding or subtracting it.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">time</td><td>The time to be added or subtracted from the blocks' timestamps. </td></tr>
+    <tr><td class="paramname">start</td><td>The starting block number (1-indexed). </td></tr>
+    <tr><td class="paramname">end</td><td>The ending block number (1-indexed). </td></tr>
+    <tr><td class="paramname">negateTime</td><td>Flag indicating whether to negate the time (subtract). </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a880401ab2c46d4d82e2fe48cce0fc0be" name="a880401ab2c46d4d82e2fe48cce0fc0be"></a>
@@ -1305,6 +1660,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Toggles real-time data saving on or off. Enables or disables the data-saving feature in real-time. </p>
 
 </div>
 </div>
@@ -1331,6 +1688,14 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Signal emitted to refresh the tag list display in the UI. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tagList</td><td>The updated list of tags to display. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="aef36284240475a01dac7ffc5de89b85d" name="aef36284240475a01dac7ffc5de89b85d"></a>
@@ -1355,6 +1720,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Signal emitted when a reply is received from an external source. </p>
 
 </div>
 </div>
@@ -1381,6 +1748,9 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Exports the transcript as a PDF file. </p>
+<p>This function gathers the content of the transcript and formats it into HTML before exporting it as a PDF. The user is prompted to select a save location. </p>
+
 </div>
 </div>
 <a id="a4571912707a204f088e87688555747a9" name="a4571912707a204f088e87688555747a9"></a>
@@ -1405,6 +1775,9 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Exports the transcript as a text file. </p>
+<p>The function compiles the content of the transcript into a plain text format and allows the user to choose a save location. </p>
 
 </div>
 </div>
@@ -1431,6 +1804,15 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Saves the current transcript data to an XML file. </p>
+<p>This function writes the contents of <code>m_blocks</code> to an XML file, with each block represented as a "line" element containing a timestamp, speaker, and a list of words. Words within each line are nested as "word" elements with associated timestamps, tags, and edit status.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">file</td><td>A pointer to the QFile where the XML content will be written. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a3d6b6693ce0c3afe56b3b119c9645d82" name="a3d6b6693ce0c3afe56b3b119c9645d82"></a>
@@ -1455,6 +1837,15 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Selects tags for the current block. </p>
+<p>This function assigns a list of tags to the current block and refreshes the displayed tag list.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">newTagList</td><td>The list of tags to assign to the current block. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1481,6 +1872,14 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Signal emitted to send the text content of a specific block. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blockText</td><td>The text content of the block to send. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="af0bd4e214815f33b3291fc615f0fa7ff" name="af0bd4e214815f33b3291fc615f0fa7ff"></a>
@@ -1505,6 +1904,14 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Signal emitted to send a vector of block timestamps for display in the <code><a class="el" href="class_audio_wave_form.html">AudioWaveForm</a></code>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">timeArray</td><td>A QVector of QTime objects representing the timestamps of each block. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1535,6 +1942,16 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Sends a request to an external service for text completion. </p>
+<p>This function constructs and sends a network request to an external API based on the input text and language code.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">input</td><td>The input text to send for completion suggestions. </td></tr>
+    <tr><td class="paramname">langCode</td><td>The language code indicating the language of the input text. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a3be9bbf00c2409f719f2b1f91232d636" name="a3be9bbf00c2409f719f2b1f91232d636"></a>
@@ -1551,6 +1968,8 @@ Friends</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Sets the content of the editor. </p>
 
 </div>
 </div>
@@ -1569,6 +1988,14 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Sets the font for the editor. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">font</td><td>The font to be set for the editor. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="aa97597555742469db6febc91e3861654" name="aa97597555742469db6febc91e3861654"></a>
@@ -1586,6 +2013,8 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Configures the editor to move along timestamps. </p>
+
 </div>
 </div>
 <a id="a0fc2d4af3315bbbb6c6eac1e6a750412" name="a0fc2d4af3315bbbb6c6eac1e6a750412"></a>
@@ -1602,6 +2031,8 @@ Friends</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Toggles the visibility of timestamps in the editor. </p>
 
 </div>
 </div>
@@ -1628,6 +2059,15 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Sets the word editor for the current <a class="el" href="class_editor.html" title="Manages the editing functionalities of transcripts, including time stamps, speaker changes,...">Editor</a> instance. </p>
+<p>This function connects the word editor's itemChanged signal to the <a class="el" href="class_editor.html" title="Manages the editing functionalities of transcripts, including time stamps, speaker changes,...">Editor</a>'s wordEditorChanged slot.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">wordEditor</td><td>Pointer to the <a class="el" href="class_word_editor.html">WordEditor</a> instance. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="ad266af87ea3ba852caf6953d9099f4a5" name="ad266af87ea3ba852caf6953d9099f4a5"></a>
@@ -1653,6 +2093,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Displays all blocks and their content in the QDebug (Saved in Logfile). Iterates through each block and prints its timestamp, speaker, text, and associated tags, followed by printing word details within each block. </p>
+
 </div>
 </div>
 <a id="a875bbf46c31f55ccc136a689831f436a" name="a875bbf46c31f55ccc136a689831f436a"></a>
@@ -1669,6 +2111,9 @@ Friends</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Shows the waveform based on the current blocks. </p>
+<p>This function emits a signal with the timestamps of the blocks to display the waveform associated with the transcript. </p>
 
 </div>
 </div>
@@ -1695,6 +2140,14 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Navigates to the next or previous block by the same speaker. Searches for the closest block in the specified direction with the same speaker, then jumps to that block's timestamp if found. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">jumpDirection</td><td>Direction to jump ("up" or "down"). </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a7ec3692475db293adda642da72605e79" name="a7ec3692475db293adda642da72605e79"></a>
@@ -1719,6 +2172,14 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Splits the current text line at the cursor's position. Divides the block into two based on cursor position, creating a new block and adjusting the timestamp and word list of each. Updates the editor content accordingly. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">elapsedTime</td><td>The time to associate with the split point. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1745,6 +2206,14 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Provides word suggestions and replaces the selected word. Highlights the current word under the cursor and replaces it with the suggested text. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">suggest</td><td>The suggested replacement text. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a63fda28b1d256edcf6a2487bb47893aa" name="a63fda28b1d256edcf6a2487bb47893aa"></a>
@@ -1761,6 +2230,9 @@ Friends</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Checks the visibility status of timestamps. </p>
+<dl class="section return"><dt>Returns</dt><dd>True if timestamps are visible, otherwise false. </dd></dl>
 
 </div>
 </div>
@@ -1787,6 +2259,9 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Closes the current transcript file. </p>
+<p>Clears the transcript URL, removes loaded blocks, sets the transcript language to English, and reloads the dictionary to clear the document. </p>
+
 </div>
 </div>
 <a id="a17bd1ec05085a33782c1f60c207ee84a" name="a17bd1ec05085a33782c1f60c207ee84a"></a>
@@ -1811,6 +2286,9 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Opens a transcript file, allowing the user to select a file from the file dialog. </p>
+<p>Displays a file dialog to choose a transcript file and sets the directory based on user settings. Loads the transcript from the selected URL. </p>
 
 </div>
 </div>
@@ -1837,6 +2315,9 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Saves the current transcript. </p>
+<p>If the transcript URL is empty, calls <code><a class="el" href="#ade6bcd1472fc571c3de64faf5cda80ae" title="Saves the current transcript with a new file name.">transcriptSaveAs()</a></code> to save the file. Otherwise, opens the existing file and saves the XML content. Also creates necessary resources if they don't already exist. </p>
+
 </div>
 </div>
 <a id="ade6bcd1472fc571c3de64faf5cda80ae" name="ade6bcd1472fc571c3de64faf5cda80ae"></a>
@@ -1861,6 +2342,9 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Saves the current transcript with a new file name. </p>
+<p>Opens a file dialog to select a save location and file name, then saves the transcript as XML. Ensures that the file has an <code>.xml</code> extension and updates the transcript URL. </p>
 
 </div>
 </div>
@@ -1891,6 +2375,16 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Updates the current block's timestamp with a new value. </p>
+<p>This function sets the timestamp of the specified block to the given end time.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">block_num</td><td>The index of the block to update (0-indexed). </td></tr>
+    <tr><td class="paramname">endTime</td><td>The new timestamp to set for the block. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a8aa95a47fc87b1d6a385b354f02b58d1" name="a8aa95a47fc87b1d6a385b354f02b58d1"></a>
@@ -1915,6 +2409,15 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Updates timestamps for a range of blocks based on a provided vector of seconds. </p>
+<p>This function sets the timestamps of the blocks based on the provided vector. New blocks are added if the vector exceeds the current number of blocks.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blks</td><td>A QVector of integers representing the timestamps in seconds. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1941,6 +2444,9 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Updates the word editor with the current block's words. </p>
+<p>This function refreshes the word editor display based on the current block of text being edited. </p>
+
 </div>
 </div>
 <a id="a368365081ef10148332d82114362bb9c" name="a368365081ef10148332d82114362bb9c"></a>
@@ -1965,6 +2471,15 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Enables or disables the auto-save feature for the editor. </p>
+<p>Sets the <code>m_autoSave</code> member variable to the specified value, enabling or disabling the auto-save functionality based on the <code>value</code> parameter.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">value</td><td>Boolean value to enable (true) or disable (false) auto-save. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1994,6 +2509,15 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Enables or disables transliteration for the editor. Sets the transliteration state and language code. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">value</td><td>True to enable transliteration, false to disable. </td></tr>
+    <tr><td class="paramname">langCode</td><td>The language code to use for transliteration. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -2045,6 +2569,14 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Jumps to the next or previous word in the highlighted block. Adjusts position based on direction and ensures cursor remains within block limits. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">jumpDirection</td><td>Direction to jump ("left" or "right"). </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <h2 class="groupheader">Friends And Related Symbol Documentation</h2>
@@ -2067,6 +2599,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Grants <a class="el" href="class_highlighter.html">Highlighter</a> access to private members. </p>
 
 </div>
 </div>
@@ -2091,6 +2625,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>List of all clipboard contents. </p>
+
 </div>
 </div>
 <a id="a38f2fee47a798894abce424bac3bb0bf" name="a38f2fee47a798894abce424bac3bb0bf"></a>
@@ -2113,6 +2649,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>List of text items in the clipboard. </p>
+
 </div>
 </div>
 <a id="ae6e38997f4bba84322369bc51abe5998" name="ae6e38997f4bba84322369bc51abe5998"></a>
@@ -2125,7 +2663,7 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">QString Editor::ComparedOutputFile =&quot;ComparedDictonary.json&quot;</td>
+          <td class="memname">QString Editor::ComparedOutputFile = &quot;ComparedDictonary.json&quot;</td>
         </tr>
       </table>
   </td>
@@ -2134,6 +2672,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>File path for compared dictionary output. </p>
 
 </div>
 </div>
@@ -2157,6 +2697,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Flag to prevent updates to the word editor. </p>
+
 </div>
 </div>
 <a id="ab6cd7d998604c2a73776e458fdfed2c7" name="ab6cd7d998604c2a73776e458fdfed2c7"></a>
@@ -2169,7 +2711,7 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">QString Editor::fileAfterSave =&quot;final.txt&quot;</td>
+          <td class="memname">QString Editor::fileAfterSave = &quot;final.txt&quot;</td>
         </tr>
       </table>
   </td>
@@ -2178,6 +2720,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>File path for the final state after saving. </p>
 
 </div>
 </div>
@@ -2191,7 +2735,7 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">QString Editor::fileBeforeSave =&quot;initial.txt&quot;</td>
+          <td class="memname">QString Editor::fileBeforeSave = &quot;initial.txt&quot;</td>
         </tr>
       </table>
   </td>
@@ -2200,6 +2744,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>File path for the initial state before saving. </p>
 
 </div>
 </div>
@@ -2223,6 +2769,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Index of the currently highlighted block in the editor. </p>
+
 </div>
 </div>
 <a id="a060bb789c6d35df37f1b0d9b30b59f32" name="a060bb789c6d35df37f1b0d9b30b59f32"></a>
@@ -2245,6 +2793,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Index of the currently highlighted word in the editor. </p>
+
 </div>
 </div>
 <a id="a493fbfe6a83ab6720eaa3e0fe1e03756" name="a493fbfe6a83ab6720eaa3e0fe1e03756"></a>
@@ -2257,7 +2807,7 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int Editor::lastHighlightedBlock =-1</td>
+          <td class="memname">int Editor::lastHighlightedBlock = -1</td>
         </tr>
       </table>
   </td>
@@ -2266,6 +2816,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Index of the last highlighted block. </p>
 
 </div>
 </div>
@@ -2289,6 +2841,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Indicates if auto-save functionality is enabled. </p>
+
 </div>
 </div>
 <a id="aa5e3e8b40229746deeadb2d979680486" name="aa5e3e8b40229746deeadb2d979680486"></a>
@@ -2302,6 +2856,8 @@ Friends</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Stores the blocks of text and their associated data. </p>
 
 </div>
 </div>
@@ -2325,6 +2881,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Dialog for changing speakers. </p>
+
 </div>
 </div>
 <a id="a01c9f5eb6a05e88a744f82f758b6fa82" name="a01c9f5eb6a05e88a744f82f758b6fa82"></a>
@@ -2347,6 +2905,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Set of words that have been corrected. </p>
+
 </div>
 </div>
 <a id="a91c5f82791fb1e99654352b2ca89581e" name="a91c5f82791fb1e99654352b2ca89581e"></a>
@@ -2359,7 +2919,7 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">QString Editor::m_customDictonaryPath =NULL</td>
+          <td class="memname">QString Editor::m_customDictonaryPath = nullptr</td>
         </tr>
       </table>
   </td>
@@ -2368,6 +2928,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Path to the custom dictionary file. </p>
 
 </div>
 </div>
@@ -2391,6 +2953,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>List of user-defined dictionary entries. </p>
+
 </div>
 </div>
 <a id="a7bc2d8241124b94ab717905675c4dba9" name="a7bc2d8241124b94ab717905675c4dba9"></a>
@@ -2412,6 +2976,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>List of English dictionary entries. </p>
 
 </div>
 </div>
@@ -2435,6 +3001,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Pointer to the syntax highlighter. </p>
+
 </div>
 </div>
 <a id="a616423117562b14237a8050d83db713d" name="a616423117562b14237a8050d83db713d"></a>
@@ -2456,6 +3024,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>List of the last replies from network requests. </p>
 
 </div>
 </div>
@@ -2479,6 +3049,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Network manager for handling requests. </p>
+
 </div>
 </div>
 <a id="afb39a83f58999d181c704d464a199410" name="afb39a83f58999d181c704d464a199410"></a>
@@ -2500,6 +3072,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Dialog for propagating time changes. </p>
 
 </div>
 </div>
@@ -2523,6 +3097,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Default punctuation characters used in the editor. </p>
+
 </div>
 </div>
 <a id="aa9b1598f56af611f7e67ab5f0db63cbb" name="aa9b1598f56af611f7e67ab5f0db63cbb"></a>
@@ -2544,6 +3120,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Pointer to the current network reply. </p>
 
 </div>
 </div>
@@ -2567,6 +3145,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Interval in seconds for auto-saving documents. </p>
+
 </div>
 </div>
 <a id="aba3965567765fc564efa87e5d877a540" name="aba3965567765fc564efa87e5d877a540"></a>
@@ -2588,6 +3168,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Timer for managing save intervals. </p>
 
 </div>
 </div>
@@ -2611,6 +3193,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Dialog for selecting tags. </p>
+
 </div>
 </div>
 <a id="a7607928103aed67bdd3d169e02318fda" name="a7607928103aed67bdd3d169e02318fda"></a>
@@ -2633,10 +3217,12 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Completer for speaker names. </p>
+
 </div>
 </div>
-<a id="a680bffc3b5a25afe382b8115a30977f8" name="a680bffc3b5a25afe382b8115a30977f8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a680bffc3b5a25afe382b8115a30977f8">&#9670;&#160;</a></span>m_textCompleter</h2>
+<a id="a61708085a872204b105d45dc5422a622" name="a61708085a872204b105d45dc5422a622"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61708085a872204b105d45dc5422a622">&#9670;&#160;</a></span>m_textCompleter</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2645,7 +3231,7 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">QCompleter * Editor::m_textCompleter = nullptr</td>
+          <td class="memname">QCompleter* Editor::m_textCompleter = nullptr</td>
         </tr>
       </table>
   </td>
@@ -2654,6 +3240,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Completer for text suggestions. </p>
 
 </div>
 </div>
@@ -2677,6 +3265,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Language of the transcript. </p>
+
 </div>
 </div>
 <a id="aee2ba47c334616aca2f76e2cdf57f27c" name="aee2ba47c334616aca2f76e2cdf57f27c"></a>
@@ -2690,6 +3280,8 @@ Friends</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>URL of the loaded transcript. </p>
 
 </div>
 </div>
@@ -2713,6 +3305,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Indicates if transliteration is enabled. </p>
+
 </div>
 </div>
 <a id="a8cec672b0b47a5bb248cfac3f2b78515" name="a8cec672b0b47a5bb248cfac3f2b78515"></a>
@@ -2735,10 +3329,12 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Language code for transliteration. </p>
+
 </div>
 </div>
-<a id="a125bfdb39a2a08f5449bfc5cfd417cac" name="a125bfdb39a2a08f5449bfc5cfd417cac"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a125bfdb39a2a08f5449bfc5cfd417cac">&#9670;&#160;</a></span>m_transliterationCompleter</h2>
+<a id="af1422a3a243976cba6adb324434997b3" name="af1422a3a243976cba6adb324434997b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1422a3a243976cba6adb324434997b3">&#9670;&#160;</a></span>m_transliterationCompleter</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2747,7 +3343,7 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">QCompleter * Editor::m_transliterationCompleter = nullptr</td>
+          <td class="memname">QCompleter* Editor::m_transliterationCompleter = nullptr</td>
         </tr>
       </table>
   </td>
@@ -2756,6 +3352,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Completer for transliteration suggestions. </p>
 
 </div>
 </div>
@@ -2779,6 +3377,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Pointer to the word editor instance. </p>
+
 </div>
 </div>
 <a id="aadc5203a274f5b6b0d67bf3921a4e31c" name="aadc5203a274f5b6b0d67bf3921a4e31c"></a>
@@ -2791,7 +3391,7 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool Editor::moveAlongTimeStamps =true</td>
+          <td class="memname">bool Editor::moveAlongTimeStamps = true</td>
         </tr>
       </table>
   </td>
@@ -2800,6 +3400,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Flag to determine if the editor should move along timestamps. </p>
 
 </div>
 </div>
@@ -2813,7 +3415,7 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool Editor::realTimeDataSaver =false</td>
+          <td class="memname">bool Editor::realTimeDataSaver = false</td>
         </tr>
       </table>
   </td>
@@ -2822,6 +3424,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Flag to indicate if real-time data saving is enabled. </p>
 
 </div>
 </div>
@@ -2845,6 +3449,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Indicates if the editor is currently in a setting content mode. </p>
+
 </div>
 </div>
 <a id="a47127a7b15cd2adee71d85932b3b3db0" name="a47127a7b15cd2adee71d85932b3b3db0"></a>
@@ -2867,6 +3473,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Pointer to application settings. </p>
+
 </div>
 </div>
 <a id="abf4cca9cfb55cb8427d74d8628540cfe" name="abf4cca9cfb55cb8427d74d8628540cfe"></a>
@@ -2881,6 +3489,8 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Flag indicating whether to show timestamps. </p>
+
 </div>
 </div>
 <a id="af0417cb474b2c9cf803c9a8b04bf9fb9" name="af0417cb474b2c9cf803c9a8b04bf9fb9"></a>
@@ -2894,6 +3504,8 @@ Friends</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Regular expression for speaker identification. </p>
 
 </div>
 </div>
@@ -2917,6 +3529,8 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>List of supported file formats. </p>
+
 </div>
 </div>
 <a id="a751b05346e1fd6dc1331dd9e52d3d5f7" name="a751b05346e1fd6dc1331dd9e52d3d5f7"></a>
@@ -2930,6 +3544,8 @@ Friends</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Regular expression for timestamps. </p>
 
 </div>
 </div>
@@ -2952,6 +3568,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Indicates if the word editor is being updated. </p>
 
 </div>
 </div>
