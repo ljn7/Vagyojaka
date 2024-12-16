@@ -12,6 +12,7 @@
 #include<QBuffer>
 #include"fftw3.h"
 #include"qcustomplot.h"
+#include "qmediadevices.h"
 #include<QProcess>
 #include<QAudioFormat>
 #include<QAudioDecoder>
@@ -37,7 +38,8 @@ public:
     QString getMediaFileName();
     QString getPositionInfo();
     QStringList supportedFormats;
-    // QAudioOutput *m_audioOutput;
+    QAudioOutput *audioOutput = nullptr;
+
     void loadMediaFromUrl(QUrl *fileUrl);
 
     void resampleAudio(const char* inputPath, const char* outputPath, int targetSamplingRate);
@@ -46,7 +48,8 @@ public slots:
     void open();
     void seek(int seconds);
     void togglePlayback();
-    // void setVolume(int volume);
+    void setVolume(float volume) { audioOutput->setVolume(volume); };
+    void setMuted(bool muted) { audioOutput->setMuted(muted); };
     // void setMuted(bool muted);
 
 signals:
@@ -61,13 +64,17 @@ signals:
 
 private:
     static QTime getTimeFromPosition(const qint64& position);
+    void setDefaultAudioOutputDevice();
     QString m_mediaFileName;
     QSettings* settings;
 
     bool isAudioFile(const QString& filePath);
     bool isVideoFile(const QString& filePath);
-    QBuffer audioBuffer;
+    // QBuffer audioBuffer;
     QMediaPlayer *p;
     qlonglong sampleRate;
+    QMediaDevices m_mediaDevices;
+    float m_amplification = 1.0f;
+
 
 };

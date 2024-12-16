@@ -15,13 +15,13 @@ public:
     explicit PlayerControls(QWidget *parent = nullptr);
 
     QMediaPlayer::PlaybackState state() const;
-    int volume() const;
+    float volume() const;
     bool isMuted() const;
     qreal playbackRate() const;
 
 public slots:
     void setState(QMediaPlayer::PlaybackState state);
-    void setVolume(int volume);
+    void setVolume(float volume);
     void setMuted(bool muted);
     void setPlaybackRate(float rate);
 
@@ -31,7 +31,7 @@ signals:
     void stop();
     void seekForward();
     void seekBackward();
-    void changeVolume(int volume);
+    void changeVolume(float volume);
     void changeMuting(bool muting);
     void changeRate(qreal rate);
     void splitClick();

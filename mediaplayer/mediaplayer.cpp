@@ -1,12 +1,16 @@
 #include "mediaplayer.h"
 #include "qapplication.h"
+#include "qaudiodevice.h"
 #include "qmediametadata.h"
+#include "qmediadevices.h"
 #include <iostream>
 
 MediaPlayer::MediaPlayer(QWidget *parent)
     : QMediaPlayer(parent)
 {
-    //Qt6
+    audioOutput = new QAudioOutput(this);
+    this->setAudioOutput(audioOutput);
+
     this->supportedFormats = {
         "Audio Files (*.mp3 *.ogg *.oga *.mka *.wav *.m4a *.aac *.flac *.wv *.mpc *.ape *.alac *.amr "
         "*.tta *.ac3 *.dts *.ra *.opus *.spx *.aif *.aiff *.aifc *.caf *.tak *.shr)",
@@ -20,6 +24,9 @@ MediaPlayer::MediaPlayer(QWidget *parent)
     };
     QString iniPath = QApplication::applicationDirPath() + "/" + "config.ini";
     settings = new QSettings(iniPath, QSettings::IniFormat);
+    connect(&m_mediaDevices, &QMediaDevices::audioOutputsChanged, [this]() {
+        setDefaultAudioOutputDevice();
+    });
 }
 
 QTime MediaPlayer::elapsedTime()
@@ -239,13 +246,6 @@ void MediaPlayer::togglePlayback()
         pause();
 }
 
-
-// Qt6
-// void MediaPlayer::setVolume(int volume)
-// {
-//     audioOutput()->setVolume(volume);
-// }
-
 // // Qt6
 
 // void MediaPlayer::setMuted(bool muted)
@@ -253,4 +253,13 @@ void MediaPlayer::togglePlayback()
 //     audioOutput()->setMuted(muted);
 // }
 
+void MediaPlayer::setDefaultAudioOutputDevice() {
 
+    QAudioDevice device = QMediaDevices::defaultAudioOutput();
+    if (!device.isNull()) {
+        audioOutput->setDevice(device);
+        qDebug() << "Audio output device set to:" << device.description();
+    } else {
+        qDebug() << "No audio output devices available.";
+    }
+}

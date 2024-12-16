@@ -36,8 +36,8 @@ Tool::Tool(QWidget *parent)
 
     player = new MediaPlayer(this);
     player->setVideoOutput(ui->m_videoWidget);
-    m_audioOutput = new QAudioOutput(this);
-    player->setAudioOutput(m_audioOutput);
+    // m_audioOutput = new QAudioOutput(this);
+    // player->setAudioOutput(m_audioOutput);
 
     connect(&m_mediaDevices, &QMediaDevices::audioOutputsChanged, [this]() {
         setDefaultAudioOutputDevice();
@@ -73,13 +73,13 @@ Tool::Tool(QWidget *parent)
     connect(ui->m_playerControls, &PlayerControls::stop, player, &QMediaPlayer::stop);
     connect(ui->m_playerControls, &PlayerControls::seekForward, player, [&]() {player->seek(3);});
     connect(ui->m_playerControls, &PlayerControls::seekBackward, player, [&]() {player->seek(-3);});
-    connect(ui->m_playerControls, &PlayerControls::changeVolume, m_audioOutput, &QAudioOutput::setVolume);
-    connect(ui->m_playerControls, &PlayerControls::changeMuting, m_audioOutput, &QAudioOutput::setMuted);
+    connect(ui->m_playerControls, &PlayerControls::changeVolume, player, &MediaPlayer::setVolume);
+    connect(ui->m_playerControls, &PlayerControls::changeMuting, player, &MediaPlayer::setMuted);
     connect(ui->m_playerControls, &PlayerControls::changeRate, player, &QMediaPlayer::setPlaybackRate);
     connect(ui->m_playerControls, &PlayerControls::stop, ui->m_videoWidget, QOverload<>::of(&QVideoWidget::update));
     connect(player, &MediaPlayer::playbackStateChanged, ui->m_playerControls, &PlayerControls::setState);
-    connect(m_audioOutput, &QAudioOutput::volumeChanged, ui->m_playerControls, &PlayerControls::setVolume);
-    connect(m_audioOutput, &QAudioOutput::mutedChanged, ui->m_playerControls, &PlayerControls::setMuted);
+    connect(player->audioOutput, &QAudioOutput::volumeChanged, ui->m_playerControls, &PlayerControls::setVolume);
+    connect(player->audioOutput, &QAudioOutput::mutedChanged, ui->m_playerControls, &PlayerControls::setMuted);
     connect(player, &MediaPlayer::message, this->statusBar(), &QStatusBar::showMessage);
 
     connect(player, &MediaPlayer::openMessage, [this](const QString& text) {
@@ -396,7 +396,7 @@ void Tool::setFontForElements()
     ui->m_editor_3->setEditorFont(font);
     ui->m_wordEditor->setFont(font);
     ui->m_wordEditor->fitTableContents();
-
+    ui->tableWidget->tableView->setFont(font);
     ui->m_tagListDisplay->setFont(font);
 }
 
@@ -843,13 +843,13 @@ void Tool::on_actionShow_Endlines_triggered()
 
 void Tool::setDefaultAudioOutputDevice() {
 
-    QAudioDevice device = QMediaDevices::defaultAudioOutput();
-    if (!device.isNull()) {
-        m_audioOutput->setDevice(device);
-        qDebug() << "Audio output device set to:" << device.description();
-    } else {
-        qDebug() << "No audio output devices available.";
-    }
+    // QAudioDevice device = QMediaDevices::defaultAudioOutput();
+    // if (!device.isNull()) {
+    //     m_audioOutput->setDevice(device);
+    //     qDebug() << "Audio output device set to:" << device.description();
+    // } else {
+    //     qDebug() << "No audio output devices available.";
+    // }
 }
 
 
