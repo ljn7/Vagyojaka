@@ -24,7 +24,7 @@ TTSAnnotator::TTSAnnotator(QWidget *parent)
     setupUI();
 
     QString iniPath = QApplication::applicationDirPath() + "/" + "config.ini";
-    settings = new QSettings(iniPath, QSettings::IniFormat);
+    settings = std::make_unique<QSettings>(iniPath, QSettings::IniFormat);
 
     this->supportedFormats = {
         "xml Files (*.xml)",
@@ -51,17 +51,15 @@ void TTSAnnotator::onSelectionChanged(const QItemSelection &selected, const QIte
 void TTSAnnotator::setupUI()
 {
 
-    // Set up the model
-    m_model = std::make_unique<LazyLoadingModel>(this);
-    tableView->setModel(m_model.get());
-
     // Set headers for the model
     m_model->setHorizontalHeaderLabels({
         "Audios", "Transcript", "Mispronounced words", "Tags", "Sound Quality", "ASR Quality"
     });
 
     // Set up delegates
-    m_audioPlayerDelegate = new AudioPlayerDelegate(xmlDirectory, this);
+    if (!m_audioPlayerDelegate) {
+        m_audioPlayerDelegate = new AudioPlayerDelegate(xmlDirectory, this);
+    }
     tableView->setItemDelegateForColumn(0, m_audioPlayerDelegate);
 
     ComboBoxDelegate* soundQualityDelegate = new ComboBoxDelegate(1, 5, SoundQualityColor.darker(105), this);
@@ -81,6 +79,8 @@ void TTSAnnotator::setupUI()
     tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     tableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
+    tableView->verticalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+
     tableView->setStyleSheet(
         "QTableView::item:selected { background-color: rgba(0, 120, 215, 100); }"
         "QTableView::item:focus { background-color: rgba(0, 120, 215, 50); }"
@@ -91,6 +91,8 @@ void TTSAnnotator::setupUI()
 
     // Set up connections
     connect(tableView, &QTableView::clicked, this, &TTSAnnotator::onCellClicked);
+    connect(tableView->horizontalHeader(), &QHeaderView::sectionResized,
+            this, &TTSAnnotator::onHeaderResized);
 
     // Set up button connections
     connect(ui->InsertRowButton, &QPushButton::clicked, this, &TTSAnnotator::insertRow);
@@ -109,6 +111,13 @@ void TTSAnnotator::setupUI()
 
 }
 
+void TTSAnnotator::onHeaderResized(int logicalIndex, int oldSize, int newSize)
+{
+    // Once the user resizes the column, switch to interactive mode
+    if (tableView->horizontalHeader()->sectionResizeMode(logicalIndex) != QHeaderView::Interactive) {
+        tableView->horizontalHeader()->setSectionResizeMode(logicalIndex, QHeaderView::Interactive);
+    }
+}
 
 void TTSAnnotator::onItemSelectionChanged()
 {
@@ -117,6 +126,11 @@ void TTSAnnotator::onItemSelectionChanged()
 
 void TTSAnnotator::openTTSTranscript()
 {
+
+    if (m_audioPlayerDelegate) {
+        static_cast<AudioPlayerDelegate*>(m_audioPlayerDelegate)->clearAllEditors();
+    }
+
     QFileDialog fileDialog(this);
     fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
     fileDialog.setWindowTitle(tr("Open File"));

@@ -25,6 +25,7 @@ public:
 
     static const QColor SoundQualityColor;
     static const QColor TTSQualityColor;
+    QTableView* tableView;
 
 private slots:
     void on_saveAsTableButton_clicked();
@@ -35,6 +36,7 @@ private slots:
     void onSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void onCellClicked(const QModelIndex &index);
     void onItemSelectionChanged();
+    void onHeaderResized(int logicalIndex, int oldSize, int newSize);
 
 private:
     void parseXML();
@@ -47,11 +49,10 @@ private:
     void setDefaultFontOnTableView();
 
     Ui::TTSAnnotator* ui;
-    QTableView* tableView;
     std::unique_ptr<LazyLoadingModel> m_model;
     QUrl fileUrl;
     QString xmlDirectory;
-    QSettings* settings;
+    std::unique_ptr<QSettings> settings;
     QStringList supportedFormats;
-    AudioPlayerDelegate* m_audioPlayerDelegate;
+    AudioPlayerDelegate* m_audioPlayerDelegate = nullptr;
 };

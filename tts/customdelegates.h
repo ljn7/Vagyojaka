@@ -19,7 +19,7 @@ public:
     void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
     void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
     void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
-
+    void clearAllEditors();
     void stopAllPlayers() const;
     void cleanupUnusedEditors() const;
     void setBaseDir(QString pBaseDir);
@@ -28,6 +28,7 @@ private:
     QString m_baseDir;
     mutable QMap<QModelIndex, AudioPlayerWidget*> m_activeEditors;
     mutable QModelIndex m_lastPlayingIndex;
+
 };
 
 class ComboBoxDelegate : public QStyledItemDelegate {

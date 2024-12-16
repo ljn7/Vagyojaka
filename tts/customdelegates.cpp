@@ -75,7 +75,9 @@ void AudioPlayerDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
 void AudioPlayerDelegate::stopAllPlayers() const
 {
     for (AudioPlayerWidget* player : m_activeEditors) {
-        player->stop();  // Assuming AudioPlayerWidget has a stop() method
+        if (player) {
+            player->stop();
+        }
     }
 }
 
@@ -84,16 +86,35 @@ void AudioPlayerDelegate::cleanupUnusedEditors() const
     QMutableMapIterator<QModelIndex, AudioPlayerWidget*> i(m_activeEditors);
     while (i.hasNext()) {
         i.next();
-        if (i.key() != m_lastPlayingIndex) {
-            delete i.value();
+        if (!i.key().isValid() || i.key() != m_lastPlayingIndex) {
+            if (i.value()) {
+                i.value()->stop();
+                delete i.value();
+            }
             i.remove();
         }
     }
 }
 
+void AudioPlayerDelegate::clearAllEditors()
+{
+    stopAllPlayers();
+
+    // Delete all editors
+    for (auto* editor : m_activeEditors) {
+        delete editor;
+    }
+    m_activeEditors.clear();
+    m_lastPlayingIndex = QModelIndex();
+}
+
 void AudioPlayerDelegate::setBaseDir(QString pBaseDir)
 {
-    m_baseDir = pBaseDir;
+    if (m_baseDir != pBaseDir) {
+        // Stop and clear all players before changing directory
+        clearAllEditors();
+        m_baseDir = pBaseDir;
+    }
 }
 
 ComboBoxDelegate::ComboBoxDelegate(int min, int max, const QColor& color, QObject* parent)
