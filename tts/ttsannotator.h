@@ -26,6 +26,8 @@ public:
     static const QColor SoundQualityColor;
     static const QColor TTSQualityColor;
     QTableView* tableView;
+    TextEditDelegate* textDelegate = nullptr;
+
 
 private slots:
     void on_saveAsTableButton_clicked();
@@ -52,7 +54,7 @@ private:
     std::unique_ptr<LazyLoadingModel> m_model;
     QUrl fileUrl;
     QString xmlDirectory;
-    std::unique_ptr<QSettings> settings;
+    std::unique_ptr<QSettings> settings = nullptr;
     QStringList supportedFormats;
     AudioPlayerDelegate* m_audioPlayerDelegate = nullptr;
 };

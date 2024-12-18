@@ -19,11 +19,20 @@
 #include "qmediadevices.h"
 #include "qaudiodevice.h"
 
+// #include <config/settingsManager.h>
+
 Tool::Tool(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::Tool)
 {
     ui->setupUi(this);
+    // auto& settings = SettingsManager::getInstance();
+    // settings.initializeAction(ui->Show_Time_Stamps, "showTimeStamps", true);
+
+    // // Connect QAction changes
+    // connect(ui->Show_Time_Stamps, &QAction::toggled, [&settings, this](bool) {
+    //     settings.saveActionState(ui->Show_Time_Stamps, "showTimeStamps");
+    // });
 
     QString iniPath = QApplication::applicationDirPath() + "/" + "config.ini";
     settings = new QSettings(iniPath, QSettings::IniFormat);
@@ -33,6 +42,7 @@ Tool::Tool(QWidget *parent)
     else {
         ui->Show_Time_Stamps->setChecked(settings->value("showTimeStamps").toString() == "true");
     }
+
 
     player = new MediaPlayer(this);
     player->setVideoOutput(ui->m_videoWidget);
@@ -324,9 +334,15 @@ void Tool::keyPressEvent(QKeyEvent *event)
         else if(ui->m_wordEditor->hasFocus())
             ui->m_wordEditor->insertTimeStamp(player->elapsedTime());
     }
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
     else if (event->key() == Qt::Key_Space && event->modifiers() == Qt::ControlModifier) {
         player->togglePlayback();
     }
+#elif defined(Q_OS_MAC)
+    else if (event->key() == Qt::Key_Space && event->modifiers() == Qt::AltModifier) {
+        player->togglePlayback();
+    }
+#endif
     else
         QMainWindow::keyPressEvent(event);
 }
@@ -396,7 +412,11 @@ void Tool::setFontForElements()
     ui->m_editor_3->setEditorFont(font);
     ui->m_wordEditor->setFont(font);
     ui->m_wordEditor->fitTableContents();
+    ui->tableWidget->textDelegate->setFont(font);
     ui->tableWidget->tableView->setFont(font);
+    ui->tableWidget->tableView->horizontalHeader()->setFont(font);  // Set font for header
+    ui->tableWidget->tableView->verticalHeader()->setFont(font);    // Set font for row headers
+    ui->tableWidget->tableView->viewport()->update();
     ui->m_tagListDisplay->setFont(font);
 }
 

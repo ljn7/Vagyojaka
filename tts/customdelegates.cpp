@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QApplication>
 #include <QMouseEvent>
+#include "editor/texteditor.h"
 #include "qdir"
 
 AudioPlayerDelegate::AudioPlayerDelegate(const QString& baseDir, QObject* parent)
@@ -186,4 +187,95 @@ void ComboBoxDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     }
 
     painter->restore();
+}
+
+TextEditDelegate::TextEditDelegate(QFont font, QWidget *parent)
+    : QStyledItemDelegate(parent), m_font(font)
+{
+}
+
+QWidget *TextEditDelegate::createEditor(QWidget *parent,
+                                        const QStyleOptionViewItem &option,
+                                        const QModelIndex &index) const
+{
+    Q_UNUSED(option);
+    Q_UNUSED(index);
+
+    QPlainTextEdit *editor = new QPlainTextEdit(parent);
+    editor->document()->setDefaultFont(m_font);
+    return editor;
+}
+
+void TextEditDelegate::setEditorData(QWidget *editor,
+                                     const QModelIndex &index) const
+{
+    QString value = index.model()->data(index, Qt::EditRole).toString();
+    CustomTextEdit *textEdit = static_cast<CustomTextEdit*>(editor);
+    textEdit->setPlainText(value);
+}
+
+void TextEditDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
+                                    const QModelIndex &index) const
+{
+    CustomTextEdit *textEdit = static_cast<CustomTextEdit*>(editor);
+    QString value = textEdit->toPlainText();
+    model->setData(index, value, Qt::EditRole);
+}
+
+void TextEditDelegate::updateEditorGeometry(QWidget *editor,
+                                            const QStyleOptionViewItem &option,
+                                            const QModelIndex &index) const
+{
+    Q_UNUSED(index);
+    editor->setGeometry(option.rect);
+}
+
+void TextEditDelegate::setFont(QFont font)
+{
+    m_font = font;
+}
+
+CustomTextEdit::CustomTextEdit(QWidget *parent)
+    : QPlainTextEdit(parent)
+{
+}
+
+void CustomTextEdit::keyPressEvent(QKeyEvent *e)
+{
+    if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) {
+        if (e->modifiers() & Qt::ShiftModifier) {
+            // Shift+Enter inserts a new line
+            QPlainTextEdit::keyPressEvent(e);
+        } else {
+            // Enter without shift finishes editing
+            e->accept();
+            QWidget *editor = this;
+            QStyledItemDelegate *delegate = qobject_cast<QStyledItemDelegate*>(editor->parent());
+            if (delegate) {
+                emit delegate->commitData(editor);
+                emit delegate->closeEditor(editor);
+            }
+        }
+    } else if (e->key() == Qt::Key_Escape) {
+        e->accept();
+        QWidget *editor = this;
+        QStyledItemDelegate *delegate = qobject_cast<QStyledItemDelegate*>(editor->parent());
+        if (delegate) {
+            emit delegate->closeEditor(editor);
+        }
+    } else {
+        QPlainTextEdit::keyPressEvent(e);
+    }
+}
+
+void CustomTextEdit::focusOutEvent(QFocusEvent *e)
+{
+    QPlainTextEdit::focusOutEvent(e);
+
+    QWidget *editor = this;
+    QStyledItemDelegate *delegate = qobject_cast<QStyledItemDelegate*>(editor->parent());
+    if (delegate) {
+        emit delegate->commitData(editor);
+        emit delegate->closeEditor(editor, QAbstractItemDelegate::NoHint);
+    }
 }

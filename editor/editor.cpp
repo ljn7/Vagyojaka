@@ -19,7 +19,8 @@
 #include <QEventLoop>
 #include <QDebug>
 #include <QUndoStack>
-#include<QPrinter>
+#include <QPrinter>
+// #include "config/settingsmanager.h"
 
 Editor::Editor(QWidget *parent)
     : TextEditor(parent),
@@ -70,6 +71,10 @@ Editor::Editor(QWidget *parent)
     }
 
     settings->setValue("showTimeStamps", QVariant(showTimeStamp).toString());
+
+    // auto& settings = SettingsManager::getInstance();
+    // showTimeStamp = settings.getShowTimeStamps();
+
     this->supportedFormats = {
         "xml Files (*.xml)",
         "All Files (*)"
@@ -763,6 +768,9 @@ void Editor::transcriptOpen()
     fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
     fileDialog.setWindowTitle(tr("Open File"));
     fileDialog.setNameFilters(supportedFormats);
+    // QString dr = SettingsManager::getInstance().getTranscriptsDirectory();
+    // std::cerr << dr.toStdString() << std::endl;
+    // fileDialog.setDirectory(SettingsManager::getInstance().getTranscriptsDirectory());
     if(settings->value("transcriptDir").toString()=="")
         fileDialog.setDirectory(QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).value(0, QDir::homePath()));
     else
@@ -1035,6 +1043,7 @@ void Editor::loadTranscriptFromUrl(QUrl *fileUrl)
     QFile transcriptFile(fileUrl->toLocalFile());
     QFileInfo filedir(transcriptFile);
     QString dirInString=filedir.dir().path();
+    // SettingsManager::getInstance().setTranscriptsDirectory("transcriptDir");
     settings->setValue("transcriptDir", dirInString);
     if (!transcriptFile.open(QIODevice::ReadOnly)) {
         qDebug() << "From loadTranscriptFromUrl - 1";
@@ -1430,6 +1439,7 @@ void Editor::setShowTimeStamp()
     }
 
     settings->setValue("showTimeStamps", QVariant(showTimeStamp).toString());
+    // SettingsManager::getInstance().setShowTimeStamps(showTimeStamp);
 
     setContent();
     QTextCursor cursorx(this->document()->findBlockByNumber(highlightedBlock));

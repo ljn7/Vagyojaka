@@ -50,7 +50,6 @@ void TTSAnnotator::onSelectionChanged(const QItemSelection &selected, const QIte
 
 void TTSAnnotator::setupUI()
 {
-
     // Set headers for the model
     m_model->setHorizontalHeaderLabels({
         "Audios", "Transcript", "Mispronounced words", "Tags", "Sound Quality", "ASR Quality"
@@ -61,10 +60,16 @@ void TTSAnnotator::setupUI()
         m_audioPlayerDelegate = new AudioPlayerDelegate(xmlDirectory, this);
     }
     tableView->setItemDelegateForColumn(0, m_audioPlayerDelegate);
-
     ComboBoxDelegate* soundQualityDelegate = new ComboBoxDelegate(1, 5, SoundQualityColor.darker(105), this);
     ComboBoxDelegate* ttsQualityDelegate = new ComboBoxDelegate(0, 1, TTSQualityColor.darker(105), this);
 
+    // Add TextEditDelegate for text columns
+    textDelegate = new TextEditDelegate(font(), this);
+    tableView->setItemDelegateForColumn(1, textDelegate); // Transcript column
+    tableView->setItemDelegateForColumn(2, textDelegate); // Mispronounced words column
+    tableView->setItemDelegateForColumn(3, textDelegate); // Tags column
+
+    // soundQualityDelegate->
     tableView->setItemDelegateForColumn(4, soundQualityDelegate);
     tableView->setItemDelegateForColumn(5, ttsQualityDelegate);
 
@@ -77,8 +82,20 @@ void TTSAnnotator::setupUI()
 
     // Set up header properties
     tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    tableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    // tableView->horizontalHeader()->viewport()->update();
 
+    // Store the column widths after stretch
+    QVector<int> columnWidths;
+    for (int i = 0; i < tableView->model()->columnCount(); ++i) {
+        columnWidths.append(tableView->columnWidth(i));
+    }
+    tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+    // Restore the stretched widths for columns
+    for (int i = 0; i < columnWidths.size(); ++i) {
+        tableView->setColumnWidth(i, columnWidths[i]);
+    }
+
+    tableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     tableView->verticalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 
     tableView->setStyleSheet(
@@ -86,13 +103,13 @@ void TTSAnnotator::setupUI()
         "QTableView::item:focus { background-color: rgba(0, 120, 215, 50); }"
         );
 
-    // Enable sorting
-    tableView->setSortingEnabled(true);
+    // // Enable sorting
+    // tableView->setSortingEnabled(true);
 
     // Set up connections
     connect(tableView, &QTableView::clicked, this, &TTSAnnotator::onCellClicked);
-    connect(tableView->horizontalHeader(), &QHeaderView::sectionResized,
-            this, &TTSAnnotator::onHeaderResized);
+    // connect(tableView->horizontalHeader(), &QHeaderView::sectionResized,
+    //         this, &TTSAnnotator::onHeaderResized);
 
     // Set up button connections
     connect(ui->InsertRowButton, &QPushButton::clicked, this, &TTSAnnotator::insertRow);
@@ -105,7 +122,7 @@ void TTSAnnotator::setupUI()
 
     // Resize rows and columns to content
     tableView->resizeRowsToContents();
-    tableView->resizeColumnsToContents();
+    // tableView->resizeColumnsToContents();
     connect(tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &TTSAnnotator::onItemSelectionChanged);
 
@@ -303,32 +320,32 @@ void TTSAnnotator::onCellClicked(const QModelIndex &index)
 
 void TTSAnnotator::setDefaultFontOnTableView()
 {
-    QFont defaultFont = tableView->font();
+    // QFont defaultFont = tableView->font();
 
-    // Define a list of preferred fonts
-    QStringList preferredFonts = {
-        ".AppleSystemUIFont",  // macOS system font
-        "SF Pro",              // macOS
-        "Segoe UI",            // Windows
-        "Roboto",              // Android and modern systems
-        "Noto Sans",           // Good Unicode coverage
-        "Arial",               // Widely available
-        "Helvetica"            // Fallback
-    };
+    // // Define a list of preferred fonts
+    // QStringList preferredFonts = {
+    //     ".AppleSystemUIFont",  // macOS system font
+    //     "SF Pro",              // macOS
+    //     "Segoe UI",            // Windows
+    //     "Roboto",              // Android and modern systems
+    //     "Noto Sans",           // Good Unicode coverage
+    //     "Arial",               // Widely available
+    //     "Helvetica"            // Fallback
+    // };
 
-    QString chosenFont;
-    for (const QString& fontFamily : preferredFonts) {
-        if (QFontDatabase::families().contains(fontFamily)) {
-            chosenFont = fontFamily;
-            break;
-        }
-    }
+    // QString chosenFont;
+    // for (const QString& fontFamily : preferredFonts) {
+    //     if (QFontDatabase::families().contains(fontFamily)) {
+    //         chosenFont = fontFamily;
+    //         break;
+    //     }
+    // }
 
-    if (!chosenFont.isEmpty()) {
-        defaultFont.setFamily(chosenFont);
-    }
+    // if (!chosenFont.isEmpty()) {
+    //     defaultFont.setFamily(chosenFont);
+    // }
 
-    tableView->setFont(defaultFont);
+    // tableView->setFont(defaultFont);
 
-    tableView->resizeRowsToContents();
+    // tableView->resizeRowsToContents();
 }

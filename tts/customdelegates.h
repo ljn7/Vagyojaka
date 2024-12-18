@@ -1,5 +1,6 @@
 #pragma once
 
+#include "qplaintextedit.h"
 #include <QStyledItemDelegate>
 #include <QComboBox>
 
@@ -43,4 +44,34 @@ public:
 private:
     int m_min, m_max;
     QColor m_color;
+};
+
+
+#include <QStyledItemDelegate>
+#include <QPlainTextEdit>
+
+class CustomTextEdit : public QPlainTextEdit {
+    Q_OBJECT
+public:
+    explicit CustomTextEdit(QWidget *parent = nullptr);
+protected:
+    void keyPressEvent(QKeyEvent *e) override;
+    void focusOutEvent(QFocusEvent *e) override;
+};
+
+class TextEditDelegate : public QStyledItemDelegate {
+    Q_OBJECT
+public:
+    explicit TextEditDelegate( QFont font, QWidget *parent = nullptr);
+
+    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+                          const QModelIndex &index) const override;
+    void setEditorData(QWidget *editor, const QModelIndex &index) const override;
+    void setModelData(QWidget *editor, QAbstractItemModel *model,
+                      const QModelIndex &index) const override;
+    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
+                              const QModelIndex &index) const override;
+
+    void setFont(QFont font);
+    QFont m_font;
 };

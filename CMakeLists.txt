@@ -116,6 +116,8 @@ add_executable(
         tts/lazyloadingmodel.h tts/lazyloadingmodel.cpp
         tts/customdelegates.h tts/customdelegates.cpp
         AppIcon.ico
+        config/settingsmanager.h
+        config/settingsmanager.cpp
 
 
 )
