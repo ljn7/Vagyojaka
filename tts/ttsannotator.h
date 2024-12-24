@@ -2,10 +2,13 @@
 
 #include "qitemselectionmodel.h"
 #include "tts/customdelegates.h"
+#include "tts/lazyloadingmodel.h"
+#include "ui_ttsannotator.h"
 #include <QWidget>
 #include <QUrl>
 #include <QSettings>
 #include <memory>
+#include <algorithm>
 
 namespace Ui {
 class TTSAnnotator;
@@ -28,6 +31,11 @@ public:
     QTableView* tableView;
     TextEditDelegate* textDelegate = nullptr;
 
+signals:
+    void transcriptWordsEdited(int64_t wordCount);
+    void mispronunciationWordsEdited(int64_t wordCount);
+    void tagWordsEdited(int64_t wordCount);
+    void openMessage(QString text);
 
 private slots:
     void on_saveAsTableButton_clicked();
@@ -40,6 +48,43 @@ private slots:
     void onItemSelectionChanged();
     void onHeaderResized(int logicalIndex, int oldSize, int newSize);
 
+public slots:
+    void updateTranscriptEditedWords(int64_t count) {
+        totalTranscriptEditedWords = std::max(0LL, totalTranscriptEditedWords + count);
+        ui->totalTranscriptEditedWordsLbl->setText(
+            QString("Total Edited Transcript words: %1").arg(totalTranscriptEditedWords));
+    }
+
+    void updateMispronunciationEditedWords(int64_t count) {
+        totalMispronouncedEditedWords = std::max(0LL, totalMispronouncedEditedWords + count);
+        ui->totalMispronouncedEditedWordsLbl->setText(
+            QString("Total Edited Mispronounced words: %1").arg(totalMispronouncedEditedWords));
+    }
+
+    void updateTagEditedWords(int64_t count) {
+        totalTaggedEditedWords = std::max(0LL, totalTaggedEditedWords + count);
+        ui->totalTaggedEditedWordsLbl->setText(
+            QString("Total Edited Tagged words: %1").arg(totalTaggedEditedWords));
+    }
+
+public slots:
+    void updateEditedWordCounts() {
+        if (!m_model) return;
+
+        // Calculate edits for each column
+        totalTranscriptEditedWords += m_model->calculateColumnEditedWords(1);
+        totalMispronouncedEditedWords += m_model->calculateColumnEditedWords(2);
+        totalTaggedEditedWords += m_model->calculateColumnEditedWords(3);
+
+        // Update the labels
+        ui->totalTranscriptEditedWordsLbl->setText(
+            QString("Total Edited Transcript words: %1").arg(totalTranscriptEditedWords));
+        ui->totalMispronouncedEditedWordsLbl->setText(
+            QString("Total Edited Mispronounced words: %1").arg(totalMispronouncedEditedWords));
+        ui->totalTaggedEditedWordsLbl->setText(
+            QString("Total Edited Tagged words: %1").arg(totalTaggedEditedWords));
+    }
+
 private:
     void parseXML();
     void setupUI();
@@ -49,6 +94,9 @@ private:
     void insertRow();
     void deleteRow();
     void setDefaultFontOnTableView();
+    QString getWordCountFilename();
+    void saveWordCounts();
+    void loadWordCounts();
 
     Ui::TTSAnnotator* ui;
     std::unique_ptr<LazyLoadingModel> m_model;
@@ -57,4 +105,10 @@ private:
     std::unique_ptr<QSettings> settings = nullptr;
     QStringList supportedFormats;
     AudioPlayerDelegate* m_audioPlayerDelegate = nullptr;
+    int64_t totalTranscriptEditedWords = 0;
+    int64_t totalMispronouncedEditedWords = 0;
+    int64_t totalTaggedEditedWords = 0;
+    int64_t totalTranscriptWords = 0;
+    int64_t totalMispronouncedWords = 0;
+    int64_t totalTaggedWords = 0;
 };

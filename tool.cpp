@@ -93,19 +93,27 @@ Tool::Tool(QWidget *parent)
     connect(player, &MediaPlayer::message, this->statusBar(), &QStatusBar::showMessage);
 
     connect(player, &MediaPlayer::openMessage, [this](const QString& text) {
-        this->ui->mediaFilenameLbl->setText(text);
         QString message = text;
         if (text.size() > 30)
             message = text.left(30) + "...";
         this->ui->mediaFilenameLbl->setText("           Media: " + message);
+        this->ui->mediaFilenameLbl->update();
     });
 
     connect(ui->m_editor, &Editor::openMessage, [this](const QString& text) {
-        this->ui->transcriptFilenameLbl->setText(text);
         QString message = text;
         if (text.size() > 30)
             message = text.left(30) + "...";
         this->ui->transcriptFilenameLbl->setText("Transcript: " + message + "           ");
+        this->ui->transcriptFilenameLbl->update();
+    });
+
+    connect(ui->tableWidget, &TTSAnnotator::openMessage, [this](const QString& text) {
+        QString message = text;
+        if (text.size() > 30)
+            message = text.left(30) + "...";
+        this->ui->asrvalidatorFilenameLbl->setText("           Validation Transcript: " + message);
+        this->ui->asrvalidatorFilenameLbl->update();
     });
     // Qt6
     // connect(player, QOverload<QMediaPlayer::Error>::of(&QMediaPlayer::error), this, &Tool::handleMediaPlayerError);
@@ -279,6 +287,7 @@ Tool::Tool(QWidget *parent)
     connect(ui->tabWidget, &QTabWidget::currentChanged, this, &Tool::onTabChanged);
     connect(player, &MediaPlayer::sendMediaUrl, ui->widget, &AudioWaveForm::setMediaUrl);
 
+    onTabChanged(ui->tabWidget->currentIndex());
 }
 
 Tool::~Tool()
@@ -828,12 +837,15 @@ void Tool::on_actionShow_Waveform_triggered()
 }
 
 void Tool::onTabChanged(int index) {
-    if (index > 0) {  // Tab 2 index
-        ui->mediaFilenameLbl->hide();
-        ui->transcriptFilenameLbl->hide();
-    } else {
-        ui->mediaFilenameLbl->show();
-        ui->transcriptFilenameLbl->show();
+    ui->mediaFilenameLbl->setVisible(false);
+    ui->transcriptFilenameLbl->setVisible(false);
+    ui->asrvalidatorFilenameLbl->setVisible(false);
+
+    if (index == 0) {
+        ui->mediaFilenameLbl->setVisible(true);
+        ui->transcriptFilenameLbl->setVisible(true);
+    } else if (index == 3) {
+        ui->asrvalidatorFilenameLbl->setVisible(true);
     }
 }
 

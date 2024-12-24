@@ -118,6 +118,7 @@ add_executable(
         AppIcon.ico
         config/settingsmanager.h
         config/settingsmanager.cpp
+        utils/constants.h utils/constants.cpp
 
 
 )

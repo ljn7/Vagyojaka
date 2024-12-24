@@ -1,8 +1,8 @@
 #include "ttsannotator.h"
-#include "qfontdatabase.h"
 #include "ui_ttsannotator.h"
 #include "lazyloadingmodel.h"
 #include "customdelegates.h"
+#include "utils/constants.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QStandardPaths>
@@ -30,6 +30,11 @@ TTSAnnotator::TTSAnnotator(QWidget *parent)
         "xml Files (*.xml)",
         "All Files (*)"
     };
+
+    connect(m_model.get(), &LazyLoadingModel::transcriptEditedWordsCount, this, &TTSAnnotator::updateTranscriptEditedWords);
+    connect(m_model.get(), &LazyLoadingModel::mispronouncedEditedWordsCount, this, &TTSAnnotator::updateMispronunciationEditedWords);
+    connect(m_model.get(), &LazyLoadingModel::taggedEditedWordsCount, this, &TTSAnnotator::updateTagEditedWords);
+
 }
 
 TTSAnnotator::~TTSAnnotator() = default;
@@ -61,7 +66,7 @@ void TTSAnnotator::setupUI()
     }
     tableView->setItemDelegateForColumn(0, m_audioPlayerDelegate);
     ComboBoxDelegate* soundQualityDelegate = new ComboBoxDelegate(1, 5, SoundQualityColor.darker(105), this);
-    ComboBoxDelegate* ttsQualityDelegate = new ComboBoxDelegate(0, 1, TTSQualityColor.darker(105), this);
+    CheckBoxDelegate* ttsQualityDelegate = new CheckBoxDelegate(false, TTSQualityColor.darker(105), this);
 
     // Add TextEditDelegate for text columns
     textDelegate = new TextEditDelegate(font(), this);
@@ -81,19 +86,25 @@ void TTSAnnotator::setupUI()
                                QAbstractItemView::AnyKeyPressed);
 
     // Set up header properties
-    tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    // tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     // tableView->horizontalHeader()->viewport()->update();
 
     // Store the column widths after stretch
-    QVector<int> columnWidths;
-    for (int i = 0; i < tableView->model()->columnCount(); ++i) {
-        columnWidths.append(tableView->columnWidth(i));
-    }
+    // QVector<int> columnWidths;
+    // for (int i = 0; i < tableView->model()->columnCount(); ++i) {
+    //     columnWidths.append(tableView->columnWidth(i));
+    // }
+    // tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+    // // Restore the stretched widths for columns
+    // for (int i = 0; i < columnWidths.size(); ++i) {
+    //     tableView->setColumnWidth(i, columnWidths[i]);
+    // }
+    // tableView->horizontalHeader()->updateGeometry();
+    // tableView->horizontalHeader()->viewport()->update();
+
     tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
-    // Restore the stretched widths for columns
-    for (int i = 0; i < columnWidths.size(); ++i) {
-        tableView->setColumnWidth(i, columnWidths[i]);
-    }
+    tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignVCenter);
+    ui->tableView->horizontalHeader()->setStretchLastSection(true);
 
     tableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     tableView->verticalHeader()->setSectionResizeMode(QHeaderView::Interactive);
@@ -114,8 +125,15 @@ void TTSAnnotator::setupUI()
     // Set up button connections
     connect(ui->InsertRowButton, &QPushButton::clicked, this, &TTSAnnotator::insertRow);
     connect(ui->deleteRowButton, &QPushButton::clicked, this, &TTSAnnotator::deleteRow);
-    connect(ui->saveAsTableButton, &QPushButton::clicked, this, &TTSAnnotator::saveAs);
-    connect(ui->saveTableButton, &QPushButton::clicked, this, &TTSAnnotator::save);
+    // connect(ui->saveAsTableButton, &QPushButton::clicked, this, &TTSAnnotator::saveAs);
+    // connect(ui->saveTableButton, &QPushButton::clicked, this, &TTSAnnotator::save);
+
+    connect(textDelegate, &TextEditDelegate::transcriptWordsEdited,
+            this, &TTSAnnotator::updateTranscriptEditedWords);
+    connect(textDelegate, &TextEditDelegate::mispronunciationWordsEdited,
+            this, &TTSAnnotator::updateMispronunciationEditedWords);
+    connect(textDelegate, &TextEditDelegate::tagWordsEdited,
+            this, &TTSAnnotator::updateTagEditedWords);
 
     // Set initial focus
     tableView->setFocus();
@@ -167,6 +185,7 @@ void TTSAnnotator::openTTSTranscript()
             m_audioPlayerDelegate->setBaseDir(xmlDirectory);
         parseXML();
 
+        emit openMessage(fileUrl.fileName());
         QFileInfo filedir(fileUrl.toLocalFile());
         QString dirInString = filedir.dir().path();
         settings->setValue("annotatorTranscriptDir", dirInString);
@@ -182,6 +201,13 @@ void TTSAnnotator::parseXML()
     }
 
     QXmlStreamReader xmlReader(&file);
+    int currentRow = 0;
+    totalTranscriptWords = 0;
+    totalMispronouncedWords = 0;
+    totalTaggedWords = 0;
+    totalTranscriptEditedWords = 0;
+    totalMispronouncedEditedWords = 0;
+    totalTaggedEditedWords = 0;
 
     while (!xmlReader.atEnd() && !xmlReader.hasError()) {
         if (xmlReader.isStartElement() && xmlReader.name() == QString("row")) {
@@ -190,24 +216,61 @@ void TTSAnnotator::parseXML()
                 xmlReader.readNext();
                 if (xmlReader.isStartElement()) {
                     QString elementName = QString::fromUtf8(xmlReader.name().toUtf8());
+                    QXmlStreamAttributes attrs = xmlReader.attributes();
+
+                    bool isEdited = attrs.hasAttribute("isEdited") &&
+                                    attrs.value("isEdited").toString() == "true";
+
                     xmlReader.readNext();
-                    QString text = QString::fromUtf8(xmlReader.text().toUtf8());
+                    QString text = QString::fromUtf8(xmlReader
+                                       .text()
+                                       .toUtf8()
+                                    )
+                                    .trimmed()
+                                    .replace(Constants::Text::WHITESPACE_NORMALIZER, " ");
+
+                    uint64_t totalWords = text.split(" ",  Qt::SkipEmptyParts).size();
+
                     if (elementName == QString("words")) {
                         row.words = text;
+                        totalTranscriptWords += totalWords;
+                        row.wordsEdited = isEdited;
                     } else if (elementName == QString("not-pronounced-properly")) {
                         row.not_pronounced_properly = text;
+                        totalMispronouncedWords += totalWords;
+                        row.pronunciationEdited = isEdited;
                     } else if (elementName == QString("sound-quality")) {
-                        row.sound_quality = text.toInt();
+                        row.sound_quality = std::clamp(text.toInt(), 1, 5);
                     } else if (elementName == QString("asr-quality")) {
-                        row.asr_quality = text.toInt();
+                        row.asr_quality = std::clamp(text.toInt(), 0, 1);
                     } else if (elementName == QString("audio-filename")) {
                         row.audioFileName = text;
                     } else if (elementName == QString("tag")) {
                         row.tag = text;
+                        totalTaggedWords += text.trimmed().split(";", Qt::SkipEmptyParts).count();
+                        row.tagEdited = isEdited;
                     }
                 }
             }
-            m_model->addRow(row);
+            // Add the row and get its index
+            int currentRow = m_model->addRow(row);
+            m_model->storeOriginalData(currentRow, row.words,
+                                       row.not_pronounced_properly,
+                                       row.tag);
+
+            // Set background colors for edited fields
+            if (row.wordsEdited) {
+                m_model->setData(m_model->index(currentRow, 1),
+                                 QBrush(Qt::yellow), Qt::BackgroundRole);
+            }
+            if (row.pronunciationEdited) {
+                m_model->setData(m_model->index(currentRow, 2),
+                                 QBrush(Qt::yellow), Qt::BackgroundRole);
+            }
+            if (row.tagEdited) {
+                m_model->setData(m_model->index(currentRow, 3),
+                                 QBrush(Qt::yellow), Qt::BackgroundRole);
+            }
         }
         xmlReader.readNext();
     }
@@ -215,6 +278,14 @@ void TTSAnnotator::parseXML()
     if (xmlReader.hasError()) {
         QMessageBox::warning(this, tr("XML Error"), tr("Error parsing XML: %1").arg(xmlReader.errorString()));
     }
+    if (tableView) {
+        loadWordCounts();
+        tableView->viewport()->update();
+    }
+
+    ui->totalTranscriptWordsLbl->setText(QString("Total Transcript words: %1").arg(totalTranscriptWords));
+    ui->totalMispronouncedWordsLbl->setText(QString("Total Mispronounced words: %1").arg(totalMispronouncedWords));
+    ui->totalTaggedWordsLbl->setText(QString("Total Tagged words: %1").arg(totalTaggedWords));
 }
 
 void TTSAnnotator::save()
@@ -252,12 +323,29 @@ void TTSAnnotator::saveToFile(const QString& fileName)
     const auto& rows = m_model->rows();
     for (const auto& row : rows) {
         xmlWriter.writeStartElement("row");
-        xmlWriter.writeTextElement("words", row.words);
-        xmlWriter.writeTextElement("not-pronounced-properly", row.not_pronounced_properly);
+
+        // Write words with isEdited attribute
+        xmlWriter.writeStartElement("words");
+        xmlWriter.writeAttribute("isEdited", row.wordsEdited ? "true" : "false");
+        xmlWriter.writeCharacters(row.words);
+        xmlWriter.writeEndElement();
+
+        // Write not-pronounced-properly with isEdited attribute
+        xmlWriter.writeStartElement("not-pronounced-properly");
+        xmlWriter.writeAttribute("isEdited", row.pronunciationEdited ? "true" : "false");
+        xmlWriter.writeCharacters(row.not_pronounced_properly);
+        xmlWriter.writeEndElement();
+
         xmlWriter.writeTextElement("sound-quality", QString::number(row.sound_quality));
         xmlWriter.writeTextElement("asr-quality", QString::number(row.asr_quality));
         xmlWriter.writeTextElement("audio-filename", row.audioFileName);
-        xmlWriter.writeTextElement("tag", row.tag);
+
+        // Write tag with isEdited attribute
+        xmlWriter.writeStartElement("tag");
+        xmlWriter.writeAttribute("isEdited", row.tagEdited ? "true" : "false");
+        xmlWriter.writeCharacters(row.tag);
+        xmlWriter.writeEndElement();
+
         xmlWriter.writeEndElement(); // row
     }
 
@@ -269,7 +357,24 @@ void TTSAnnotator::saveToFile(const QString& fileName)
     if (file.error() != QFile::NoError) {
         QMessageBox::warning(this, tr("Save Error"), tr("Error occurred while saving the file: %1").arg(file.errorString()));
     } else {
-        QMessageBox::information(this, tr("Save Successful"), tr("File saved successfully."));
+        // updateEditedWordCounts();
+        saveWordCounts();
+        QMessageBox::information(this,
+            tr("Save Successful"),
+            tr("File saved successfully.\n"
+               "Total Transcript words: %1\n"
+               "Total Mispronounced words: %2\n"
+               "Total Tagged words: %3\n"
+               "Total Transcript edited words: %4\n"
+               "Total Mispronounced edited words: %5\n"
+               "Total Tagged edited words: %6\n")
+                 .arg(totalTranscriptWords)
+                 .arg(totalMispronouncedWords)
+                 .arg(totalTaggedWords)
+                 .arg(totalTranscriptEditedWords)
+                 .arg(totalMispronouncedEditedWords)
+                 .arg(totalTaggedEditedWords)
+        );
     }
 }
 
@@ -348,4 +453,90 @@ void TTSAnnotator::setDefaultFontOnTableView()
     // tableView->setFont(defaultFont);
 
     // tableView->resizeRowsToContents();
+}
+
+QString TTSAnnotator::getWordCountFilename() {
+    if (fileUrl.isEmpty()) return QString();
+
+    QDir baseDir(QFileInfo(fileUrl.toLocalFile()).absolutePath());
+    // Create wordcount directory if it doesn't exist
+    if (!baseDir.exists("wordcount")) {
+        if (!baseDir.mkdir("wordcount")) {
+            qDebug() << "Failed to create wordcount directory";
+            QMessageBox::critical(this, "Error", "Failed to create the 'wordcount' directory.");
+            return QString();
+        }
+    }
+
+    QString baseName = QFileInfo(fileUrl.toLocalFile()).fileName();
+    return baseDir.absolutePath() + "/wordcount/" + baseName.left(baseName.lastIndexOf('.')) + "_wordcount.xml";
+}
+
+void TTSAnnotator::saveWordCounts() {
+    QString countFile = getWordCountFilename();
+    if (countFile.isEmpty()) return;
+
+    QFile file(countFile);
+    if (!file.open(QIODevice::WriteOnly)) {
+        qDebug() << "Failed to open word count file for writing:" << file.errorString();
+        return;
+    }
+
+    QXmlStreamWriter xmlWriter(&file);
+    xmlWriter.setAutoFormatting(true);
+    xmlWriter.writeStartDocument();
+    xmlWriter.writeStartElement("wordcounts");
+
+    xmlWriter.writeTextElement("transcript_edited", QString::number(totalTranscriptEditedWords));
+    xmlWriter.writeTextElement("mispronounced_edited", QString::number(totalMispronouncedEditedWords));
+    xmlWriter.writeTextElement("tagged_edited", QString::number(totalTaggedEditedWords));
+    xmlWriter.writeTextElement("transcript_total", QString::number(totalTranscriptWords));
+    xmlWriter.writeTextElement("mispronounced_total", QString::number(totalMispronouncedWords));
+    xmlWriter.writeTextElement("tagged_total", QString::number(totalTaggedWords));
+
+    xmlWriter.writeEndElement(); // wordcounts
+    xmlWriter.writeEndDocument();
+    file.close();
+}
+
+void TTSAnnotator::loadWordCounts() {
+    QString countFile = getWordCountFilename();
+    if (countFile.isEmpty()) return;
+
+    QFile file(countFile);
+    if (!file.exists() || !file.open(QIODevice::ReadOnly)) {
+        // Reset counts if file doesn't exist or can't be opened
+        totalTranscriptEditedWords = 0;
+        totalMispronouncedEditedWords = 0;
+        totalTaggedEditedWords = 0;
+        return;
+    }
+
+    QXmlStreamReader xmlReader(&file);
+    while (!xmlReader.atEnd() && !xmlReader.hasError()) {
+        if (xmlReader.isStartElement()) {
+            QString elementName = xmlReader.name().toString();
+            xmlReader.readNext();
+
+            if (elementName == "transcript_edited")
+                totalTranscriptEditedWords = xmlReader.text().toString().toULongLong();
+            else if (elementName == "mispronounced_edited")
+                totalMispronouncedEditedWords = xmlReader.text().toString().toULongLong();
+            else if (elementName == "tagged_edited")
+                totalTaggedEditedWords = xmlReader.text().toString().toULongLong();
+            else if (elementName == "transcript_total")
+                totalTranscriptWords = xmlReader.text().toString().toULongLong();
+            else if (elementName == "mispronounced_total")
+                totalMispronouncedWords = xmlReader.text().toString().toULongLong();
+            else if (elementName == "tagged_total")
+                totalTaggedWords = xmlReader.text().toString().toULongLong();
+        }
+        xmlReader.readNext();
+    }
+    file.close();
+
+    // Update UI
+    ui->totalTranscriptEditedWordsLbl->setText(QString("Total Transcript edited words: %1").arg(totalTranscriptEditedWords));
+    ui->totalMispronouncedEditedWordsLbl->setText(QString("Total Mispronounced edited words: %1").arg(totalMispronouncedEditedWords));
+    ui->totalTaggedEditedWordsLbl->setText(QString("Total Tagged edited words: %1").arg(totalTaggedEditedWords));
 }

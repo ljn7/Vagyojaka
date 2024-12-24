@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>699</width>
+    <width>796</width>
     <height>508</height>
    </rect>
   </property>
@@ -62,9 +62,64 @@
       </widget>
      </item>
      <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLabel" name="totalTranscriptWordsLbl">
+         <property name="text">
+          <string>Transcript words: 0</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="totalTranscriptEditedWordsLbl">
+         <property name="text">
+          <string>Transcript words Edited: 0</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="totalMispronouncedWordsLbl">
+         <property name="text">
+          <string>Mispronounced Words: 0</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="totalMispronouncedEditedWordsLbl">
+         <property name="text">
+          <string>Mispronounced Edited Words: 0</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="totalTaggedWordsLbl">
+         <property name="text">
+          <string>Tagged Words: 0</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="totalTaggedEditedWordsLbl">
+         <property name="text">
+          <string>Tagged Words Edited: 0</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
       <layout class="QHBoxLayout" name="horizontalLayout_7">
        <item>
         <widget class="QPushButton" name="InsertRowButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="statusTip">
+          <string extracomment="Disabled"/>
+         </property>
+         <property name="whatsThis">
+          <string extracomment="Disabled"/>
+         </property>
          <property name="text">
           <string>Insert a row</string>
          </property>
@@ -72,8 +127,11 @@
        </item>
        <item>
         <widget class="QPushButton" name="deleteRowButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
-          <string>Remove selected row</string>
+          <string extracomment="Disabled">Remove selected row</string>
          </property>
         </widget>
        </item>
