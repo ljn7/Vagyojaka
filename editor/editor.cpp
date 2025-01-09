@@ -1260,10 +1260,10 @@ void Editor::saveXml(QFile* file)
 
                 writer.writeCharacters(a_word.text);
                 writer.writeEndElement();
-                if(a_word.text.contains('.')==true)
-                {
-                    break;
-                }
+                // if(a_word.text.contains('.')==true)
+                // {
+                //     break;
+                // }
             }
             writer.writeEndElement();
         }
