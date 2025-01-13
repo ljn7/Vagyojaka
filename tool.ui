@@ -1227,7 +1227,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Version 5.5.8</string>
+    <string>Version 5.5.9</string>
    </property>
    <property name="toolTip">
     <string>Version</string>
