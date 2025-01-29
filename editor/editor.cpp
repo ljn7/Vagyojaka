@@ -22,6 +22,9 @@
 #include <QPrinter>
 // #include "config/settingsmanager.h"
 
+const QColor Editor::Colors::coral(255, 127, 80);
+const QColor Editor::Colors::brown(165,42,42);
+
 Editor::Editor(QWidget *parent)
     : TextEditor(parent),
     m_speakerCompleter(makeCompleter()), m_textCompleter(makeCompleter()), m_transliterationCompleter(makeCompleter()),
@@ -139,26 +142,15 @@ void Highlighter::highlightBlock(const QString& text)
         format.setFontUnderline(true);
         format.setUnderlineColor(Qt::red);
         format.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
-        //to remove highlight of timestamp
-        /*if(Editor::showTimeStamp){
-            qInfo()<<"changed to true";
-            for (int i = 0; i < words.size() -1 ; i++) {
-                if (!invalidWordNumbers.contains(i))
-                    continue;
-                for (int j = 0; j < i; j++) start += (words[j].size() + 1);
-                int count = words[i].size();
-                setFormat(start + 1, count, format);
-                start = speakerEnd;
-            }
-        }else*/ {
-            for (int i = 0; i < words.size() ; i++) {
-                if (!invalidWordNumbers.contains(i))
-                    continue;
-                for (int j = 0; j < i; j++) start += (words[j].size() + 1);
-                int count = words[i].size();
-                setFormat(start + 1, count, format);
-                start = speakerEnd;
-            }}
+
+        for (int i = 0; i < words.size() ; i++) {
+            if (!invalidWordNumbers.contains(i))
+                continue;
+            for (int j = 0; j < i; j++) start += (words[j].size() + 1);
+            int count = words[i].size();
+            setFormat(start + 1, count, format);
+            start = speakerEnd;
+        }
     }
     if (taggedWords.contains(currentBlock().blockNumber())) {
         auto invalidWordNumbers = taggedWords.values(currentBlock().blockNumber());
@@ -194,8 +186,12 @@ void Highlighter::highlightBlock(const QString& text)
                 start = speakerEnd;
             }}
     }
-    if (!editedWords.isEmpty()) {
-        auto invalidWordNumbers = editedWords.values(currentBlock().blockNumber());
+    if (editedWords.contains(currentBlock().blockNumber())
+        || editedWordsInternal.contains(currentBlock().blockNumber())) {
+
+        auto editedWordsNumber = editedWords.values(currentBlock().blockNumber());
+        auto editedWordsInternalNumber = editedWordsInternal.values(currentBlock().blockNumber());
+
         auto speakerEnd = 0;
         auto speakerMatch = QRegularExpression(R"(\{.*\}:)").match(text);
         if (speakerMatch.hasMatch())
@@ -206,27 +202,25 @@ void Highlighter::highlightBlock(const QString& text)
         int start = speakerEnd;
 
         QTextCharFormat format;
-        format.setBackground(Qt::yellow);
-        //to remove highlight of timestamp
-        /*if(Editor::showTimeStamp){
-            qInfo()<<"changed to true";
-            for (int i = 0; i < words.size() -1 ; i++) {
-                if (!invalidWordNumbers.contains(i))
-                    continue;
-                for (int j = 0; j < i; j++) start += (words[j].size() + 1);
-                int count = words[i].size();
-                setFormat(start + 1, count, format);
-                start = speakerEnd;
+        for (int i = 0; i < words.size(); i++) {
+            if (!editedWordsNumber.contains(i) && !editedWordsInternalNumber.contains(i))
+                continue;
+
+            if (editedWordsNumber.contains(i) && editedWordsInternalNumber.contains(i)) {
+                format.setBackground(Editor::Colors::brown);
             }
-        }else*/ {
-            for (int i = 0; i < words.size() ; i++) {
-                if (!invalidWordNumbers.contains(i))
-                    continue;
-                for (int j = 0; j < i; j++) start += (words[j].size() + 1);
-                int count = words[i].size();
-                setFormat(start + 1, count, format);
-                start = speakerEnd;
-            }}
+            else if (editedWordsInternalNumber.contains(i)) {
+                format.setBackground(Editor::Colors::coral);
+            }
+            else if (editedWordsNumber.contains(i)) {
+                format.setBackground(Qt::yellow);
+            }
+
+            for (int j = 0; j < i; j++) start += (words[j].size() + 1);
+            int count = words[i].size();
+            setFormat(start + 1, count, format);
+            start = speakerEnd;
+        }
     }
     if (blockToHighlight == -1)
         return;
@@ -1020,9 +1014,9 @@ QTime Editor::getTime(const QString& text)
     }
 }
 
-word Editor::makeWord(const QTime& t, const QString& s, const QStringList& tagList, const QString& isEdited)
+word Editor::makeWord(const QTime& t, const QString& s, const QStringList& tagList, const QString& isEdited, const QString& isEditedInternal)
 {
-    word w = {t, s, tagList, isEdited};
+    word w = {t, s, tagList, isEdited, isEditedInternal};
     return w;
 }
 
@@ -1089,7 +1083,7 @@ void Editor::loadTranscriptFromUrl(QUrl *fileUrl)
     m_saveTimer->start(m_saveInterval * 1000);
 }
 
-block Editor::fromEditor(qint64 blockNumber) const
+block Editor::fromEditor(qint64 blockNumber)
 {
     QTime timeStamp;
     QVector<word> words;
@@ -1124,7 +1118,7 @@ block Editor::fromEditor(qint64 blockNumber) const
     auto list = text.split(" ");
     //checking
     for (auto& m_word: std::as_const(list)) {
-        words.append(makeWord(QTime(), m_word, QStringList(), "true"));
+        words.append(makeWord(QTime(), m_word, QStringList(), "false", "true"));
     }
 
     block b = {timeStamp, text, speaker, QStringList(), words};
@@ -1142,6 +1136,10 @@ void Editor::loadTranscriptData(QFile& file)
         // if (reader.name() == "transcript") {
         if (reader.name() == QString("transcript")) {
             m_transcriptLang = reader.attributes().value("lang").toString();
+
+            totalEditedWords = totalEditedWordsInternal = 0;
+            emit sendTotalEditedWordsCount(totalEditedWords);
+            emit sendTotalEditedWordsInternalCount(totalEditedWordsInternal);
 
             while(reader.readNextStartElement()) {
                 //Qt6
@@ -1199,15 +1197,22 @@ void Editor::loadTranscriptData(QFile& file)
                         // if(reader.name() == "word")
                         if(reader.name() == QString("word")){
                             QString isEditedStr = reader.attributes().value("isEdited").toString();
+                            QString isEditedInternalStr = reader.attributes().value("isEditedInternal").toString();
                             auto wordTimeStamp  = getTime(reader.attributes().value("timestamp").toString());
                             auto wordTagString  = reader.attributes().value("tags").toString();
-                            auto wordText       = reader.readElementText();
+                            auto wordText       = reader.readElementText().trimmed();
                             QStringList wordTagList;
                             if (wordTagString != "")
                                 wordTagList = wordTagString.split(",");
 
                             blockText += (wordText + " ");
-                            line.words.append(makeWord(wordTimeStamp, wordText, wordTagList, isEditedStr.toLower()));
+                            line.words.append(makeWord(wordTimeStamp, wordText, wordTagList, isEditedStr.toLower(), isEditedInternalStr.toLower()));
+                            if (isEditedStr == "true") {
+                                emit sendTotalEditedWordsCount(++totalEditedWords);
+                            }
+                            if (isEditedInternalStr == "true") {
+                                emit sendTotalEditedWordsInternalCount(++totalEditedWordsInternal);
+                            }
                         }
                         else
                             reader.skipCurrentElement();
@@ -1254,6 +1259,7 @@ void Editor::saveXml(QFile* file)
                 writer.writeStartElement("word");
                 writer.writeAttribute("timestamp", a_word.timeStamp.toString("hh:mm:ss.zzz"));
                 writer.writeAttribute("isEdited", (a_word.isEdited == "true") ? "true": "false");
+                writer.writeAttribute("isEditedInternal", (a_word.isEditedInternal == "true") ? "true": "false");
 
                 if (!a_word.tagList.isEmpty())
                     writer.writeAttribute("tags", a_word.tagList.join(","));
@@ -1479,6 +1485,8 @@ void Editor::setContent()
         QMultiMap<int, int> invalidWords;
         QMultiMap<int, int>  taggedWords;
         QMultiMap<int, int> editedWords;
+        QMultiMap<int, int> editedWordsInternal;
+
         for (int i = 0; i < m_blocks.size(); i++) {
             if (m_blocks[i].timeStamp.isNull())
                 invalidBlocks.append(i);
@@ -1600,6 +1608,9 @@ void Editor::setContent()
                     if(m_blocks[i].words[j].isEdited == "true") {
                         editedWords.insert(i, j);
                     }
+                    if(m_blocks[i].words[j].isEditedInternal == "true") {
+                        editedWordsInternal.insert(i, j);
+                    }
                 }
             }
         }
@@ -1610,6 +1621,7 @@ void Editor::setContent()
         m_highlighter->setBlockToHighlight(highlightedBlock);
         m_highlighter->setWordToHighlight(highlightedWord);
         m_highlighter->setEditedWords(editedWords);
+        m_highlighter->setEditedWordsInternal(editedWordsInternal);
         settingContent = false;
     }
 }
@@ -1624,7 +1636,51 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
     // If chars aren't added or deleted then return
     if (!(charsAdded || charsRemoved) || settingContent)
         return;
-    else if (m_blocks.isEmpty()) { // If block data is empty (i.e. no file opened) just fill them from editor
+
+    // Get current block info
+    // int currentBlockNumber = textCursor().blockNumber();
+    // auto currentBlockFromEditor = fromEditor(currentBlockNumber);
+
+    // // Store initial cursor position
+    // QTextCursor initialCursor = textCursor();
+    // int initialPosition = initialCursor.position();
+
+    // static QRegularExpression regex("\\s{3,}"); // Only replace 3 or more spaces with single space
+    // QString currentBlockTextFromEditor = currentBlockFromEditor.text;
+    // QString normalizedEditorText = currentBlockTextFromEditor;
+    // normalizedEditorText.replace(regex, " ");  // Don't trim here to preserve intentional spaces
+
+    // QString normalizedDataText = m_blocks[currentBlockNumber].text;
+    // normalizedDataText.replace(regex, " ");
+    // // Compare without trimming to preserve spaces at cursor position
+
+    // if (normalizedEditorText == normalizedDataText) {
+    //     QTextCursor cursor = textCursor();
+
+    //     settingContent = true;
+    //     QTextBlock block = document()->findBlockByNumber(currentBlockNumber);
+    //     cursor.setPosition(block.position());
+    //     cursor.setPosition(block.position() + block.length() - 1, QTextCursor::KeepAnchor);
+
+    //     QString blockText;
+    //     if(showTimeStamp) {
+    //         blockText = "{" + currentBlockFromEditor.speaker + "}: " + normalizedEditorText +
+    //                     " {" + currentBlockFromEditor.timeStamp.toString("hh:mm:ss.zzz") + "}";
+    //     } else {
+    //         blockText = "{" + currentBlockFromEditor.speaker + "}: " + normalizedEditorText;
+    //     }
+
+    //     cursor.insertText(blockText);
+
+    //     // Restore cursor to initial position
+    //     initialCursor.setPosition(initialPosition);
+    //     setTextCursor(initialCursor);
+    //     settingContent = false;
+
+    //     return;
+    // }
+
+    if (m_blocks.isEmpty()) { // If block data is empty (i.e. no file opened) just fill them from editor
         for (int i = 0; i < document()->blockCount(); i++)
             m_blocks.append(fromEditor(i));
         return;
@@ -1696,21 +1752,24 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
                 // break; //added flag instead of breaking
             } else {
                 wordsFromEditor[i].isEdited = wordsFromData[i].isEdited;
+                wordsFromEditor[i].isEditedInternal = wordsFromData[i].isEditedInternal;
             }
 
         if (diffStart == -1)
             diffStart = wordsFromEditor.size() - 1;
-        for (int i = 0; i <= diffStart; i++)
-            if (i < wordsFromData.size()){
-                wordsFromEditor[i].timeStamp = wordsFromData[i].timeStamp;
-                //                wordsFromEditor[i].tagList = wordsFromData[i].tagList;
-            }
+        for (int i = 0; i <= diffStart && i < wordsFromData.size(); i++)
+            wordsFromEditor[i].timeStamp = wordsFromData[i].timeStamp;
+            //                wordsFromEditor[i].tagList = wordsFromData[i].tagList;
 
         if (!wordsDifference) {
-            wordsFromEditor[diffStart].isEdited = "true";
+            // wordsFromEditor[diffStart].isEdited = "true";
+            wordsFromEditor[diffStart].isEditedInternal = "true";
+            emit sendTotalEditedWordsInternalCount(++totalEditedWordsInternal);
+
             for (int i = diffStart; i < wordsFromEditor.size(); i++){
                 wordsFromEditor[i].timeStamp = wordsFromData[i].timeStamp;
                 wordsFromEditor[i].tagList = wordsFromData[i].tagList;
+                wordsFromEditor[i].isEdited = wordsFromData[i].isEdited;
             }
         }
 
@@ -1719,19 +1778,20 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
 
             int counter = 0;
             for (int i = 0, j = 0; i < wordsFromData.size() && j < wordsFromEditor.size();) {
+                wordsFromEditor[j].isEdited = wordsFromData[i].isEdited;
                 if (wordsFromData[i].text != wordsFromEditor[j].text && counter < 2) {
-
-                    wordsFromEditor[j].isEdited = "true";
+                    // wordsFromEditor[j].isEdited = "true";
+                    wordsFromEditor[j].isEditedInternal = "true";
+                    emit sendTotalEditedWordsInternalCount(++totalEditedWordsInternal);
                     counter++;
                     if (counter == 2)
                         i++;
                     j++;
                 } else {
 
-                    wordsFromEditor[j].isEdited = wordsFromData[i].isEdited;
+                    wordsFromEditor[j].isEditedInternal = wordsFromData[i].isEditedInternal;
                     i++;
                     j++;
-
                 }
             }
             for (int i = wordsFromEditor.size() - 1, j = wordsFromData.size() - 1; j > diffStart; i--, j--) {
@@ -1771,6 +1831,7 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
         }
 
         //currentBlockFromData = currentBlockFromEditor;
+
         if(showTimeStamp)
             currentBlockFromData = currentBlockFromEditor;
         else{
@@ -1791,6 +1852,7 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
     QMultiMap<int, int> invalidWords;
     QMultiMap<int, int>  taggedWords;
     QMultiMap<int, int> editedWords;
+    QMultiMap<int, int> editedWordsInternal;
 
     for (int i = 0; i < m_blocks.size(); i++) {
         if (m_blocks[i].timeStamp.isNull())
@@ -1802,9 +1864,13 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
             for (int j = 0; j < m_blocks[i].words.size(); j++) {
                 auto wordText = m_blocks[i].words[j].text.toLower();
                 auto isWordEdited = m_blocks[i].words[j].isEdited == "true";
+                auto isWordEditedInternal = m_blocks[i].words[j].isEditedInternal == "true";
 
                 if (isWordEdited) {
                     editedWords.insert(i, j);
+                }
+                if (isWordEditedInternal) {
+                    editedWordsInternal.insert(i, j);
                 }
                 if (wordText != "" && m_punctuation.contains(wordText.back()))
                     wordText = wordText.left(wordText.size() - 1);
@@ -1919,6 +1985,7 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
     m_highlighter->setInvalidWords(invalidWords);
     m_highlighter->setTaggedWords(taggedWords);
     m_highlighter->setEditedWords(editedWords);
+    m_highlighter->setEditedWordsInternal(editedWordsInternal);
     updateWordEditor();
     if(realTimeDataSaver){
         transcriptSave();
@@ -2032,8 +2099,10 @@ void Editor::splitLine(const QTime& elapsedTime)
     int sizeOfWordsAfter = m_blocks[cursor.blockNumber()].words.size() - wordNumber - 1;
 
     //checking
-    if (cutWordRight != "")
-        words.append(makeWord(timeStampOfCutWord, cutWordRight, tagsOfCutWord, "true"));
+    if (cutWordRight != "") {
+        words.append(makeWord(timeStampOfCutWord, cutWordRight, tagsOfCutWord,
+                              m_blocks[cursor.blockNumber()].words[wordNumber].isEdited, "true"));
+    }
 
     for (int i = 0; i < sizeOfWordsAfter; i++) {
         words.append(m_blocks[cursor.blockNumber()].words[wordNumber + 1]);
@@ -2045,6 +2114,7 @@ void Editor::splitLine(const QTime& elapsedTime)
     else {
         m_blocks[cursor.blockNumber()].words[wordNumber].text = cutWordLeft;
         m_blocks[cursor.blockNumber()].words[wordNumber].timeStamp = elapsedTime;
+        m_blocks[cursor.blockNumber()].words[wordNumber].isEditedInternal = "true";
     }
 
     block blockToInsert = {m_blocks[cursor.blockNumber()].timeStamp,

@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 
     qInstallMessageHandler(customMessageHandler);
     QApplication app(argc, argv);
-    app.setApplicationName("Vagyojaka");
+    app.setApplicationName("Vagyojaka - Internal Verification");
     // app.setApplicationDisplayName("Vagyojaka: ASR Post Editor");
     app.setOrganizationName("IIT Bombay");
     Tool w;

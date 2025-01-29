@@ -375,6 +375,8 @@ private slots:
      */
     void on_actionOpen_triggered();
 
+    void on_actionEdited_Words_Count_triggered();
+
 private:
 
     /*!
@@ -527,4 +529,5 @@ private:
      * This object provides access to media devices available on the system.
      */
     QMediaDevices m_mediaDevices;
+    bool hideTotalWordsCount = true;
 };

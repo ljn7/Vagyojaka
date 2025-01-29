@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Vagyojaka: ASR Post Editor</string>
+   <string>Vagyojaka: ASR Post Editor (For Internal Usage)</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -744,6 +744,46 @@
       </widget>
      </widget>
     </item>
+    <item>
+     <layout class="QHBoxLayout" name="totalWordsLayout">
+      <item>
+       <widget class="QLabel" name="totalEditedWordsCount">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="font">
+         <font>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Total Edited Words:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="totalEditedWordsInternalCount">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="font">
+         <font>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Total Edited Words Internal:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -802,6 +842,7 @@
     <addaction name="Show_Time_Stamps"/>
     <addaction name="Real_Time_Data_Saver"/>
     <addaction name="move_along_timestamps"/>
+    <addaction name="actionEdited_Words_Count"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -1227,7 +1268,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Version 5.5.9</string>
+    <string>Version 5.5.11-internal</string>
    </property>
    <property name="toolTip">
     <string>Version</string>
@@ -1289,6 +1330,14 @@
   <action name="actionShow_Endlines">
    <property name="text">
     <string>Show Endlines </string>
+   </property>
+  </action>
+  <action name="actionEdited_Words_Count">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Edited Words Count</string>
    </property>
   </action>
  </widget>

@@ -278,7 +278,13 @@ Tool::Tool(QWidget *parent)
     // tableWidget = ui->tableWidget;
     connect(ui->tabWidget, &QTabWidget::currentChanged, this, &Tool::onTabChanged);
     connect(player, &MediaPlayer::sendMediaUrl, ui->widget, &AudioWaveForm::setMediaUrl);
-
+    connect(ui->m_editor, &Editor::sendTotalEditedWordsCount, this, [&](int count) {
+        ui->totalEditedWordsCount->setText(QString("Total Edited Words: %1").arg(std::max(count, 0)));
+    });
+    connect(ui->m_editor, &Editor::sendTotalEditedWordsInternalCount, this, [&](int count) {
+        ui->totalEditedWordsInternalCount->setText(QString("Total Edited Words Internal: %1").arg(std::max(count, 0)));
+    });
+    on_actionEdited_Words_Count_triggered();
 }
 
 Tool::~Tool()
@@ -876,5 +882,19 @@ void Tool::setDefaultAudioOutputDevice() {
 void Tool::on_actionOpen_triggered()
 {
     ui->tableWidget->openTTSTranscript();
+}
+
+
+void Tool::on_actionEdited_Words_Count_triggered()
+{
+    if (hideTotalWordsCount) {
+        ui->totalEditedWordsCount->hide();
+        ui->totalEditedWordsInternalCount->hide();
+    } else {
+        ui->totalEditedWordsCount->show();
+        ui->totalEditedWordsInternalCount->show();
+    }
+    hideTotalWordsCount = !hideTotalWordsCount;
+
 }
 

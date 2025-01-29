@@ -75,6 +75,7 @@ public:
      * @brief Toggles the visibility of timestamps in the editor.
      */
     void setShowTimeStamp();
+    void processBlock(block& currentBlockFromEditor);
 
     QVector<block> m_blocks; ///< Stores the blocks of text and their associated data.
     QUrl m_transcriptUrl; ///< URL of the loaded transcript.
@@ -211,6 +212,10 @@ signals:
      * @param blockText The text content of the block to send.
      */
     void sendBlockText(QString blockText);
+
+    void sendTotalEditedWordsCount(int count);
+    void sendTotalEditedWordsInternalCount(int count);
+
 
 public slots:
 
@@ -566,7 +571,7 @@ private:
      * @param isEdited A QString indicating the edit status of the word.
      * @return A `word` struct initialized with the provided parameters.
      */
-    static word makeWord(const QTime& t, const QString& s, const QStringList& tagList, const QString& isEdited);
+    static word makeWord(const QTime& t, const QString& s, const QStringList& tagList, const QString& isEdited, const QString& isEditedInternal);
 
     /**
      * @brief Creates and configures a QCompleter for use in the editor.
@@ -621,7 +626,7 @@ private:
      * @param blockNumber The block number to convert into a block structure.
      * @return block A block structure containing the extracted data.
      */
-    block fromEditor(qint64 blockNumber) const;
+    block fromEditor(qint64 blockNumber);
 
     /**
      * @brief Loads transcript data from an XML file into the editor.
@@ -700,15 +705,20 @@ private:
     bool moveAlongTimeStamps = true; ///< Flag to determine if the editor should move along timestamps.
     QStringList supportedFormats; ///< List of supported file formats.
 
+
 private:
     bool isWordValid(const QString& wordText,
                      const QStringList& primaryDict,
                      const QStringList& englishDict,
                      const QString& transcriptLang);
+    int totalEditedWords {0};
+    int totalEditedWordsInternal {0};
 public:
-
+    struct Colors {
+        static const QColor coral;
+        static const QColor brown;
+    };
 };
-
 
 
 
@@ -761,6 +771,10 @@ public:
         editedWords = editedWordsMap;
         rehighlight();
     }
+    void setEditedWordsInternal(const QMultiMap<int, int>& editedWordsInternalMap) {
+        editedWordsInternal = editedWordsInternalMap;
+        rehighlight();
+    }
     void clearInvalidBlocks()
     {
         invalidBlockNumbers.clear();
@@ -778,4 +792,5 @@ private:
     QMultiMap<int, int> invalidWords;
     QMultiMap<int, int> taggedWords;
     QMultiMap<int, int> editedWords;
+    QMultiMap<int, int> editedWordsInternal;
 };

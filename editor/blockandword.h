@@ -9,17 +9,16 @@ struct word
     QString text;
     QStringList tagList;
     QString isEdited;
+    QString isEditedInternal;
 
-    word(QTime timeStamp, QString text, QStringList tagList, QString isEdited = "false")
-        : timeStamp(timeStamp), text(text), tagList(tagList), isEdited(isEdited) {}
+    word(QTime timeStamp, QString text, QStringList tagList, QString isEdited = "false", QString isEditedInternal = "false")
+        : timeStamp(timeStamp), text(text), tagList(tagList), isEdited(isEdited), isEditedInternal(isEditedInternal) {}
 
-    word() : timeStamp(), text(), tagList(), isEdited("false") {}
+    word() : timeStamp(), text(), tagList(), isEdited("false"), isEditedInternal("false") {}
 
     inline bool operator==(word w) const
     {
-        if (w.timeStamp == timeStamp && w.text == text && w.isEdited == isEdited)
-            return true;
-        return false;
+        return (w.timeStamp == timeStamp && w.text == text && w.isEdited == isEdited && w.isEditedInternal == isEditedInternal);
     }
 };
 
