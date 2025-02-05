@@ -18,6 +18,7 @@
 #include <git/git.h>
 #include "qmediadevices.h"
 #include "qaudiodevice.h"
+#include <algorithm>
 
 // #include <config/settingsManager.h>
 
@@ -43,6 +44,7 @@ Tool::Tool(QWidget *parent)
         ui->Show_Time_Stamps->setChecked(settings->value("showTimeStamps").toString() == "true");
     }
 
+    seekSpeed = std::clamp(settings->value("seekSpeed").toInt(), 1, 5);
 
     player = new MediaPlayer(this);
     player->setVideoOutput(ui->m_videoWidget);
@@ -76,8 +78,8 @@ Tool::Tool(QWidget *parent)
     // Connect Player Controls and Media Player
     connect(ui->player_open, &QAction::triggered, player, &MediaPlayer::open);
     connect(ui->player_togglePlay, &QAction::triggered, player, &MediaPlayer::togglePlayback);
-    connect(ui->player_seekForward, &QAction::triggered, player, [&]() {player->seek(3);});
-    connect(ui->player_seekBackward, &QAction::triggered, player, [&]() {player->seek(-3);});
+    connect(ui->player_seekForward, &QAction::triggered, player, [&]() {player->seek(seekSpeed);});
+    connect(ui->player_seekBackward, &QAction::triggered, player, [&]() {player->seek(-seekSpeed);});
     connect(ui->m_playerControls, &PlayerControls::play, player, &QMediaPlayer::play);
     connect(ui->m_playerControls, &PlayerControls::pause, player, &QMediaPlayer::pause);
     connect(ui->m_playerControls, &PlayerControls::stop, player, &QMediaPlayer::stop);
@@ -876,5 +878,25 @@ void Tool::setDefaultAudioOutputDevice() {
 void Tool::on_actionOpen_triggered()
 {
     ui->tableWidget->openTTSTranscript();
+}
+
+
+void Tool::on_actionIncrease_speed_by_1_triggered()
+{
+    seekSpeed = std::min(seekSpeed + 1, (int64_t)5);
+    settings->setValue("seekSpeed", seekSpeed);
+
+    QString message = QString("Speed increased to %1").arg(seekSpeed);
+    QToolTip::showText(QCursor::pos(), message, this, QRect(), 1500);
+}
+
+
+void Tool::on_actionDecrease_speed_by_1_triggered()
+{
+    seekSpeed = std::max(seekSpeed - 1, (int64_t)1);
+    settings->setValue("seekSpeed", seekSpeed);
+
+    QString message = QString("Speed decreased to %1").arg(seekSpeed);
+    QToolTip::showText(QCursor::pos(), message, this, QRect(), 1500);
 }
 

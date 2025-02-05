@@ -80,6 +80,12 @@ Editor::Editor(QWidget *parent)
         "All Files (*)"
     };
     m_english_dictionary = (listFromFile(QString(":/wordlists/english.txt")));
+
+    // debounceTimer = new QTimer(this);
+    // debounceTimer->setSingleShot(true);
+    // debounceTimer->setInterval(debounceDelay);
+
+    // connect(debounceTimer, &QTimer::timeout, this, &Editor::handleContentChanged);
 }
 
 
@@ -104,7 +110,7 @@ void Editor::setMoveAlongTimeStamps()
         moveAlongTimeStamps=false;
     else
         moveAlongTimeStamps=true;
-    qInfo()<<moveAlongTimeStamps;
+    // qInfo()<<moveAlongTimeStamps; // Disabled debug
 }
 
 
@@ -238,7 +244,7 @@ void Highlighter::highlightBlock(const QString& text)
             speakerEnd = speakerMatch.capturedEnd();
 
         int timeStampStart = QRegularExpression(R"(\{(\d?\d:)?[0-5]?\d:[0-5]?\d(\.\d\d?\d?)?\})").match(text).capturedStart();
-        qInfo()<<timeStampStart;
+        // qInfo()<<timeStampStart;
         QTextCharFormat format;
 
         format.setForeground(QColor(Qt::blue).lighter(120));
@@ -332,7 +338,7 @@ void Highlighter::highlightBlock(const QString& text)
                     int count = words[i].size();
                     setFormat(start + 1, count, format1);
                     start = speakerEnd;
-                    qInfo()<<"in";
+                    // qInfo()<<"in"; // Disabled debug
                 }
             }
 
@@ -436,11 +442,11 @@ void Editor::keyPressEvent(QKeyEvent *event)
         markWordAsCorrect(textCursor().blockNumber(), wordNumber);
     }
     else if (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_I){
-        qInfo()<<"doubtful";
+        // qInfo()<<"doubtful"; // Disabled debug
         int blocknumber = textCursor().blockNumber();
         int wordNumber = textCursor().block().text().left(textCursor().positionInBlock()).trimmed().count(" ");
-        qInfo()<<blocknumber;
-        qInfo()<<wordNumber;
+        // qInfo()<<blocknumber; // Disabled debug
+        // qInfo()<<wordNumber; // Disabled debug
 
         if (blocknumber > m_blocks.size() || blocknumber < 0 ||
             wordNumber <= 0 || wordNumber > m_blocks[blocknumber].words.size()) {
@@ -462,7 +468,7 @@ void Editor::keyPressEvent(QKeyEvent *event)
         setTextCursor(cursor);
         centerCursor();
     }
-    qInfo()<<event;
+    // qInfo()<<event; // Disabled debug
 
     auto checkPopupVisible = [](QCompleter* completer) {
         return completer && completer->popup()->isVisible();
@@ -870,7 +876,7 @@ void Editor::transcriptSave()
     if(!realTimeDataSaver){
         result = system(alignmentstr.c_str());
     }
-    qInfo()<<result;
+    // qInfo()<<result; // Disabled debug
 
 }
 
@@ -1133,7 +1139,7 @@ block Editor::fromEditor(qint64 blockNumber) const
 
 void Editor::loadTranscriptData(QFile& file)
 {
-    qInfo()<<moveAlongTimeStamps;
+    // qInfo()<<moveAlongTimeStamps; // Disabled debug
     QXmlStreamReader reader(&file);
     m_transcriptLang = "";
     m_blocks.clear();
@@ -1238,7 +1244,7 @@ void Editor::saveXml(QFile* file)
     // for (auto& a_block: qsConst(m_blocks)) {
     for (auto& a_block: std::as_const(m_blocks)) {
         if (a_block.text != "") {
-            qDebug() << a_block.text;
+            // qDebug() << a_block.text; // Disabled debug
             auto timeStamp = a_block.timeStamp;
             QString timeStampString = timeStamp.toString("hh:mm:ss.zzz");
             auto speaker = a_block.speaker;
@@ -1310,7 +1316,7 @@ void Editor::helpJumpToPlayer()
             }
         }
     }
-    qInfo()<<timeToJump;
+    // qInfo()<<timeToJump; // Disabled debug
     emit jumpToPlayer(timeToJump);
 }
 
@@ -1532,7 +1538,7 @@ void Editor::setContent()
                     }
                     if (wordText != "" && wordText[wordText.size()-1] == ']'){
                         wordText = wordText.left(wordText.size() - 1);
-                        qInfo()<<wordText;
+                        // qInfo()<<wordText; // Disabled debug
                     }
                     if (wordText != "" && wordText[0] == '{'){
                         QString text="";
@@ -1624,7 +1630,14 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
     // If chars aren't added or deleted then return
     if (!(charsAdded || charsRemoved) || settingContent)
         return;
-    else if (m_blocks.isEmpty()) { // If block data is empty (i.e. no file opened) just fill them from editor
+
+    // debounceTimer->start();
+    handleContentChanged();
+
+}
+
+void Editor::handleContentChanged() {
+    if (m_blocks.isEmpty()) { // If block data is empty (i.e. no file opened) just fill them from editor
         for (int i = 0; i < document()->blockCount(); i++)
             m_blocks.append(fromEditor(i));
         return;
@@ -1638,12 +1651,12 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
     if(m_blocks.size() != blockCount()) {
         auto blocksChanged = m_blocks.size() - blockCount();
         if (blocksChanged > 0) { // Blocks deleted
-            qInfo() << "[Lines Deleted]" << QString("%1 lines deleted").arg(QString::number(blocksChanged));
+            // qInfo() << "[Lines Deleted]" << QString("%1 lines deleted").arg(QString::number(blocksChanged)); // Disabled debug
             for (int i = 1; i <= blocksChanged; i++)
                 m_blocks.removeAt(currentBlockNumber + 1);
         }
         else { // Blocks added
-            qInfo() << "[Lines Inserted]" << QString("%1 lines inserted").arg(QString::number(-blocksChanged));
+            // qInfo() << "[Lines Inserted]" << QString("%1 lines inserted").arg(QString::number(-blocksChanged)); // Disabled debug
             for (int i = 1; i <= -blocksChanged; i++) {
                 if (document()->findBlockByNumber(currentBlockNumber + blocksChanged).text().trimmed() == "")
                     m_blocks.insert(currentBlockNumber + blocksChanged, fromEditor(currentBlockNumber - i));
@@ -1657,10 +1670,10 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
     auto& currentBlockFromData = m_blocks[currentBlockNumber];
 
     if (currentBlockFromData.speaker != currentBlockFromEditor.speaker) {
-        qInfo() << "[Speaker Changed]"
-                << QString("line number: %1").arg(QString::number(currentBlockNumber + 1))
-                << QString("initial: %1").arg(currentBlockFromData.speaker)
-                << QString("final: %1").arg(currentBlockFromEditor.speaker);
+        // qInfo() << "[Speaker Changed]"
+        //         << QString("line number: %1").arg(QString::number(currentBlockNumber + 1))
+        //         << QString("initial: %1").arg(currentBlockFromData.speaker)
+        //         << QString("final: %1").arg(currentBlockFromEditor.speaker); // Disabled debug
 
         currentBlockFromData.speaker = currentBlockFromEditor.speaker;
     }
@@ -1674,10 +1687,10 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
         }
     }
     if (currentBlockFromData.text != currentBlockFromEditor.text) {
-        qInfo() << "[Text Changed]"
-                << QString("line number: %1").arg(QString::number(currentBlockNumber + 1))
-                << QString("initial: %1").arg(currentBlockFromData.text)
-                << QString("final: %1").arg(currentBlockFromEditor.text);
+        // qInfo() << "[Text Changed]"
+        //         << QString("line number: %1").arg(QString::number(currentBlockNumber + 1))
+        //         << QString("initial: %1").arg(currentBlockFromData.text)
+        //         << QString("final: %1").arg(currentBlockFromEditor.text); // Disabled debug
 
         currentBlockFromData.text = currentBlockFromEditor.text;
         auto tagList = currentBlockFromData.tagList;
@@ -1715,7 +1728,7 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
         }
 
         if (wordsDifference > 0) {
-            qInfo()<<"exceeds";
+            // qInfo()<<"exceeds";  // Disabled debug
 
             int counter = 0;
             for (int i = 0, j = 0; i < wordsFromData.size() && j < wordsFromEditor.size();) {
@@ -1827,7 +1840,7 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
                     for(int i=1;i<wordText.size();i++){
                         text+=wordText[i];
                     }
-                    qInfo()<<text;
+                    // qInfo()<<text;  // Disabled debug
                     wordText=text;
                 }
                 if (wordText != "" && wordText[wordText.size()-1] == ')'){
@@ -1958,7 +1971,7 @@ void Editor::splitLine(const QTime& elapsedTime)
     if (document()->blockCount() <= 0)
         return;
 
-    qInfo() << "Split Line - - - - - -- - - - -- - \n";
+    // qInfo() << "Split Line - - - - - -- - - - -- - \n";  // Disabled debug
     auto cursor = textCursor();
     // if (cursor.blockNumber() != highlightedBlock)
     //     return;
@@ -2077,9 +2090,9 @@ void Editor::splitLine(const QTime& elapsedTime)
     // QTextCursor cursorx(this->document()->findBlockByNumber(highlightedBlock));
     // this->setTextCursor(cursorx);
 
-    qInfo() << "[Line Split]"
-            << QString("line number: %1").arg(QString::number(highlightedBlock + 1))
-            << QString("word number: %1, %2").arg(QString::number(wordNumber + 1), cutWordLeft + cutWordRight);
+    // qInfo() << "[Line Split]"
+    //         << QString("line number: %1").arg(QString::number(highlightedBlock + 1))
+    //         << QString("word number: %1, %2").arg(QString::number(wordNumber + 1), cutWordLeft + cutWordRight); // Disabled debug
 }
 
 void Editor::mergeUp()
@@ -2104,11 +2117,11 @@ void Editor::mergeUp()
     setTextCursor(cursor);
     centerCursor();
 
-    qInfo() << "[Merge Up]"
-            << QString("line number: %1, %2").arg(QString::number(previousBlockNumber + 1), QString::number(blockNumber + 1))
-            << QString("final line: %1, %2").arg(QString::number(previousBlockNumber + 1), m_blocks[previousBlockNumber].text);
+    // qInfo() << "[Merge Up]"
+    //         << QString("line number: %1, %2").arg(QString::number(previousBlockNumber + 1), QString::number(blockNumber + 1))
+    //         << QString("final line: %1, %2").arg(QString::number(previousBlockNumber + 1), m_blocks[previousBlockNumber].text); // Disabled debug
     //    qInfo()<<(undoS);
-    qDebug() << this->findChildren<QUndoStack*>();
+    // qDebug() << this->findChildren<QUndoStack*>(); // Disabled debug
 
 }
 
@@ -2138,9 +2151,9 @@ void Editor::mergeDown()
     setTextCursor(cursor);
     centerCursor();
 
-    qInfo() << "[Merge Down]"
-            << QString("line number: %1, %2").arg(QString::number(blockNumber + 1), QString::number(nextBlockNumber + 1))
-            << QString("final line: %1, %2").arg(QString::number(blockNumber + 1), m_blocks[nextBlockNumber].text);
+    // qInfo() << "[Merge Down]"
+    //         << QString("line number: %1, %2").arg(QString::number(blockNumber + 1), QString::number(nextBlockNumber + 1))
+    //         << QString("final line: %1, %2").arg(QString::number(blockNumber + 1), m_blocks[nextBlockNumber].text); // Disabled debug
 }
 
 void Editor::createChangeSpeakerDialog()
@@ -2231,8 +2244,8 @@ void Editor::insertTimeStamp(const QTime& elapsedTime)
     centerCursor();
     dontUpdateWordEditor = false;
 
-    qInfo() << "[Inserted TimeStamp from Player]"
-            << QString("line number: %1, timestamp: %2").arg(QString::number(blockNumber), elapsedTime.toString("hh:mm:ss.zzz"));
+    // qInfo() << "[Inserted TimeStamp from Player]"
+    //         << QString("line number: %1, timestamp: %2").arg(QString::number(blockNumber), elapsedTime.toString("hh:mm:ss.zzz")); // Disabled debug
 
 }
 
@@ -2447,7 +2460,7 @@ void Editor::saveAsPDF()
     auto pdfSaveLocation = QFileDialog::getSaveFileName(this, "Export PDF", QString("/"), "*.pdf");
     if(pdfSaveLocation!=""){
         if (QFileInfo(pdfSaveLocation).suffix().isEmpty()) { pdfSaveLocation.append(".pdf"); }
-        qInfo()<<pdfSaveLocation;
+        // qInfo()<<pdfSaveLocation; // Disabled debug
 
         QPrinter printer(QPrinter::PrinterResolution);
         printer.setOutputFormat(QPrinter::PdfFormat);
@@ -2474,7 +2487,7 @@ void Editor::saveAsTXT()    // save the transcript as a text file
         if (QFileInfo(txtSaveLocation).suffix().isEmpty()) {
             txtSaveLocation.append(".txt");
         }
-        qInfo() << txtSaveLocation;
+        // qInfo() << txtSaveLocation;
 
         QFile txtFile(txtSaveLocation);
         if (txtFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -2559,10 +2572,10 @@ void Editor::changeSpeaker(const QString& newSpeaker, bool replaceAllOccurrences
     setTextCursor(cursor);
     centerCursor();
 
-    qInfo() << "[Speaker Changed]"
-            << QString("line number: %1").arg(QString::number(blockNumber + 1))
-            << QString("initial: %1").arg(blockSpeaker)
-            << QString("final: %1").arg(newSpeaker);
+    // qInfo() << "[Speaker Changed]"
+    //         << QString("line number: %1").arg(QString::number(blockNumber + 1))
+    //         << QString("initial: %1").arg(blockSpeaker)
+    //         << QString("final: %1").arg(newSpeaker); // Disabled debug
 }
 
 void Editor::propagateTime(const QTime& time, int start, int end, bool negateTime)
@@ -2604,9 +2617,9 @@ void Editor::propagateTime(const QTime& time, int start, int end, bool negateTim
     setTextCursor(cursor);
     centerCursor();
 
-    qInfo() << "[Time propagated]"
-            << QString("block range: %1 - %2").arg(QString::number(start), QString::number(end))
-            << QString("time: %1 %2").arg(negateTime? "-" : "+", time.toString("hh:mm:ss.zzz"));
+    // qInfo() << "[Time propagated]"
+    //         << QString("block range: %1 - %2").arg(QString::number(start), QString::number(end))
+    //         << QString("time: %1 %2").arg(negateTime? "-" : "+", time.toString("hh:mm:ss.zzz")); // Disabled debug
 }
 
 void Editor::selectTags(const QStringList& newTagList)
@@ -2615,8 +2628,8 @@ void Editor::selectTags(const QStringList& newTagList)
 
     emit refreshTagList(newTagList);
 
-    qInfo() << "[Tags Selected]"
-            << "new tags: " << newTagList;
+    // qInfo() << "[Tags Selected]"
+    //         << "new tags: " << newTagList; // Disabled debug
     setContent();
 
 }
@@ -2671,8 +2684,8 @@ void Editor::markWordAsCorrect(int blockNumber, int wordNumber)
             correctedWords.write(QString(a_word + "\n").toStdString().c_str());
     }
 
-    qInfo() << "[Mark As Correct]"
-            << QString("text: %1").arg(textToInsert);
+    // qInfo() << "[Mark As Correct]"
+    //         << QString("text: %1").arg(textToInsert); // Disabled debug
 }
 
 void Editor::insertSpeakerCompletion(const QString& completion)

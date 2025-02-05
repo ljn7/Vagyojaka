@@ -426,6 +426,8 @@ public slots:
      */
     void updateTimeStampsBlock(QVector<int> blks);
 
+    void handleContentChanged();
+
 private slots:
     void contentChanged(int position, int charsRemoved, int charsAdded);
     void wordEditorChanged();
@@ -699,6 +701,8 @@ private:
     int lastHighlightedBlock = -1; ///< Index of the last highlighted block.
     bool moveAlongTimeStamps = true; ///< Flag to determine if the editor should move along timestamps.
     QStringList supportedFormats; ///< List of supported file formats.
+    QTimer *debounceTimer;
+    const int debounceDelay = 300;
 
 private:
     bool isWordValid(const QString& wordText,
@@ -767,7 +771,6 @@ public:
     }
 
     void highlightBlock(const QString&) override;
-
 
 private:
     int blockToHighlight{-1};

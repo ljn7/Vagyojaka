@@ -752,7 +752,7 @@
      <x>0</x>
      <y>0</y>
      <width>802</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -768,10 +768,20 @@
     <property name="title">
      <string>Player</string>
     </property>
+    <widget class="QMenu" name="menuSeek_Speed">
+     <property name="title">
+      <string>Seek Speed</string>
+     </property>
+     <addaction name="actionIncrease_speed_by_1"/>
+     <addaction name="actionDecrease_speed_by_1"/>
+    </widget>
     <addaction name="player_open"/>
     <addaction name="player_togglePlay"/>
     <addaction name="player_seekForward"/>
     <addaction name="player_seekBackward"/>
+    <addaction name="separator"/>
+    <addaction name="separator"/>
+    <addaction name="menuSeek_Speed"/>
    </widget>
    <widget class="QMenu" name="menuEditor">
     <property name="title">
@@ -1227,7 +1237,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Version 5.5.9</string>
+    <string>Version 5.5.10</string>
    </property>
    <property name="toolTip">
     <string>Version</string>
@@ -1289,6 +1299,16 @@
   <action name="actionShow_Endlines">
    <property name="text">
     <string>Show Endlines </string>
+   </property>
+  </action>
+  <action name="actionIncrease_speed_by_1">
+   <property name="text">
+    <string>Increase speed by +1</string>
+   </property>
+  </action>
+  <action name="actionDecrease_speed_by_1">
+   <property name="text">
+    <string>Decrease speed by -1</string>
    </property>
   </action>
  </widget>

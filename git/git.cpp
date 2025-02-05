@@ -383,7 +383,7 @@ void Git::pull()
     if (error < 0)
     {
         const git_error *e = giterr_last();
-        std::cout << "Error: " << error << " / " << e->klass << " : " << e->message << std::endl;
+        qCritical() << error << " / " << e->klass << " : " << e->message;
 
         return;
     }
@@ -403,9 +403,9 @@ void Git::pull()
 
         while (git_index_conflict_next(&ancestor_out, &our_out, &their_out, conflict_iterator) != GIT_ITEROVER)
         {
-            if (ancestor_out) std::cout<< "ancestor: " << ancestor_out->path <<std::endl;
-            if (our_out) std::cout<< "our: " << our_out->path <<std::endl;
-            if (their_out) std::cout<< "their: " << their_out->path <<std::endl;
+            if (ancestor_out) qWarning() << "ancestor: " << ancestor_out->path;
+            if (our_out) qWarning() << "our: " << our_out->path;
+            if (their_out) qWarning() << "their: " << their_out->path;
         }
 
         // git checkout --theirs <file>

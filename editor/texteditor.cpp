@@ -2,10 +2,17 @@
 
 #include <QPainter>
 #include <QTextBlock>
+#include <QtConcurrent/qtconcurrentrun.h>
+#include <qfuture.h>
+#include <qtimer.h>
 
 TextEditor::TextEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
     lineNumberArea = new LineNumberArea(this);
+    // m_debounceTimer = new QTimer(this);
+    // m_debounceTimer->setSingleShot(true);
+    // connect(m_debounceTimer, &QTimer::timeout, this, &TextEditor::processContentChanges);
+
 
     connect(this, &TextEditor::blockCountChanged, this, &TextEditor::updateLineNumberAreaWidth);
     connect(this, &TextEditor::updateRequest, this, &TextEditor::updateLineNumberArea);
@@ -69,8 +76,39 @@ void TextEditor::resizeEvent(QResizeEvent *e)
     lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
+// Debounce text changes
+// void TextEditor::contentChanged(int position, int charsRemoved, int charsAdded)
+// {
+//     Q_UNUSED(position);
+//     Q_UNUSED(charsRemoved);
+//     Q_UNUSED(charsAdded);
+
+//     m_debounceTimer->start(100); // Adjust the timeout as needed
+// }
+
+// Process content changes after debounce
+// void TextEditor::processContentChanges()
+// {
+//     // Perform the actual content change processing here
+//     // This function will be called after the debounce timer expires
+//     highlightSyntaxInBackground();
+// }
+
+// // Asynchronous syntax highlighting
+// void TextEditor::highlightSyntaxInBackground()
+// {
+//     QFuture<void> future = QtConcurrent::run([this]() {
+//         // Perform syntax highlighting here
+//         // Ensure thread-safe access to the document
+//     });
+// }
+
 void TextEditor::highlightCurrentLine()
 {
+    if (m_cachedSelection.cursor == textCursor()) {
+        return; // No need to recalculate if the selection hasn't changed
+    }
+
     QList<QTextEdit::ExtraSelection> extraSelections;
 
     if (!isReadOnly()) {
@@ -83,6 +121,8 @@ void TextEditor::highlightCurrentLine()
         selection.cursor = textCursor();
         selection.cursor.clearSelection();
         extraSelections.append(selection);
+
+        m_cachedSelection = selection;
     }
 
     setExtraSelections(extraSelections);
