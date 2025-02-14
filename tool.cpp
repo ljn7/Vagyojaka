@@ -83,8 +83,8 @@ Tool::Tool(QWidget *parent)
     connect(ui->m_playerControls, &PlayerControls::play, player, &QMediaPlayer::play);
     connect(ui->m_playerControls, &PlayerControls::pause, player, &QMediaPlayer::pause);
     connect(ui->m_playerControls, &PlayerControls::stop, player, &QMediaPlayer::stop);
-    connect(ui->m_playerControls, &PlayerControls::seekForward, player, [&]() {player->seek(3);});
-    connect(ui->m_playerControls, &PlayerControls::seekBackward, player, [&]() {player->seek(-3);});
+    connect(ui->m_playerControls, &PlayerControls::seekForward, player, [&]() {player->seek(seekSpeed);});
+    connect(ui->m_playerControls, &PlayerControls::seekBackward, player, [&]() {player->seek(-seekSpeed);});
     connect(ui->m_playerControls, &PlayerControls::changeVolume, player, &MediaPlayer::setVolume);
     connect(ui->m_playerControls, &PlayerControls::changeMuting, player, &MediaPlayer::setMuted);
     connect(ui->m_playerControls, &PlayerControls::changeRate, player, &QMediaPlayer::setPlaybackRate);
@@ -529,7 +529,7 @@ void Tool::on_btn_translate_clicked()
         mapper.close();
         std::string makingexec="chmod +x "+mapperFileInfo.absoluteFilePath().replace(" ", "\\ ").toStdString();
         int result = system(makingexec.c_str());
-        qInfo()<<result;
+        // qInfo()<<result; Disabled Debug
     }
 
 
@@ -560,7 +560,7 @@ void Tool::on_btn_translate_clicked()
     QString filepaths=fileInfo.dir().path();
     QString translatedFile=filepaths+"/HindiTranslated.xml";
     QString filepaths2=filepaths;
-    qInfo()<<filepaths2;
+    // qInfo()<<filepaths2;  Disabled Debug
 
 
 
@@ -586,17 +586,17 @@ void Tool::on_btn_translate_clicked()
                                 +" "+ '\"'+FromTranscriptFileToTranslate.absoluteFilePath().toStdString()+ '\"'
                                 +" "+ '\"'+tempXMLinfo.absoluteFilePath().toStdString()+ '\"';
 
-    qInfo()<<translatorStr.c_str();
+    // qInfo()<<translatorStr.c_str(); // Disabled debug
 
     int result2 = system(translatorStr.c_str());
-    qInfo()<<result2;
+    // qInfo()<<result2; // Disabled debug
 
-    qInfo()<<"Save Pressed";
+    // qInfo()<<"Save Pressed"; // Disabled debug
     bool fileExists = QFileInfo::exists(filepaths2+"/HindiTranslated.xml") && QFileInfo(filepaths2+"/HindiTranslated.xml").isFile();
     while(!fileExists){
         fileExists = QFileInfo::exists(filepaths2+"/HindiTranslated.xml") && QFileInfo(filepaths2+"/HindiTranslated.xml").isFile();
     }
-    qInfo()<<"path exists now";
+    // qInfo()<<"path exists now"; // Disabled debug
     QFile transcriptFile3(filepaths2+"/HindiTranslated.xml");
     if (!transcriptFile3.open(QIODevice::ReadOnly)) {
         qInfo()<<(transcriptFile3.errorString());
@@ -604,7 +604,7 @@ void Tool::on_btn_translate_clicked()
     }
     ui->m_editor_3->loadTranscriptData(transcriptFile3);
     ui->m_editor_3->setContent();
-    qInfo()<<"translated";
+    // qInfo()<<"translated"; // Disabled debug
     progressBar.setValue(100);
     progressBar.hide();
 

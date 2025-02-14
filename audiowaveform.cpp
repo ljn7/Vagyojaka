@@ -76,7 +76,7 @@ AudioWaveForm::AudioWaveForm(QWidget *parent)
     connect(mPlayer, &QMediaPlayer::durationChanged, [this]() {
         emit samplingStatus(false);
         qint64 tot_duration = mPlayer->duration();
-        qInfo()<<"size of buffer is: "<< mAudioBuffer.size();
+        // qInfo()<<"size of buffer is: "<< mAudioBuffer.size(); // Disabled debug
         AVFormatContext* formatCtx = avformat_alloc_context();
         sample_rate = 0;
         total_duration = 0;
@@ -136,14 +136,14 @@ void AudioWaveForm::showWaveForm() {
 
     if(!MediaFile.open(QIODevice::ReadOnly))
     {
-        qInfo()<<"Not open for readonly\n";
+        // qInfo()<<"Not open for readonly\n";
         return;
     }
     if(isAudioFile(filePath)){
-        qInfo()<<"File id audio file\n";
+        // qInfo()<<"File id audio file\n";
         audioData = MediaFile.readAll();
     } else {
-        qInfo()<<"File is video file\n";
+        // qInfo()<<"File is video file\n";
         QString ffmpegPath = "ffmpeg";
         QProcess ffmpegProcess;
         QStringList ffmpegArgs = {"-i", filePath, "-vn", "-f", "wav", "-"};
@@ -187,7 +187,7 @@ void AudioWaveForm::processSampleRate()
     // this->total_duration = totalDuration;
     this->num_sam = sample_rate * (total_duration/1000);
     // factor = num_sam / NUM_SAMPLES;
-    qInfo()<<"sample_rate is: :"<<this->sample_rate<<"\n";
+    // qInfo()<<"sample_rate is: :"<<this->sample_rate<<"\n";
     //qInfo()<<"total duration is: "<<total_dur<<"\n";
     //qInfo()<<"num samples is: "<<num_sam<<"\n";
 

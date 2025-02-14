@@ -6,6 +6,18 @@ const int MaxLogLines = 10000;
 
 QMutex logMutex;  // Global mutex for thread safety
 
+static const QHash<QtMsgType, QString>& getMsgLevelHash() {
+    static const QHash<QtMsgType, QString> hash({
+        {QtDebugMsg, "Debug"},
+        {QtInfoMsg, "Info"},
+        {QtWarningMsg, "Warning"},
+        {QtCriticalMsg, "Critical"},
+        {QtFatalMsg, "Fatal"}
+    });
+    return hash;
+}
+
+
 void writeLogToFile(const QString &logText) {
     // Get the application-specific data directory
     QString logDirPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/logs";
@@ -36,15 +48,8 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
     QString dateTimeText = QString("[%1] ").arg(dateTime);
 
     const char *file = context.file ? context.file : "";
-    QHash<QtMsgType, QString> msgLevelHash({
-        {QtDebugMsg, "Debug"},
-        {QtInfoMsg, "Info"},
-        {QtWarningMsg, "Warning"},
-        {QtCriticalMsg, "Critical"},
-        {QtFatalMsg, "Fatal"}
-    });
 
-    QString logLevelName = msgLevelHash[type];
+    QString logLevelName = getMsgLevelHash().value(type, "Unknown");
     QString logText = QString("%1 %2: %3 (%4)").arg(dateTimeText, logLevelName, msg, file);
 
     // Run log writing in a separate thread using QtConcurrent

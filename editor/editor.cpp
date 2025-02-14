@@ -20,6 +20,7 @@
 #include <QDebug>
 #include <QUndoStack>
 #include <QPrinter>
+#include <qthreadpool.h>
 // #include "config/settingsmanager.h"
 
 Editor::Editor(QWidget *parent)
@@ -30,6 +31,7 @@ Editor::Editor(QWidget *parent)
     speakerExp(QRegularExpression(R"(\{.*\}:)")),
     m_saveTimer(new QTimer(this))
 {
+    // taskSemaphore.release();
     connect(this->document(), &QTextDocument::contentsChange, this, &Editor::contentChanged);
     connect(this, &Editor::cursorPositionChanged, this, &Editor::updateWordEditor);
     connect(this, &Editor::cursorPositionChanged, this,
@@ -1631,12 +1633,6 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
     if (!(charsAdded || charsRemoved) || settingContent)
         return;
 
-    // debounceTimer->start();
-    handleContentChanged();
-
-}
-
-void Editor::handleContentChanged() {
     if (m_blocks.isEmpty()) { // If block data is empty (i.e. no file opened) just fill them from editor
         for (int i = 0; i < document()->blockCount(); i++)
             m_blocks.append(fromEditor(i));
@@ -1681,8 +1677,8 @@ void Editor::handleContentChanged() {
         if (currentBlockFromData.timeStamp != currentBlockFromEditor.timeStamp) {
 
             currentBlockFromData.timeStamp = currentBlockFromEditor.timeStamp;
-            qInfo() << "[TimeStamp Changed]"
-                    << QString("line number: %1, %2").arg(QString::number(currentBlockNumber + 1), currentBlockFromEditor.timeStamp.toString("hh:mm:ss.zzz"));
+            // qInfo() << "[TimeStamp Changed]"
+            //         << QString("line number: %1, %2").arg(QString::number(currentBlockNumber + 1), currentBlockFromEditor.timeStamp.toString("hh:mm:ss.zzz"));
 
         }
     }
@@ -1936,7 +1932,89 @@ void Editor::handleContentChanged() {
     if(realTimeDataSaver){
         transcriptSave();
     }
+
+    // {
+    //     QMutexLocker locker(&queueMutex);
+    //     taskQueue.enqueue({
+    //         QVariant(position),
+    //         QVariant(charsRemoved),
+    //         QVariant(charsAdded),
+    //         QVariant(textCursor().blockNumber()),
+    //         QVariant(document()->blockCount()),
+    //         QVariant::fromValue(currentBlockFromEditor),
+    //         QVariant::fromValue(currentBlockFromData)
+    //     });
+    // }
+
+    // std::cerr << "Enqueued task\n";
+
+    // QMetaObject::invokeMethod(this, "processNextTask", Qt::QueuedConnection);
+
+    // debounceTimer->start();
+    // handleContentChanged();
+
 }
+
+// void Editor::processNextTask() {
+
+//     std::cerr << "Processing next task\n";
+
+//     if (taskQueue.isEmpty())
+//         return;
+
+//     if (!taskSemaphore.tryAcquire()) {
+//         return;
+//     }
+
+//     QVariantList task;
+//     {
+//         QMutexLocker locker(&queueMutex);
+//         if (taskQueue.isEmpty()) {  // Check again under lock
+//             taskSemaphore.release();
+//             return;
+//         }
+//         task = taskQueue.dequeue();
+//     }
+
+//     int position = task[0].toInt();
+//     int charsRemoved = task[1].toInt();
+//     int charsAdded = task[2].toInt();
+//     int currentBlockNumber = task[3].toInt();
+//     int blockCount = task[4].toInt();
+//     block currentBlockFromEditor = task[5].value<block>();
+//     block currentBlockFromData = task[6].value<block>();
+
+//     auto* worker = new TaskRunner(
+//         this,
+//         task[0].toInt(),
+//         task[1].toInt(),
+//         task[2].toInt(),
+//         task[3].toInt(),
+//         task[4].toInt(),
+//         task[5].value<block>(),
+//         task[6].value<block>()
+//         );
+
+//     std::cerr << "Starting worker\n";
+//     QThreadPool::globalInstance()->start(worker);
+// }
+
+// void Editor::processContentChange(int position, int charsRemoved, int charsAdded, int currentBlockNumber, int blockCount,
+//                                   block currentBlockFromEditor, block currentBlockFromData) {
+
+//     std::cerr << "Processing content change\n";
+//     QMutexLocker locker(&queueMutex);
+//     std::cerr << "After locker\n";
+
+
+//     std::cerr << "Task completed\n";
+// }
+
+// void Editor::handleContentChanged() {
+
+
+
+// }
 
 bool Editor::isWordValid(const QString& wordText,
                  const QStringList& primaryDict,
