@@ -4,54 +4,56 @@
 
 const int MaxLogLines = 10000;
 
+QMutex logMutex;  // Global mutex for thread safety
 
-void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
-{
-    Q_UNUSED(context);
+static const QHash<QtMsgType, QString>& getMsgLevelHash() {
+    static const QHash<QtMsgType, QString> hash({
+        {QtDebugMsg, "Debug"},
+        {QtInfoMsg, "Info"},
+        {QtWarningMsg, "Warning"},
+        {QtCriticalMsg, "Critical"},
+        {QtFatalMsg, "Fatal"}
+    });
+    return hash;
+}
 
+
+void writeLogToFile(const QString &logText) {
+    // Get the application-specific data directory
+    QString logDirPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/logs";
+
+    // Ensure the logs directory exists
+    QDir dir;
+    if (!dir.exists(logDirPath)) {
+        dir.mkpath(logDirPath);
+    }
+
+    // Generate new log file name (once per session)
+    static QString logFilePath = logDirPath + "/logfile-" + QDateTime::currentDateTime().toString("yyyy-MM-dd_HH-mm-ss") + ".log";
+
+    logMutex.lock();  // Lock before accessing the file
+
+    QFile outFile(logFilePath);
+    if (outFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+        QTextStream textStream(&outFile);
+        textStream.setEncoding(QStringConverter::Utf8);
+        textStream << logText << "\n";
+    }
+
+    logMutex.unlock();  // Unlock after writing
+}
+
+void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
     QString dateTime = QDateTime::currentDateTime().toString("dd/MM/yyyy hh:mm:ss");
     QString dateTimeText = QString("[%1] ").arg(dateTime);
 
-    QByteArray localMsg = msg.toLocal8Bit();
     const char *file = context.file ? context.file : "";
-    const char *function = context.function ? context.function : "";
 
-    switch (type) {
-    case QtDebugMsg:
-        fprintf(stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        break;
-    case QtInfoMsg:
-        fprintf(stderr, "Info: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        break;
-    case QtWarningMsg:
-        fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        break;
-    case QtCriticalMsg:
-        fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        break;
-    case QtFatalMsg:
-        fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        break;
-    }
+    QString logLevelName = getMsgLevelHash().value(type, "Unknown");
+    QString logText = QString("%1 %2: %3 (%4)").arg(dateTimeText, logLevelName, msg, file);
 
-    QFile outFile("LogFile.log");
-    outFile.open(QIODevice::ReadWrite | QIODevice::Append | QIODevice::Text);
-
-    QTextStream textStream(&outFile);
-    //Qt6
-    // textStream.setCodec("UTF-8");
-    textStream.setEncoding(QStringConverter::Utf8);
-
-    QHash<QtMsgType, QString> msgLevelHash({{QtDebugMsg, "Debug:"},
-                                            {QtInfoMsg, "Info:"},
-                                            {QtWarningMsg, "Warning:"},
-                                            {QtCriticalMsg, "Critical:"},
-                                            {QtFatalMsg, "Fatal:"}}
-                                           );
-    QString logLevelName = msgLevelHash[type];
-    QString logText = QString("%1 %2 %3 (%4)").arg(dateTimeText, logLevelName, msg,  context.file);
-
-    textStream << logText << "\n";
+    // Run log writing in a separate thread using QtConcurrent
+    QtConcurrent::run(writeLogToFile, logText);
 }
 
 int main(int argc, char *argv[])

@@ -12,8 +12,12 @@ class TextEditor : public QPlainTextEdit
 
 public:
     explicit TextEditor(QWidget *parent = nullptr);
+    void updateLineNumberArea(const QRect &rect, int dy);
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
+    void highlightCurrentLine();
+    void contentChanged(int position, int charsRemoved, int charsAdded);
+    QTextEdit::ExtraSelection m_cachedSelection;
 
     void setLineNumberAreaFont(const QFont& font)
     {
@@ -33,12 +37,16 @@ protected:
 
 private slots:
     void updateLineNumberAreaWidth(int newBlockCount);
-    void highlightCurrentLine();
-    void updateLineNumberArea(const QRect &rect, int dy);
+    // void highlightCurrentLine();
+    // void updateLineNumberArea(const QRect &rect, int dy);
 
 private:
     QWidget *lineNumberArea;
     FindReplaceDialog *m_findReplace = nullptr;
+    // QTimer *m_debounceTimer = nullptr;
+    // void processContentChanges();
+    // void highlightSyntaxInBackground();
+    // int lineNumberAreaWidth() const;
 };
 
 class LineNumberArea : public QWidget

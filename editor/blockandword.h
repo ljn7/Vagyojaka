@@ -42,3 +42,5 @@ struct block
         return false;
     }
 };
+
+Q_DECLARE_METATYPE(block)

@@ -13,7 +13,12 @@
 #include <QTextDocument>
 #include <QCompleter>
 #include <QAbstractItemModel>
+#include <iostream>
+#include <ostream>
 #include <qcompleter.h>
+#include <qmutex.h>
+#include <qrunnable.h>
+#include <qsemaphore.h>
 #include <set>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -21,7 +26,10 @@
 #include <QTimer>
 #include <QUndoCommand>
 #include <QSettings>
+// #include <QQueue>
+
 class Highlighter;
+// class TaskRunner;
 
 /**
  * @class Editor
@@ -431,6 +439,8 @@ public slots:
      */
     void updateTimeStampsBlock(QVector<int> blks);
 
+    // void handleContentChanged();
+
 private slots:
     void contentChanged(int position, int charsRemoved, int charsAdded);
     void wordEditorChanged();
@@ -704,16 +714,25 @@ private:
     int lastHighlightedBlock = -1; ///< Index of the last highlighted block.
     bool moveAlongTimeStamps = true; ///< Flag to determine if the editor should move along timestamps.
     QStringList supportedFormats; ///< List of supported file formats.
-
+    // QTimer *debounceTimer;
+    // const int debounceDelay = 300;
 
 private:
     bool isWordValid(const QString& wordText,
                      const QStringList& primaryDict,
                      const QStringList& englishDict,
                      const QString& transcriptLang);
+
+
     int totalEditedWords {0};
     int totalEditedWordsInternal {0};
 public:
+    // QQueue<QVariantList> taskQueue;  // Stores tasks in order
+    // QMutex queueMutex;
+    // QSemaphore taskSemaphore{1};
+    // Q_INVOKABLE void processNextTask();
+    // Q_INVOKABLE void processContentChange(int position, int charsRemoved, int charsAdded, int currentBlockNumber, int blockCount,
+    //                           block currentBlockFromEditor, block currentBlockFromData);
     struct Colors {
         static const QColor coral;
         static const QColor brown;
@@ -782,7 +801,6 @@ public:
 
     void highlightBlock(const QString&) override;
 
-
 private:
     int blockToHighlight{-1};
     int wordToHighlight{-1};
@@ -794,3 +812,44 @@ private:
     QMultiMap<int, int> editedWords;
     QMultiMap<int, int> editedWordsInternal;
 };
+
+// class TaskRunner : public QRunnable {
+// public:
+//     TaskRunner(Editor* editor, int position, int charsRemoved, int charsAdded,
+//                int currentBlockNumber, int blockCount,
+//                const block& currentBlockFromEditor,
+//                const block& currentBlockFromData)
+//         : editor(editor)
+//         , position(position)
+//         , charsRemoved(charsRemoved)
+//         , charsAdded(charsAdded)
+//         , currentBlockNumber(currentBlockNumber)
+//         , blockCount(blockCount)
+//         , currentBlockFromEditor(currentBlockFromEditor)
+//         , currentBlockFromData(currentBlockFromData) {
+//         setAutoDelete(true);
+//     }
+
+//     void run() override {
+//         // Process the content change
+//         editor->processContentChange(
+//             position, charsRemoved, charsAdded,
+//             currentBlockNumber, blockCount,
+//             currentBlockFromEditor, currentBlockFromData
+//             );
+
+//         std::cerr << "TaskRunner::run() called" << std::endl;
+//         // Schedule the next task processing
+//         QMetaObject::invokeMethod(editor, "processNextTask", Qt::QueuedConnection);
+//     }
+
+// private:
+//     Editor* editor;
+//     int position;
+//     int charsRemoved;
+//     int charsAdded;
+//     int currentBlockNumber;
+//     int blockCount;
+//     block currentBlockFromEditor;
+//     block currentBlockFromData;
+// };

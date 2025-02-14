@@ -59,7 +59,7 @@ void TranscriptGenerator::Upload_and_generate_Transcript()
         mapper.close();
         std::string makingexec="chmod +x "+mapperFileInfo.absoluteFilePath().replace(" ", "\\ ").toStdString();
         int result = system(makingexec.c_str());
-        qInfo()<<result;
+        // qInfo()<<result; // Disabled debug
     }
     QFile client_script("client.py");
     QFileInfo client_script_info(client_script);

@@ -375,6 +375,10 @@ private slots:
      */
     void on_actionOpen_triggered();
 
+    void on_actionIncrease_speed_by_1_triggered();
+
+    void on_actionDecrease_speed_by_1_triggered();
+
     void on_actionEdited_Words_Count_triggered();
 
 private:
@@ -529,5 +533,12 @@ private:
      * This object provides access to media devices available on the system.
      */
     QMediaDevices m_mediaDevices;
+
+    /*!
+     * \brief Variable representing speed of seeking in media player.
+     *
+     * This variable provides access to changing speed of seeking.
+    */
+    int64_t seekSpeed = 0;
     bool hideTotalWordsCount = true;
 };

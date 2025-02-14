@@ -5,5 +5,7 @@
         <file>wordlists/hindi.txt</file>
         <file>wordlists/gujarati.txt</file>
         <file>wordlists/tamil.txt</file>
+        <file>wordlists/telugu.txt</file>
+        <file>wordlists/marathi.txt</file>
     </qresource>
 </RCC>

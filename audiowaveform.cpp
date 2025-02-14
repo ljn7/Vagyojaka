@@ -13,6 +13,8 @@
 //---------------------------- ---
 #define AUDIBLE_RANGE_START 20
 #define AUDIBLE_RANGE_END   20000
+constexpr int BUFFER_SIZE = 1024;
+constexpr qint64 MS_PER_SECOND = 1000;
 //----------------------------
 
 AudioWaveForm::AudioWaveForm(QWidget *parent)
@@ -74,7 +76,7 @@ AudioWaveForm::AudioWaveForm(QWidget *parent)
     connect(mPlayer, &QMediaPlayer::durationChanged, [this]() {
         emit samplingStatus(false);
         qint64 tot_duration = mPlayer->duration();
-        qInfo()<<"size of buffer is: "<< mAudioBuffer.size();
+        // qInfo()<<"size of buffer is: "<< mAudioBuffer.size(); // Disabled debug
         AVFormatContext* formatCtx = avformat_alloc_context();
         sample_rate = 0;
         total_duration = 0;
@@ -94,7 +96,6 @@ AudioWaveForm::AudioWaveForm(QWidget *parent)
                 }
                 if (audioStreamIndex != -1) {
                     sample_rate = formatCtx->streams[audioStreamIndex]->codecpar->sample_rate;
-                    qDebug() << "Sample Rate from FFMPEG:" << sample_rate;
                 } else {
                     qWarning() << "No audio stream found.";
                     avformat_close_input(&formatCtx);
@@ -135,14 +136,14 @@ void AudioWaveForm::showWaveForm() {
 
     if(!MediaFile.open(QIODevice::ReadOnly))
     {
-        qInfo()<<"Not open for readonly\n";
+        // qInfo()<<"Not open for readonly\n";
         return;
     }
     if(isAudioFile(filePath)){
-        qInfo()<<"File id audio file\n";
+        // qInfo()<<"File id audio file\n";
         audioData = MediaFile.readAll();
     } else {
-        qInfo()<<"File is video file\n";
+        // qInfo()<<"File is video file\n";
         QString ffmpegPath = "ffmpeg";
         QProcess ffmpegProcess;
         QStringList ffmpegArgs = {"-i", filePath, "-vn", "-f", "wav", "-"};
@@ -186,7 +187,7 @@ void AudioWaveForm::processSampleRate()
     // this->total_duration = totalDuration;
     this->num_sam = sample_rate * (total_duration/1000);
     // factor = num_sam / NUM_SAMPLES;
-    qInfo()<<"sample_rate is: :"<<this->sample_rate<<"\n";
+    // qInfo()<<"sample_rate is: :"<<this->sample_rate<<"\n";
     //qInfo()<<"total duration is: "<<total_dur<<"\n";
     //qInfo()<<"num samples is: "<<num_sam<<"\n";
 
@@ -210,16 +211,19 @@ void AudioWaveForm::processSampleRate()
 }
 void AudioWaveForm::processBuffer()
 {
-    for (qint64 i = 0; i < num_sam; i ++) {
-        mIndices.append((double)i);
-        mSamples.append(0);
+    mIndices.reserve(num_sam);
+    mSamples.reserve(num_sam);
+    mFftIndices.reserve(AUDIBLE_RANGE_END - AUDIBLE_RANGE_START);
+
+    for (qint64 i = 0; i < num_sam; i++) {
+        mIndices.append(static_cast<double>(i));
+        mSamples.append(0.0);
     }
 
-    double freqStep = (double)sample_rate / (double)(num_sam);
+    double freqStep = static_cast<double>(sample_rate) / num_sam;
     double f = AUDIBLE_RANGE_START;
-    while (f < AUDIBLE_RANGE_END) {
+    for (double f = AUDIBLE_RANGE_START; f < AUDIBLE_RANGE_END; f += freqStep) {
         mFftIndices.append(f);
-        f += freqStep;
     }
 
     // Set up FFT plan *
@@ -254,34 +258,37 @@ void AudioWaveForm::setPlayerPosition(qint64 position)
 void AudioWaveForm::processAudioIn()
 {
     //qInfo()<<"processing audio\n";
-    mInputBuffer.open(QIODevice::ReadOnly);
+    mInputBuffer.open(QIODevice::ReadWrite);
     mInputBuffer.seek(0);
-    QByteArray ba = mInputBuffer.readAll();
-    int16_t s_max = 0;
-    int num_sample = ba.length() / 2;
-    int b_pos = 0;
-    for (qint64 i = 0; i < num_sample; i ++) {
-        int16_t s;
-        s = ba.at(b_pos++);
-        s |= ba.at(b_pos++) << 8;
-        if(s > s_max){
-            s_max = s;
-        }
-    }
-    b_pos = 0;
-    for (qint64 i = 0; i < num_sample; i ++) {
-        int16_t s;
-        s = ba.at(b_pos++);
-        s |= ba.at(b_pos++) << 8;
-        if (s != 0) {
-            mSamples.append((double)s / /*32768.0*/(double)s_max);
-        } else {
-            mSamples.append(0);
-        }
-    }
+    QByteArray audioData = mInputBuffer.readAll();
     mInputBuffer.buffer().clear();
     mInputBuffer.seek(0);
     mInputBuffer.close();
+
+    int16_t maxSample = 0;
+    const int16_t* samples = reinterpret_cast<const int16_t*>(audioData.constData());
+    const int sampleCount = audioData.size() / sizeof(int16_t);
+
+    for (int i = 0; i < sampleCount; ++i) {
+        maxSample = qMax(maxSample, qAbs(samples[i]));
+    }
+
+    int b_pos = 0;
+    for (int i = 0; i < sampleCount; ++i) {
+        maxSample = qMax(maxSample, qAbs(samples[i]));
+    }
+
+    const double normFactor = maxSample != 0 ? 1.0 / maxSample : 1.0;
+    mSamples.clear();
+    mSamples.reserve(sampleCount);
+
+    for (int i = 0; i < sampleCount; ++i) {
+        mSamples.append(samples[i] * normFactor);
+    }
+
+    // mInputBuffer.buffer().clear();
+    // mInputBuffer.seek(0);
+    // mInputBuffer.close();
     samplesUpdated();
 }
 
@@ -439,22 +446,25 @@ void AudioWaveForm::samplesUpdated()
     if (mSamples.isEmpty())
         return;
 
+    const double duration = total_duration / MS_PER_SECOND;
+    const double timeStep = duration / (num_sam - 1);
+    QVector<double> timeValues;
+    timeValues.reserve(num_sam);
+
     int n = mSamples.length();
     if (n > /*96000*/ num_sam) mSamples = mSamples.mid(n - (num_sam), -1);
     memcpy(mFftIn, mSamples.data(), num_sam * sizeof(double));
     fftw_execute(mFftPlan);
 
-    double totalDuration = total_duration/1000.0;
-    // Create a vector for time values from 0 to totalDuration
-    QVector<double> timeValues;
-    double timeStep = totalDuration/((num_sam) - 1);
-    for (qint64 i = 0; i < num_sam; i++) {
+    for (qint64 i = 0; i < num_sam; ++i) {
         timeValues.append(i * timeStep);
     }
 
+    // Update plot
     waveWidget->graph(0)->setData(timeValues, mSamples);
     waveWidget->xAxis->rescale();
     waveWidget->replot();
+
     waveWidget->setVisible(true);
 
     setPlayerPosition(0);

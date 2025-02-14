@@ -18,6 +18,7 @@
 #include <git/git.h>
 #include "qmediadevices.h"
 #include "qaudiodevice.h"
+#include <algorithm>
 
 // #include <config/settingsManager.h>
 
@@ -43,6 +44,7 @@ Tool::Tool(QWidget *parent)
         ui->Show_Time_Stamps->setChecked(settings->value("showTimeStamps").toString() == "true");
     }
 
+    seekSpeed = std::clamp(settings->value("seekSpeed").toInt(), 1, 5);
 
     player = new MediaPlayer(this);
     player->setVideoOutput(ui->m_videoWidget);
@@ -76,13 +78,13 @@ Tool::Tool(QWidget *parent)
     // Connect Player Controls and Media Player
     connect(ui->player_open, &QAction::triggered, player, &MediaPlayer::open);
     connect(ui->player_togglePlay, &QAction::triggered, player, &MediaPlayer::togglePlayback);
-    connect(ui->player_seekForward, &QAction::triggered, player, [&]() {player->seek(3);});
-    connect(ui->player_seekBackward, &QAction::triggered, player, [&]() {player->seek(-3);});
+    connect(ui->player_seekForward, &QAction::triggered, player, [&]() {player->seek(seekSpeed);});
+    connect(ui->player_seekBackward, &QAction::triggered, player, [&]() {player->seek(-seekSpeed);});
     connect(ui->m_playerControls, &PlayerControls::play, player, &QMediaPlayer::play);
     connect(ui->m_playerControls, &PlayerControls::pause, player, &QMediaPlayer::pause);
     connect(ui->m_playerControls, &PlayerControls::stop, player, &QMediaPlayer::stop);
-    connect(ui->m_playerControls, &PlayerControls::seekForward, player, [&]() {player->seek(3);});
-    connect(ui->m_playerControls, &PlayerControls::seekBackward, player, [&]() {player->seek(-3);});
+    connect(ui->m_playerControls, &PlayerControls::seekForward, player, [&]() {player->seek(seekSpeed);});
+    connect(ui->m_playerControls, &PlayerControls::seekBackward, player, [&]() {player->seek(-seekSpeed);});
     connect(ui->m_playerControls, &PlayerControls::changeVolume, player, &MediaPlayer::setVolume);
     connect(ui->m_playerControls, &PlayerControls::changeMuting, player, &MediaPlayer::setMuted);
     connect(ui->m_playerControls, &PlayerControls::changeRate, player, &QMediaPlayer::setPlaybackRate);
@@ -533,7 +535,7 @@ void Tool::on_btn_translate_clicked()
         mapper.close();
         std::string makingexec="chmod +x "+mapperFileInfo.absoluteFilePath().replace(" ", "\\ ").toStdString();
         int result = system(makingexec.c_str());
-        qInfo()<<result;
+        // qInfo()<<result; Disabled Debug
     }
 
 
@@ -564,7 +566,7 @@ void Tool::on_btn_translate_clicked()
     QString filepaths=fileInfo.dir().path();
     QString translatedFile=filepaths+"/HindiTranslated.xml";
     QString filepaths2=filepaths;
-    qInfo()<<filepaths2;
+    // qInfo()<<filepaths2;  Disabled Debug
 
 
 
@@ -590,17 +592,17 @@ void Tool::on_btn_translate_clicked()
                                 +" "+ '\"'+FromTranscriptFileToTranslate.absoluteFilePath().toStdString()+ '\"'
                                 +" "+ '\"'+tempXMLinfo.absoluteFilePath().toStdString()+ '\"';
 
-    qInfo()<<translatorStr.c_str();
+    // qInfo()<<translatorStr.c_str(); // Disabled debug
 
     int result2 = system(translatorStr.c_str());
-    qInfo()<<result2;
+    // qInfo()<<result2; // Disabled debug
 
-    qInfo()<<"Save Pressed";
+    // qInfo()<<"Save Pressed"; // Disabled debug
     bool fileExists = QFileInfo::exists(filepaths2+"/HindiTranslated.xml") && QFileInfo(filepaths2+"/HindiTranslated.xml").isFile();
     while(!fileExists){
         fileExists = QFileInfo::exists(filepaths2+"/HindiTranslated.xml") && QFileInfo(filepaths2+"/HindiTranslated.xml").isFile();
     }
-    qInfo()<<"path exists now";
+    // qInfo()<<"path exists now"; // Disabled debug
     QFile transcriptFile3(filepaths2+"/HindiTranslated.xml");
     if (!transcriptFile3.open(QIODevice::ReadOnly)) {
         qInfo()<<(transcriptFile3.errorString());
@@ -608,7 +610,7 @@ void Tool::on_btn_translate_clicked()
     }
     ui->m_editor_3->loadTranscriptData(transcriptFile3);
     ui->m_editor_3->setContent();
-    qInfo()<<"translated";
+    // qInfo()<<"translated"; // Disabled debug
     progressBar.setValue(100);
     progressBar.hide();
 
@@ -882,6 +884,26 @@ void Tool::setDefaultAudioOutputDevice() {
 void Tool::on_actionOpen_triggered()
 {
     ui->tableWidget->openTTSTranscript();
+}
+
+
+void Tool::on_actionIncrease_speed_by_1_triggered()
+{
+    seekSpeed = std::min(seekSpeed + 1, (int64_t)5);
+    settings->setValue("seekSpeed", seekSpeed);
+
+    QString message = QString("Speed increased to %1").arg(seekSpeed);
+    QToolTip::showText(QCursor::pos(), message, this, QRect(), 1500);
+}
+
+
+void Tool::on_actionDecrease_speed_by_1_triggered()
+{
+    seekSpeed = std::max(seekSpeed - 1, (int64_t)1);
+    settings->setValue("seekSpeed", seekSpeed);
+
+    QString message = QString("Speed decreased to %1").arg(seekSpeed);
+    QToolTip::showText(QCursor::pos(), message, this, QRect(), 1500);
 }
 
 
