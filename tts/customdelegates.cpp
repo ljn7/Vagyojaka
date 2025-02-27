@@ -279,3 +279,93 @@ void CustomTextEdit::focusOutEvent(QFocusEvent *e)
         emit delegate->closeEditor(editor, QAbstractItemDelegate::NoHint);
     }
 }
+
+VerificationDelegate::VerificationDelegate(QObject* parent)
+    : QStyledItemDelegate(parent)
+{
+}
+
+void VerificationDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    QStyleOptionViewItem opt = option;
+    initStyleOption(&opt, index);
+
+    QVariant bgColor = index.data(Qt::BackgroundRole);
+    // Fill background
+    if (opt.state & QStyle::State_Selected) {
+        opt.state &= ~QStyle::State_Selected; // Remove the selected state
+        opt.state |= QStyle::State_Enabled;   // Ensure the item is enabled
+    }
+
+    if (bgColor.isValid()) {
+        painter->fillRect(opt.rect, bgColor.value<QColor>());
+    }
+
+    int state = index.data(Qt::DisplayRole).toInt();
+    drawVerificationState(painter, checkboxRect(opt), state);
+
+    // Draw the focus rect if the item has focus
+    if (opt.state & QStyle::State_HasFocus) {
+        QStyleOptionFocusRect focusOption;
+        focusOption.rect = opt.rect;
+        focusOption.state = opt.state | QStyle::State_KeyboardFocusChange | QStyle::State_Item;
+        focusOption.backgroundColor = opt.palette.color(QPalette::Base);
+        QApplication::style()->drawPrimitive(QStyle::PE_FrameFocusRect, &focusOption, painter);
+    }
+}
+
+void VerificationDelegate::drawVerificationState(QPainter* painter, const QRect& rect, int state) const
+{
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing);
+
+    // Draw the checkbox outline
+    painter->setPen(QPen(Qt::black, 1));
+    painter->drawRect(rect);
+
+    if (state > 0) {
+        // Set up the pen for drawing the mark
+        QPen pen(state == 1 ? QColor(0, 128, 0) : QColor(178, 34, 34), 2);
+        painter->setPen(pen);
+
+        if (state == 1) {  // Check mark
+            QPolygonF checkMark;
+            checkMark << QPointF(rect.left() + rect.width() * 0.2, rect.top() + rect.height() * 0.5)
+                      << QPointF(rect.left() + rect.width() * 0.4, rect.top() + rect.height() * 0.7)
+                      << QPointF(rect.left() + rect.width() * 0.8, rect.top() + rect.height() * 0.3);
+            painter->drawPolyline(checkMark);
+        } else {  // X mark
+            painter->drawLine(rect.topLeft() + QPoint(4, 4), rect.bottomRight() + QPoint(-4, -4));
+            painter->drawLine(rect.topRight() + QPoint(-4, 4), rect.bottomLeft() + QPoint(4, -4));
+        }
+    }
+
+    painter->restore();
+}
+
+bool VerificationDelegate::editorEvent(QEvent* event, QAbstractItemModel* model,
+                                       const QStyleOptionViewItem& option, const QModelIndex& index)
+{
+    if (event->type() == QEvent::MouseButtonRelease) {
+        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+        if (checkboxRect(option).contains(mouseEvent->pos())) {
+            int currentState = index.data(Qt::DisplayRole).toInt();
+            if (currentState < 0 || currentState > 2) {
+                currentState = 0;  // Reset to a valid state if out of bounds
+            }
+            int newState = (currentState + 1) % 3;  // Cycle through 0, 1, 2
+            model->setData(index, newState, Qt::EditRole);
+            return true;
+        }
+    }
+    return false;
+}
+
+QRect VerificationDelegate::checkboxRect(const QStyleOptionViewItem& option) const
+{
+    const int size = std::min(option.rect.width(), option.rect.height()) - 8;
+    return QRect(option.rect.x() + (option.rect.width() - size) / 2,
+                 option.rect.y() + (option.rect.height() - size) / 2,
+                 size, size);
+}
+

@@ -25,6 +25,8 @@ public:
 
     static const QColor SoundQualityColor;
     static const QColor TTSQualityColor;
+    static const QColor CorrectColor;
+    static const QColor WrongColor;
     QTableView* tableView;
     TextEditDelegate* textDelegate = nullptr;
 

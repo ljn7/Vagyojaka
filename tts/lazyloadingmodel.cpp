@@ -18,17 +18,21 @@ int LazyLoadingModel::columnCount(const QModelIndex& parent) const
 {
     if (parent.isValid())
         return 0;
-    return 6;
+    return 7;
 }
 
 QVariant LazyLoadingModel::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid() || index.row() >= m_rows.size() || index.column() >= 6)
+    if (!index.isValid() || index.row() >= m_rows.size() || index.column() >= 7)
         return QVariant();
 
     const TTSRow& row = m_rows[index.row()];
 
     if (role == Qt::BackgroundRole) {
+        if (row.verification != Verification::not_verified) {
+            return row.verification == Verification::correct ? TTSAnnotator::CorrectColor : TTSAnnotator::WrongColor;
+        }
+
         switch (index.column()) {
         case 4: // Sound Quality column
             return TTSAnnotator::SoundQualityColor; // Light green
@@ -47,6 +51,7 @@ QVariant LazyLoadingModel::data(const QModelIndex& index, int role) const
         case 3: return row.tag;
         case 4: return row.sound_quality;
         case 5: return row.asr_quality;
+        case 6: return row.verification;
         }
     }
 
@@ -58,11 +63,13 @@ bool LazyLoadingModel::setData(const QModelIndex& index, const QVariant& value, 
     if (index.isValid() && role == Qt::EditRole) {
         TTSRow& row = m_rows[index.row()];
         switch (index.column()) {
+        case 0: row.audioFileName = value.toString(); break;
         case 1: row.words = value.toString(); break;
         case 2: row.not_pronounced_properly = value.toString(); break;
         case 3: row.tag = value.toString(); break;
         case 4: row.sound_quality = value.toInt(); break;
         case 5: row.asr_quality = value.toInt(); break;
+        case 6: row.verification = value.value<Verification>(); break;
         default: return false;
         }
         emit dataChanged(index, index, {role});
@@ -75,6 +82,10 @@ Qt::ItemFlags LazyLoadingModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
         return Qt::NoItemFlags;
+
+    if (index.column() == 0 || index.column() == 6) {  // Audio column
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable;  // Remove Qt::ItemIsEditable
+    }
 
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }

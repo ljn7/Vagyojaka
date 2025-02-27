@@ -75,3 +75,15 @@ public:
     void setFont(QFont font);
     QFont m_font;
 };
+
+class VerificationDelegate : public QStyledItemDelegate {
+    Q_OBJECT
+public:
+    explicit VerificationDelegate(QObject* parent = nullptr);
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index) override;
+
+private:
+    QRect checkboxRect(const QStyleOptionViewItem& option) const;
+    void drawVerificationState(QPainter* painter, const QRect& rect, int state) const;
+};

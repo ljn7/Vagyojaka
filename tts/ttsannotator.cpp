@@ -1,5 +1,4 @@
 #include "ttsannotator.h"
-#include "qfontdatabase.h"
 #include "ui_ttsannotator.h"
 #include "lazyloadingmodel.h"
 #include "customdelegates.h"
@@ -11,6 +10,8 @@
 
 const QColor TTSAnnotator::SoundQualityColor = QColor(230, 255, 230);
 const QColor TTSAnnotator::TTSQualityColor = QColor(255, 230, 230);
+const QColor TTSAnnotator::CorrectColor = QColor(200,255,200);
+const QColor TTSAnnotator::WrongColor = QColor(255,200,200);
 
 TTSAnnotator::TTSAnnotator(QWidget *parent)
     : QWidget(parent)
@@ -52,7 +53,7 @@ void TTSAnnotator::setupUI()
 {
     // Set headers for the model
     m_model->setHorizontalHeaderLabels({
-        "Audios", "Transcript", "Mispronounced words", "Tags", "Sound Quality", "ASR Quality"
+        "Audios", "Transcript", "Mispronounced words", "Tags", "Sound Quality", "ASR Quality", "Verification"
     });
 
     // Set up delegates
@@ -72,6 +73,9 @@ void TTSAnnotator::setupUI()
     // soundQualityDelegate->
     tableView->setItemDelegateForColumn(4, soundQualityDelegate);
     tableView->setItemDelegateForColumn(5, ttsQualityDelegate);
+
+    VerificationDelegate* verificationDelegate = new VerificationDelegate(this);
+    tableView->setItemDelegateForColumn(6, verificationDelegate);
 
     // Set up table view properties
     tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -204,6 +208,8 @@ void TTSAnnotator::parseXML()
                         row.audioFileName = text;
                     } else if (elementName == QString("tag")) {
                         row.tag = text;
+                    } else if (elementName == QString("verification")) {
+                        row.verification = static_cast<Verification>(text.toInt());
                     }
                 }
             }
@@ -258,6 +264,7 @@ void TTSAnnotator::saveToFile(const QString& fileName)
         xmlWriter.writeTextElement("asr-quality", QString::number(row.asr_quality));
         xmlWriter.writeTextElement("audio-filename", row.audioFileName);
         xmlWriter.writeTextElement("tag", row.tag);
+        xmlWriter.writeTextElement("verification", QString::number(row.verification));
         xmlWriter.writeEndElement(); // row
     }
 

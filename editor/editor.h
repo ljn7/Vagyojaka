@@ -13,8 +13,6 @@
 #include <QTextDocument>
 #include <QCompleter>
 #include <QAbstractItemModel>
-#include <iostream>
-#include <ostream>
 #include <qcompleter.h>
 #include <qmutex.h>
 #include <qrunnable.h>
