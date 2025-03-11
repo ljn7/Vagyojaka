@@ -32,7 +32,7 @@ jobs:
         target: 'desktop'
         arch: 'win64_mingw'
         tools: 'tools_mingw'
-        modules: 'qtmultimedia qtnetwork'
+        modules: 'qtmultimedia'
         cache: true
     
     - name: Install dependencies with vcpkg
