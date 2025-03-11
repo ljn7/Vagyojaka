@@ -13,7 +13,7 @@ jobs:
     runs-on: windows-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
     
@@ -25,7 +25,7 @@ jobs:
         ./vcpkg integrate install
     
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: '6.6.1'
         host: 'windows'
@@ -67,7 +67,7 @@ jobs:
         Compress-Archive -Path dist\* -DestinationPath Vagyojaka-Windows.zip
     
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Vagyojaka-Windows
         path: Vagyojaka-Windows.zip
@@ -84,7 +84,7 @@ jobs:
     runs-on: macos-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
     
@@ -133,7 +133,7 @@ jobs:
         $HOME/tools/appimagetool AppDir Vagyojaka-macOS.AppImage
     
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Vagyojaka-macOS
         path: |
@@ -154,7 +154,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
     
@@ -166,7 +166,7 @@ jobs:
         libfuse2 # For AppImage
     
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: '6.6.1'
         host: 'linux'
@@ -213,7 +213,7 @@ jobs:
         $HOME/tools/appimagetool AppDir Vagyojaka-Linux.AppImage
     
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Vagyojaka-Linux
         path: Vagyojaka-Linux.AppImage
