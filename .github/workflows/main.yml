@@ -1,0 +1,252 @@
+# .github/workflows/build-windows.yml
+name: Build Windows
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    
+    - name: Setup vcpkg
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git C:/vcpkg
+        cd C:/vcpkg
+        ./bootstrap-vcpkg.bat
+        ./vcpkg integrate install
+    
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '6.6.1'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_mingw'
+        tools: 'tools_mingw'
+        cache: true
+    
+    - name: Install dependencies with vcpkg
+      run: |
+        C:/vcpkg/vcpkg install libgit2 fftw3 --triplet=x64-mingw-dynamic
+    
+    - name: Download FFmpeg
+      run: |
+        Invoke-WebRequest -Uri "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip" -OutFile "ffmpeg.zip"
+        Expand-Archive -Path "ffmpeg.zip" -DestinationPath "C:/"
+        Rename-Item -Path "C:/ffmpeg-master-latest-win64-gpl-shared" -NewName "C:/ffmpeg"
+    
+    - name: Configure and Build
+      run: |
+        mkdir build
+        cd build
+        cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+        cmake --build . --config Release -j4
+    
+    - name: Prepare distribution
+      run: |
+        mkdir dist
+        copy build\output\Vagyojaka.exe dist\
+        windeployqt --release --no-translations --no-system-d3d-compiler --no-opengl-sw dist\Vagyojaka.exe
+        # Copy FFmpeg DLLs
+        copy C:\ffmpeg\bin\*.dll dist\
+        # Copy libgit2 and fftw3 DLLs
+        copy C:\vcpkg\installed\x64-mingw-dynamic\bin\git2.dll dist\
+        copy C:\vcpkg\installed\x64-mingw-dynamic\bin\fftw3.dll dist\
+    
+    - name: Create ZIP archive
+      run: |
+        Compress-Archive -Path dist\* -DestinationPath Vagyojaka-Windows.zip
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Vagyojaka-Windows
+        path: Vagyojaka-Windows.zip
+    
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: Vagyojaka-Windows.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+# .github/workflows/build-macos.yml
+name: Build macOS
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    
+    - name: Install dependencies
+      run: |
+        brew install qt@6 libgit2 ffmpeg fftw pkg-config
+        brew link qt@6
+    
+    - name: Configure and Build
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_PREFIX_PATH="$(brew --prefix qt@6)" -DCMAKE_BUILD_TYPE=Release
+        cmake --build . --config Release -j4
+    
+    - name: Create App Bundle
+      run: |
+        cd build/output
+        macdeployqt Vagyojaka.app -dmg
+    
+    - name: Install appimagetool
+      run: |
+        mkdir -p $HOME/tools
+        wget -O $HOME/tools/appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+        chmod +x $HOME/tools/appimagetool
+    
+    - name: Create AppImage
+      run: |
+        mkdir -p AppDir/usr/bin
+        mkdir -p AppDir/usr/lib
+        mkdir -p AppDir/usr/share/applications
+        mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+        cp build/output/Vagyojaka.app/Contents/MacOS/Vagyojaka AppDir/usr/bin/
+        # Create desktop file
+        echo "[Desktop Entry]
+        Name=Vagyojaka
+        Exec=Vagyojaka
+        Icon=vagyojaka
+        Type=Application
+        Categories=Utility;" > AppDir/usr/share/applications/vagyojaka.desktop
+        # Use AppIcon as the application icon
+        cp AppIcon.ico AppDir/usr/share/icons/hicolor/256x256/apps/vagyojaka.png
+        # Copy libraries
+        cp -R build/output/Vagyojaka.app/Contents/Frameworks/* AppDir/usr/lib/
+        # Create AppImage
+        $HOME/tools/appimagetool AppDir Vagyojaka-macOS.AppImage
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: Vagyojaka-macOS
+        path: |
+          build/output/Vagyojaka.dmg
+          Vagyojaka-macOS.AppImage
+    
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          build/output/Vagyojaka.dmg
+          Vagyojaka-macOS.AppImage
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+# .github/workflows/build-linux.yml
+name: Build Linux
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake libgit2-dev libfftw3-dev \
+        libavcodec-dev libavformat-dev libavutil-dev libavdevice-dev \
+        libfuse2 # For AppImage
+    
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '6.6.1'
+        host: 'linux'
+        target: 'desktop'
+        arch: 'gcc_64'
+        cache: true
+    
+    - name: Configure and Build
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        cmake --build . --config Release -j$(nproc)
+    
+    - name: Install appimagetool
+      run: |
+        mkdir -p $HOME/tools
+        wget -O $HOME/tools/appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+        chmod +x $HOME/tools/appimagetool
+    
+    - name: Create AppImage
+      run: |
+        mkdir -p AppDir/usr/bin
+        mkdir -p AppDir/usr/lib
+        mkdir -p AppDir/usr/share/applications
+        mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+        cp build/output/vagyojaka AppDir/usr/bin/
+        # Create desktop file
+        echo "[Desktop Entry]
+        Name=Vagyojaka
+        Exec=vagyojaka
+        Icon=vagyojaka
+        Type=Application
+        Categories=Utility;" > AppDir/usr/share/applications/vagyojaka.desktop
+        # Use AppIcon as the application icon
+        cp AppIcon.ico AppDir/usr/share/icons/hicolor/256x256/apps/vagyojaka.png
+        # Copy Qt dependencies
+        cp -r $Qt6_DIR/../../../lib/libQt6*.so* AppDir/usr/lib/
+        cp -r $Qt6_DIR/../../../plugins AppDir/usr/
+        cp -r $Qt6_DIR/../../../qml AppDir/usr/
+        # Copy other dependencies
+        ldd build/output/vagyojaka | grep "=> /" | awk '{print $3}' | sort | uniq | xargs -I{} cp -v {} AppDir/usr/lib/
+        # Create AppImage
+        $HOME/tools/appimagetool AppDir Vagyojaka-Linux.AppImage
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Vagyojaka-Linux
+        path: Vagyojaka-Linux.AppImage
+    
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: Vagyojaka-Linux.AppImage
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
