@@ -99,7 +99,7 @@ jobs:
         version: '6.6.1'
         host: 'mac'
         target: 'desktop'
-        modules: 'qtmultimedia qtprintsupport'
+        modules: 'qtmultimedia'
         cache: true
     
     - name: Configure and Build
@@ -181,7 +181,7 @@ jobs:
         host: 'linux'
         target: 'desktop'
         arch: 'gcc_64'
-        modules: 'qtmultimedia qtprintsupport'
+        modules: 'qtmultimedia'
         cache: true
     
     - name: Configure and Build
