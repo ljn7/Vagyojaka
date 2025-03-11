@@ -1,5 +1,4 @@
-# .github/workflows/build-windows.yml
-name: Build Windows
+name: Build and Release
 
 on:
   push:
@@ -10,7 +9,7 @@ on:
     branches: [ main, master ]
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
     
     steps:
@@ -81,19 +80,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-# .github/workflows/build-macos.yml
-name: Build macOS
-
-on:
-  push:
-    branches: [ main, master ]
-    tags:
-      - 'v*'
-  pull_request:
-    branches: [ main, master ]
-
-jobs:
-  build:
+  build-macos:
     runs-on: macos-latest
     
     steps:
@@ -163,19 +150,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-# .github/workflows/build-linux.yml
-name: Build Linux
-
-on:
-  push:
-    branches: [ main, master ]
-    tags:
-      - 'v*'
-  pull_request:
-    branches: [ main, master ]
-
-jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-latest
     
     steps:
