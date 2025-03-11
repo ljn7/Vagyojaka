@@ -32,6 +32,7 @@ jobs:
         target: 'desktop'
         arch: 'win64_mingw'
         tools: 'tools_mingw'
+        modules: 'qtmultimedia qtnetwork'
         cache: true
     
     - name: Install dependencies with vcpkg
@@ -48,7 +49,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+        cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DQT_DEBUG_FIND_PACKAGE=ON
         cmake --build . --config Release -j4
     
     - name: Prepare distribution
@@ -90,14 +91,22 @@ jobs:
     
     - name: Install dependencies
       run: |
-        brew install qt@6 libgit2 ffmpeg fftw pkg-config
-        brew link qt@6
+        brew install libgit2 ffmpeg fftw pkg-config
+    
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.6.1'
+        host: 'mac'
+        target: 'desktop'
+        modules: 'qtmultimedia qtnetwork qtprintsupport'
+        cache: true
     
     - name: Configure and Build
       run: |
         mkdir build
         cd build
-        cmake .. -DCMAKE_PREFIX_PATH="$(brew --prefix qt@6)" -DCMAKE_BUILD_TYPE=Release
+        cmake .. -DCMAKE_PREFIX_PATH="$Qt6_DIR" -DCMAKE_BUILD_TYPE=Release -DQT_DEBUG_FIND_PACKAGE=ON
         cmake --build . --config Release -j4
     
     - name: Create App Bundle
@@ -172,13 +181,14 @@ jobs:
         host: 'linux'
         target: 'desktop'
         arch: 'gcc_64'
+        modules: 'qtmultimedia qtnetwork qtprintsupport'
         cache: true
     
     - name: Configure and Build
       run: |
         mkdir build
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DQT_DEBUG_FIND_PACKAGE=ON
         cmake --build . --config Release -j$(nproc)
     
     - name: Install appimagetool
