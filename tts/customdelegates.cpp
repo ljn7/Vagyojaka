@@ -4,7 +4,7 @@
 #include <QApplication>
 #include <QMouseEvent>
 #include "editor/texteditor.h"
-#include "qdir"
+#include "qdir.h"
 
 AudioPlayerDelegate::AudioPlayerDelegate(const QString& baseDir, QObject* parent)
     : QStyledItemDelegate(parent), m_baseDir(baseDir)

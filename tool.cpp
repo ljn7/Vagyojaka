@@ -884,7 +884,7 @@ void Tool::on_actionOpen_triggered()
 void Tool::on_actionIncrease_speed_by_1_triggered()
 {
     seekSpeed = std::min(seekSpeed + 1, (int64_t)5);
-    settings->setValue("seekSpeed", seekSpeed);
+    settings->setValue("seekSpeed", QVariant::fromValue(seekSpeed));
 
     QString message = QString("Speed increased to %1").arg(seekSpeed);
     QToolTip::showText(QCursor::pos(), message, this, QRect(), 1500);
@@ -894,7 +894,7 @@ void Tool::on_actionIncrease_speed_by_1_triggered()
 void Tool::on_actionDecrease_speed_by_1_triggered()
 {
     seekSpeed = std::max(seekSpeed - 1, (int64_t)1);
-    settings->setValue("seekSpeed", seekSpeed);
+    settings->setValue("seekSpeed", QVariant::fromValue(seekSpeed));
 
     QString message = QString("Speed decreased to %1").arg(seekSpeed);
     QToolTip::showText(QCursor::pos(), message, this, QRect(), 1500);

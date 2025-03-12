@@ -1,5 +1,5 @@
 // SettingsManager.cpp
-#include "settingsManager.h"
+#include "config/settingsmanager.h"
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>

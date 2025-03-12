@@ -434,7 +434,7 @@ public slots:
      */
     void updateTimeStampsBlock(QVector<int> blks);
 
-    void handleContentChanged();
+    // void handleContentChanged();
 
 private slots:
     void contentChanged(int position, int charsRemoved, int charsAdded);
