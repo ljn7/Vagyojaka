@@ -40,6 +40,9 @@ private slots:
     void onItemSelectionChanged();
     void onHeaderResized(int logicalIndex, int oldSize, int newSize);
 
+protected:
+    void keyPressEvent(QKeyEvent* event) override;
+
 private:
     void parseXML();
     void setupUI();

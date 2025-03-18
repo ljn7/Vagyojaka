@@ -3,6 +3,8 @@
 #include <QPainter>
 #include <QApplication>
 #include <QMouseEvent>
+#include <qabstractitemview.h>
+#include <qobjectcleanuphandler.h>
 #include "editor/texteditor.h"
 #include "qdir.h"
 
@@ -189,6 +191,35 @@ void ComboBoxDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     painter->restore();
 }
 
+void ComboBoxDelegate::showDropdownOnEditStart(QAbstractItemView* view, const QModelIndex& index) const
+{
+    // Create and show editor
+    QWidget* editor = createEditor(view->viewport(), QStyleOptionViewItem(), index);
+    view->setIndexWidget(index, editor);
+
+    // Cast to QComboBox
+    QComboBox* comboBox = qobject_cast<QComboBox*>(editor);
+    if (comboBox) {
+        // Set the data
+        setEditorData(editor, index);
+
+        // Show dropdown automatically
+        comboBox->showPopup();
+
+        // Connect signals for when editing is complete
+        connect(comboBox, QOverload<int>::of(&QComboBox::activated), [=]() {
+            setModelData(editor, const_cast<QAbstractItemModel*>(index.model()), index);
+            view->setIndexWidget(index, nullptr);
+            delete editor;
+        });
+
+        // Handle focus out
+        comboBox->installEventFilter(new QObjectCleanupHandler());
+        comboBox->setFocusPolicy(Qt::StrongFocus);
+        comboBox->setFocus();
+    }
+}
+
 TextEditDelegate::TextEditDelegate(QFont font, QWidget *parent)
     : QStyledItemDelegate(parent), m_font(font)
 {
@@ -203,6 +234,11 @@ QWidget *TextEditDelegate::createEditor(QWidget *parent,
 
     QPlainTextEdit *editor = new QPlainTextEdit(parent);
     editor->document()->setDefaultFont(m_font);
+
+    if (index.column() == 1) {
+        editor->setReadOnly(true);
+    }
+
     return editor;
 }
 

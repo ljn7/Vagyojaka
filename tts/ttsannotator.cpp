@@ -52,7 +52,7 @@ void TTSAnnotator::setupUI()
 {
     // Set headers for the model
     m_model->setHorizontalHeaderLabels({
-        "Audios", "Transcript", "Mispronounced words", "Tags", "Sound Quality", "ASR Quality"
+        "Audios", "Transcript", "Editable Transcript", "Tags", "Sound Quality", "ASR Quality"
     });
 
     // Set up delegates
@@ -191,7 +191,7 @@ void TTSAnnotator::parseXML()
                 if (xmlReader.isStartElement()) {
                     QString elementName = QString::fromUtf8(xmlReader.name().toUtf8());
                     xmlReader.readNext();
-                    QString text = QString::fromUtf8(xmlReader.text().toUtf8());
+                    QString text = QString::fromUtf8(xmlReader.text().toUtf8()).trimmed();
                     if (elementName == QString("words")) {
                         row.words = text;
                     } else if (elementName == QString("not-pronounced-properly")) {
@@ -205,6 +205,11 @@ void TTSAnnotator::parseXML()
                     } else if (elementName == QString("tag")) {
                         row.tag = text;
                     }
+
+                    row.not_pronounced_properly = ( row.not_pronounced_properly.isEmpty() ||
+                                                    row.not_pronounced_properly.isNull() ) ?
+                                                      row.words :
+                                                      row.not_pronounced_properly;
                 }
             }
             m_model->addRow(row);
@@ -315,7 +320,32 @@ void TTSAnnotator::onCellClicked(const QModelIndex &index)
 {
     if (index.column() == 0) {  // Assuming audio player is in the first column
         tableView->openPersistentEditor(index);
+    } else if (index.column() == 4 || index.column() == 5) {  // Sound Quality or TTS Quality columns
+        // Get the appropriate delegate
+        QAbstractItemDelegate* delegate = tableView->itemDelegateForColumn(index.column());
+        ComboBoxDelegate* comboDelegate = qobject_cast<ComboBoxDelegate*>(delegate);
+        if (comboDelegate) {
+            comboDelegate->showDropdownOnEditStart(tableView, index);
+        }
     }
+}
+
+void TTSAnnotator::keyPressEvent(QKeyEvent* event)
+{
+    if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
+        QModelIndex currentIndex = tableView->currentIndex();
+        if (currentIndex.isValid() && (currentIndex.column() == 4 || currentIndex.column() == 5)) {
+            // Get the appropriate delegate
+            QAbstractItemDelegate* delegate = tableView->itemDelegateForColumn(currentIndex.column());
+            ComboBoxDelegate* comboDelegate = qobject_cast<ComboBoxDelegate*>(delegate);
+            if (comboDelegate) {
+                comboDelegate->showDropdownOnEditStart(tableView, currentIndex);
+                event->accept();
+                return;
+            }
+        }
+    }
+    QWidget::keyPressEvent(event);
 }
 
 void TTSAnnotator::setDefaultFontOnTableView()

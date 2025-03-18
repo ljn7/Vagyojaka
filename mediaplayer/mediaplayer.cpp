@@ -54,9 +54,9 @@ QString MediaPlayer::getMediaFileName()
 
 QString MediaPlayer::getPositionInfo()
 {
-    QString format = "mm:ss";
+    QString format = "mm:ss.zzz";
     if (durationTime().hour() != 0)
-        format = "hh:mm:ss";
+        format = "hh:mm:ss.zzz";
 
     return elapsedTime().toString(format) + " / " + durationTime().toString(format);
 }

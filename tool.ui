@@ -520,7 +520,7 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>00:00 / 00:00</string>
+                   <string>00:00.000 / 00:00.000</string>
                   </property>
                  </widget>
                 </item>
@@ -752,7 +752,7 @@
      <x>0</x>
      <y>0</y>
      <width>802</width>
-     <height>25</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

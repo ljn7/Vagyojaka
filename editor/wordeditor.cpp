@@ -18,10 +18,21 @@ WordEditor::WordEditor(QWidget* parent)
 QVector<word> WordEditor::currentWords() const
 {
     QVector<word> wordsToReturn;
+    QTime previousTime(0, 0, 0, 0);
 
     for (int i = 0; i < rowCount(); i++) {
         auto text = item(i, 0)->text();
-        auto timeStamp = getTime(item(i, 1)->text());
+        auto timeStampText = item(i, 1)->text();
+
+        // If timestamp is empty, use the last timestamp
+        QTime currentTimeStamp = timeStampText.isEmpty() ? previousTime : getTime(timeStampText);
+
+        if (currentTimeStamp < previousTime) {
+            currentTimeStamp = previousTime; // Update last timestamp
+        }
+
+        previousTime = currentTimeStamp;
+
         QStringList tagList;
 
         if (item(i, 2)->checkState() == Qt::Checked)
@@ -29,7 +40,7 @@ QVector<word> WordEditor::currentWords() const
         if (item(i, 3)->checkState() == Qt::Checked)
             tagList << "Slacked";
 
-        wordsToReturn.append(word {timeStamp, text, tagList});
+        wordsToReturn.append(word {currentTimeStamp, text, tagList});
     }
 
     return wordsToReturn;
@@ -50,10 +61,14 @@ void WordEditor::refreshWords(const QVector<word>& words)
     setRowCount(words.size());
 
     int counter = 0;
+    QTime previousTimestamp = QTime(0, 0, 0, 0);
+
     for (auto& a_word: words) {
         auto text = a_word.text;
-        auto timeStamp = a_word.timeStamp;
+        auto timeStamp = a_word.timeStamp.isValid() ? a_word.timeStamp : previousTimestamp;
+        previousTimestamp = timeStamp;
         auto tagList = a_word.tagList;
+
 
         setItem(counter, 0, new QTableWidgetItem(text));
         setItem(counter, 1, new QTableWidgetItem(timeStamp.toString("hh:mm:ss.zzz")));
