@@ -119,8 +119,6 @@ add_executable(
         config/settingsmanager.h
         config/settingsmanager.cpp
         utils/constants.h utils/constants.cpp
-
-
 )
 
 target_link_libraries(
@@ -171,8 +169,20 @@ message("${LIBGIT2_FOUND}")
 # find_package(libgit2)
 if (NOT LIBGIT2_FOUND)
     if (WIN32 AND MINGW)
-        find_package(unofficial-libgit2 CONFIG REQUIRED)
-        target_link_libraries(${PROJECT_NAME} PRIVATE unofficial::libgit2::libgit2)
+        find_package(libgit2 CONFIG QUIET)
+        if(libgit2_FOUND)
+            message(STATUS "Found official libgit2 package")
+            target_link_libraries(${PROJECT_NAME} PRIVATE libgit2::libgit2package)
+        else()
+            message(STATUS "Official libgit2 package not found, trying unofficial package")
+            # Try the unofficial package for MinGW
+            if(WIN32 AND MINGW)
+                find_package(unofficial-libgit2 CONFIG REQUIRED)
+                target_link_libraries(${PROJECT_NAME} PRIVATE unofficial::libgit2::libgit2)
+            elseif(LINUX OR UNIX)
+                message(FATAL_ERROR "libgit2 is required")
+            endif()
+        endif()
     elseif (LINUX OR UNIX)
         message(FATAL_ERROR "libgit2 is required")
     endif()
