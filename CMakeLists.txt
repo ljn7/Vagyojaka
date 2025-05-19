@@ -118,8 +118,9 @@ add_executable(
         AppIcon.ico
         config/settingsmanager.h
         config/settingsmanager.cpp
-
-
+        tts/utilities/findandreplacedialog.cpp
+        tts/utilities/findandreplacedialog.h
+        tts/utilities/findandreplacedialog.ui
 )
 
 target_link_libraries(
