@@ -379,6 +379,8 @@ private slots:
 
     void on_actionDecrease_speed_by_1_triggered();
 
+    void on_actionFind_and_Replace_triggered();
+
 private:
 
     /*!

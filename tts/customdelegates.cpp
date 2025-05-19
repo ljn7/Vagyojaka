@@ -232,9 +232,19 @@ QWidget *TextEditDelegate::createEditor(QWidget *parent,
     Q_UNUSED(option);
     Q_UNUSED(index);
 
-    QPlainTextEdit *editor = new QPlainTextEdit(parent);
-    editor->document()->setDefaultFont(m_font);
+    CustomTextEdit *editor = new CustomTextEdit(parent);
 
+    if (index.column() == 2) {
+        QVariant variant = index.model()->data(index, Qt::UserRole + 1);
+        QVariantMap dataMap = variant.toMap();
+
+        bool useTransliterate = dataMap.value("transliterate").toBool();
+        QString transliterateLangCode = dataMap.value("transliterateLangCode").toString();
+
+        editor->useTransliteration(useTransliterate, transliterateLangCode);
+    }
+
+    editor->document()->setDefaultFont(m_font);
     if (index.column() == 1) {
         editor->setReadOnly(true);
     }
@@ -272,7 +282,7 @@ void TextEditDelegate::setFont(QFont font)
 }
 
 CustomTextEdit::CustomTextEdit(QWidget *parent)
-    : QPlainTextEdit(parent)
+    : PlainTextEditWithCompleter(parent)
 {
 }
 
@@ -281,7 +291,7 @@ void CustomTextEdit::keyPressEvent(QKeyEvent *e)
     if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) {
         if (e->modifiers() & Qt::ShiftModifier) {
             // Shift+Enter inserts a new line
-            QPlainTextEdit::keyPressEvent(e);
+            PlainTextEditWithCompleter::keyPressEvent(e);
         } else {
             // Enter without shift finishes editing
             e->accept();
@@ -300,13 +310,14 @@ void CustomTextEdit::keyPressEvent(QKeyEvent *e)
             emit delegate->closeEditor(editor);
         }
     } else {
-        QPlainTextEdit::keyPressEvent(e);
+        PlainTextEditWithCompleter::keyPressEvent(e);
     }
+
 }
 
 void CustomTextEdit::focusOutEvent(QFocusEvent *e)
 {
-    QPlainTextEdit::focusOutEvent(e);
+    PlainTextEditWithCompleter::focusOutEvent(e);
 
     QWidget *editor = this;
     QStyledItemDelegate *delegate = qobject_cast<QStyledItemDelegate*>(editor->parent());

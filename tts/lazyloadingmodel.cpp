@@ -50,6 +50,14 @@ QVariant LazyLoadingModel::data(const QModelIndex& index, int role) const
         }
     }
 
+    if (role == Qt::UserRole + 1  && index.column() == 2) {
+        QVariantMap result;
+        result["transliterate"] = transliterate;
+        result["transliterateLangCode"] = transliterateLangCode;
+
+        return result;
+    }
+
     return QVariant();
 }
 
@@ -128,3 +136,9 @@ void LazyLoadingModel::setHorizontalHeaderLabels(const QStringList& labels)
     m_horizontalHeaderLabels = labels;
     emit headerDataChanged(Qt::Horizontal, 0, labels.size() - 1);
 }
+
+void LazyLoadingModel::setTransliterate(bool flag, const QString& langCode) {
+    transliterate = flag;
+    transliterateLangCode = langCode;
+}
+

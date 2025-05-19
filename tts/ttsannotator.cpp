@@ -1,5 +1,5 @@
 #include "ttsannotator.h"
-#include "qfontdatabase.h"
+#include "tts/utilities/findandreplacedialog.h"
 #include "ui_ttsannotator.h"
 #include "lazyloadingmodel.h"
 #include "customdelegates.h"
@@ -52,7 +52,7 @@ void TTSAnnotator::setupUI()
 {
     // Set headers for the model
     m_model->setHorizontalHeaderLabels({
-        "Audios", "Transcript", "Editable Transcript", "Tags", "Sound Quality", "ASR Quality"
+        "Audios", "Transcript", "Mispronounced words", "Tags", "Sound Quality", "ASR Quality"
     });
 
     // Set up delegates
@@ -112,10 +112,10 @@ void TTSAnnotator::setupUI()
     //         this, &TTSAnnotator::onHeaderResized);
 
     // Set up button connections
-    connect(ui->InsertRowButton, &QPushButton::clicked, this, &TTSAnnotator::insertRow);
-    connect(ui->deleteRowButton, &QPushButton::clicked, this, &TTSAnnotator::deleteRow);
-    connect(ui->saveAsTableButton, &QPushButton::clicked, this, &TTSAnnotator::saveAs);
-    connect(ui->saveTableButton, &QPushButton::clicked, this, &TTSAnnotator::save);
+    // connect(ui->InsertRowButton, &QPushButton::clicked, this, &TTSAnnotator::insertRow);
+    // connect(ui->deleteRowButton, &QPushButton::clicked, this, &TTSAnnotator::deleteRow);
+    // connect(ui->saveAsTableButton, &QPushButton::clicked, this, &TTSAnnotator::saveAs);
+    // connect(ui->saveTableButton, &QPushButton::clicked, this, &TTSAnnotator::save);
 
     // Set initial focus
     tableView->setFocus();
@@ -191,7 +191,7 @@ void TTSAnnotator::parseXML()
                 if (xmlReader.isStartElement()) {
                     QString elementName = QString::fromUtf8(xmlReader.name().toUtf8());
                     xmlReader.readNext();
-                    QString text = QString::fromUtf8(xmlReader.text().toUtf8()).trimmed();
+                    QString text = QString::fromUtf8(xmlReader.text().toUtf8());
                     if (elementName == QString("words")) {
                         row.words = text;
                     } else if (elementName == QString("not-pronounced-properly")) {
@@ -205,11 +205,6 @@ void TTSAnnotator::parseXML()
                     } else if (elementName == QString("tag")) {
                         row.tag = text;
                     }
-
-                    row.not_pronounced_properly = ( row.not_pronounced_properly.isEmpty() ||
-                                                    row.not_pronounced_properly.isNull() ) ?
-                                                      row.words :
-                                                      row.not_pronounced_properly;
                 }
             }
             m_model->addRow(row);
@@ -320,32 +315,18 @@ void TTSAnnotator::onCellClicked(const QModelIndex &index)
 {
     if (index.column() == 0) {  // Assuming audio player is in the first column
         tableView->openPersistentEditor(index);
-    } else if (index.column() == 4 || index.column() == 5) {  // Sound Quality or TTS Quality columns
-        // Get the appropriate delegate
-        QAbstractItemDelegate* delegate = tableView->itemDelegateForColumn(index.column());
-        ComboBoxDelegate* comboDelegate = qobject_cast<ComboBoxDelegate*>(delegate);
-        if (comboDelegate) {
-            comboDelegate->showDropdownOnEditStart(tableView, index);
-        }
     }
 }
 
-void TTSAnnotator::keyPressEvent(QKeyEvent* event)
+void TTSAnnotator::openFindReplaceDialog()
 {
-    if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
-        QModelIndex currentIndex = tableView->currentIndex();
-        if (currentIndex.isValid() && (currentIndex.column() == 4 || currentIndex.column() == 5)) {
-            // Get the appropriate delegate
-            QAbstractItemDelegate* delegate = tableView->itemDelegateForColumn(currentIndex.column());
-            ComboBoxDelegate* comboDelegate = qobject_cast<ComboBoxDelegate*>(delegate);
-            if (comboDelegate) {
-                comboDelegate->showDropdownOnEditStart(tableView, currentIndex);
-                event->accept();
-                return;
-            }
-        }
-    }
-    QWidget::keyPressEvent(event);
+    FindAndReplaceDialog *dialog = new FindAndReplaceDialog(tableView, this);
+    dialog->exec();
+    delete dialog;
+}
+
+void TTSAnnotator::useTransliteration(bool flag, const QString &langCode) {
+    m_model->setTransliterate(flag, langCode);
 }
 
 void TTSAnnotator::setDefaultFontOnTableView()

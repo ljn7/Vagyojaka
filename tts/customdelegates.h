@@ -1,5 +1,6 @@
 #pragma once
 
+#include "editor/plaintexteditwithcompleter.h"
 #include "qplaintextedit.h"
 #include <QStyledItemDelegate>
 #include <QComboBox>
@@ -51,13 +52,15 @@ private:
 #include <QStyledItemDelegate>
 #include <QPlainTextEdit>
 
-class CustomTextEdit : public QPlainTextEdit {
+class CustomTextEdit : public PlainTextEditWithCompleter {
     Q_OBJECT
 public:
     explicit CustomTextEdit(QWidget *parent = nullptr);
 protected:
     void keyPressEvent(QKeyEvent *e) override;
     void focusOutEvent(QFocusEvent *e) override;
+private:
+    QCompleter *m_textCompleter = nullptr;
 };
 
 class TextEditDelegate : public QStyledItemDelegate {

@@ -23,8 +23,11 @@ public:
     bool removeRow(int row, const QModelIndex& parent = QModelIndex());
     void clear();
     const QVector<TTSRow>& rows() const;
+    void setTransliterate(bool flag, const QString& langCode = "en");
 
     void setHorizontalHeaderLabels(const QStringList& labels);
+    bool transliterate { false };
+    QString transliterateLangCode = "en";
 
 private:
     QVector<TTSRow> m_rows;

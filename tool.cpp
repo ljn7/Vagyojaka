@@ -257,7 +257,7 @@ Tool::Tool(QWidget *parent)
         useTransliterationMenu->addAction(action);
     }
     group->setExclusive(true);
-    ui->menuEditor->addMenu(useTransliterationMenu);
+    ui->menuTransliteration->addMenu(useTransliterationMenu);
 
     connect(group, &QActionGroup::triggered, this, &Tool::transliterationSelected);
 
@@ -435,12 +435,14 @@ void Tool::transliterationSelected(QAction* action)
 {
     if (action->text() == "None") {
         ui->m_editor->useTransliteration(false);
+        ui->tableWidget->useTransliteration(false);
         return;
     }
 
 
     auto langCode = m_transliterationLang[action->text()];
     qDebug() << langCode;
+    ui->tableWidget->useTransliteration(true, langCode);
     ui->m_editor->useTransliteration(true, langCode);
 }
 
@@ -898,5 +900,11 @@ void Tool::on_actionDecrease_speed_by_1_triggered()
 
     QString message = QString("Speed decreased to %1").arg(seekSpeed);
     QToolTip::showText(QCursor::pos(), message, this, QRect(), 1500);
+}
+
+
+void Tool::on_actionFind_and_Replace_triggered()
+{
+    ui->tableWidget->openFindReplaceDialog();
 }
 

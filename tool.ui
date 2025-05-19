@@ -884,6 +884,12 @@
      <string>ASR Validation</string>
     </property>
     <addaction name="actionOpen"/>
+    <addaction name="actionFind_and_Replace"/>
+   </widget>
+   <widget class="QMenu" name="menuTransliteration">
+    <property name="title">
+     <string>Transliteration</string>
+    </property>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -891,6 +897,7 @@
    <addaction name="menuMedia_Player"/>
    <addaction name="menuEditor"/>
    <addaction name="menuWaveform"/>
+   <addaction name="menuTransliteration"/>
    <addaction name="menuTranslation"/>
    <addaction name="menuGit"/>
    <addaction name="menuTTS"/>
@@ -1309,6 +1316,11 @@
   <action name="actionDecrease_speed_by_1">
    <property name="text">
     <string>Decrease speed by -1</string>
+   </property>
+  </action>
+  <action name="actionFind_and_Replace">
+   <property name="text">
+    <string>Find and Replace</string>
    </property>
   </action>
  </widget>

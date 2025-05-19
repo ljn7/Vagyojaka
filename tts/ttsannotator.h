@@ -27,7 +27,8 @@ public:
     static const QColor TTSQualityColor;
     QTableView* tableView;
     TextEditDelegate* textDelegate = nullptr;
-
+    void openFindReplaceDialog();
+    void useTransliteration(bool flag, const QString& langCode = "en");
 
 private slots:
     void on_saveAsTableButton_clicked();
@@ -41,7 +42,7 @@ private slots:
     void onHeaderResized(int logicalIndex, int oldSize, int newSize);
 
 protected:
-    void keyPressEvent(QKeyEvent* event) override;
+    // void keyPressEvent(QKeyEvent* event) override;
 
 private:
     void parseXML();
