@@ -3,10 +3,17 @@
 #include <QPainter>
 #include <QApplication>
 #include <QMouseEvent>
+#include <iostream>
 #include <qabstractitemview.h>
+#include <qlineedit.h>
 #include <qobjectcleanuphandler.h>
+#include <qstandarditemmodel.h>
+#include <qtimer.h>
 #include "editor/texteditor.h"
 #include "qdir.h"
+#include "qcheckbox.h"
+#include "tts/lazyloadingmodel.h"
+#include "utils/constants.h"
 
 AudioPlayerDelegate::AudioPlayerDelegate(const QString& baseDir, QObject* parent)
     : QStyledItemDelegate(parent), m_baseDir(baseDir)
@@ -234,8 +241,11 @@ QWidget *TextEditDelegate::createEditor(QWidget *parent,
 
     CustomTextEdit *editor = new CustomTextEdit(parent);
 
+    if (!editor)
+        return nullptr;
+
     if (index.column() == 2) {
-        QVariant variant = index.model()->data(index, Qt::UserRole + 1);
+        QVariant variant = index.model()->data(index, Qt::UserRole + 4);
         QVariantMap dataMap = variant.toMap();
 
         bool useTransliterate = dataMap.value("transliterate").toBool();
@@ -248,24 +258,53 @@ QWidget *TextEditDelegate::createEditor(QWidget *parent,
     if (index.column() == 1) {
         editor->setReadOnly(true);
     }
+    // Set center alignment through the document's text option
+    QTextOption textOption = editor->document()->defaultTextOption();
+    textOption.setAlignment(Qt::AlignCenter);
+    editor->document()->setDefaultTextOption(textOption);
 
+    // Style the editor
+    QString styleSheet = QString(
+                             "CustomTextEdit {"
+                             "   border: none;"
+                             "   background-color: %1;"
+                             "   selection-background-color: %2;"
+                             "   padding: 2px 5px;"
+                             "}"
+                        ).arg(m_color.name()).arg(m_color.darker(110).name());
+
+    editor->setStyleSheet(styleSheet);
     return editor;
 }
 
 void TextEditDelegate::setEditorData(QWidget *editor,
                                      const QModelIndex &index) const
 {
+    if (!editor) {
+        return;
+    }
     QString value = index.model()->data(index, Qt::EditRole).toString();
-    CustomTextEdit *textEdit = static_cast<CustomTextEdit*>(editor);
+    CustomTextEdit *textEdit = qobject_cast<CustomTextEdit*>(editor);
+    if (!textEdit) {
+        return;
+    }
+
+    QString text = value.trimmed().replace(Constants::Text::WHITESPACE_NORMALIZER, " ");
     textEdit->setPlainText(value);
+    textEdit->setOriginalText(text);
 }
 
 void TextEditDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
                                     const QModelIndex &index) const
 {
-    CustomTextEdit *textEdit = static_cast<CustomTextEdit*>(editor);
-    QString value = textEdit->toPlainText();
-    model->setData(index, value, Qt::EditRole);
+    if (CustomTextEdit *textEdit = qobject_cast<CustomTextEdit*>(editor)) {
+        QString newValue = textEdit->toPlainText().trimmed();
+        if (textEdit->originalText() == newValue)
+            return;
+        LazyLoadingModel* lazyModel = qobject_cast<LazyLoadingModel*>(model);
+        if (!lazyModel) return;
+        model->setData(index, newValue, Qt::EditRole);
+    }
 }
 
 void TextEditDelegate::updateEditorGeometry(QWidget *editor,
@@ -281,6 +320,29 @@ void TextEditDelegate::setFont(QFont font)
     m_font = font;
 }
 
+int TextEditDelegate::calculateChangedWords(const QString& newValue, const QString& originalValue, const QString& delimiter) const {
+    QStringList newWords = newValue.split(delimiter, Qt::SkipEmptyParts);
+    QStringList originalWords = originalValue.split(delimiter, Qt::SkipEmptyParts);
+
+    int changedWords = 0;
+    if (newWords.size() > originalWords.size()) {
+        changedWords += newWords.size() - originalWords.size();
+        for (const QString& word : originalWords) {
+            if (!newWords.contains(word)) changedWords++;
+        }
+    } else if (newWords.size() < originalWords.size()) {
+        changedWords += originalWords.size() - newWords.size();
+        for (const QString& word : newWords) {
+            if (!originalWords.contains(word)) changedWords++;
+        }
+    } else {
+        for (const QString& word : newWords) {
+            if (!originalWords.contains(word)) changedWords++;
+        }
+    }
+    return changedWords;
+}
+
 CustomTextEdit::CustomTextEdit(QWidget *parent)
     : PlainTextEditWithCompleter(parent)
 {
@@ -288,27 +350,26 @@ CustomTextEdit::CustomTextEdit(QWidget *parent)
 
 void CustomTextEdit::keyPressEvent(QKeyEvent *e)
 {
+    if (m_transliterationCompleter && m_transliterationCompleter->popup()->isVisible()) {
+        PlainTextEditWithCompleter::keyPressEvent(e);
+        return;
+    }
     if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) {
-        if (e->modifiers() & Qt::ShiftModifier) {
-            // Shift+Enter inserts a new line
-            PlainTextEditWithCompleter::keyPressEvent(e);
-        } else {
-            // Enter without shift finishes editing
-            e->accept();
-            QWidget *editor = this;
-            QStyledItemDelegate *delegate = qobject_cast<QStyledItemDelegate*>(editor->parent());
-            if (delegate) {
-                emit delegate->commitData(editor);
-                emit delegate->closeEditor(editor);
-            }
-        }
-    } else if (e->key() == Qt::Key_Escape) {
-        e->accept();
         QWidget *editor = this;
         QStyledItemDelegate *delegate = qobject_cast<QStyledItemDelegate*>(editor->parent());
         if (delegate) {
+            // emit delegate->commitData(editor);
             emit delegate->closeEditor(editor);
         }
+        e->accept();
+    } else if (e->key() == Qt::Key_Escape) {
+        QWidget *editor = this;
+        QStyledItemDelegate *delegate = qobject_cast<QStyledItemDelegate*>(editor->parent());
+        if (delegate) {
+            emit delegate->commitData(editor);
+            emit delegate->closeEditor(editor);
+        }
+        e->accept();
     } else {
         PlainTextEditWithCompleter::keyPressEvent(e);
     }
@@ -325,4 +386,206 @@ void CustomTextEdit::focusOutEvent(QFocusEvent *e)
         emit delegate->commitData(editor);
         emit delegate->closeEditor(editor, QAbstractItemDelegate::NoHint);
     }
+}
+
+CheckBoxDelegate::CheckBoxDelegate(bool checked, const QColor& color, QObject* parent)
+    : QStyledItemDelegate(parent), m_checked(checked), m_color(color)
+{
+}
+
+QWidget* CheckBoxDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    Q_UNUSED(option);
+    Q_UNUSED(index);
+    QCheckBox* editor = new QCheckBox(parent);
+    bool initialState = index.data(Qt::EditRole).toBool();
+    editor->setChecked(initialState);
+
+    QString styleSheet = QString(
+                             "QCheckBox {"
+                             "   background-color: %1;"
+                             "}"
+                             "QCheckBox:checked {"
+                             "   background-color: %2;"
+                             "}")
+                             .arg(m_color.name())
+                             .arg(m_color.darker(110).name());
+    editor->setStyleSheet(styleSheet);
+    return editor;
+}
+
+void CheckBoxDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
+{
+    QCheckBox* checkBox = qobject_cast<QCheckBox*>(editor);
+    if (checkBox) {
+        bool checked = index.model()->data(index, Qt::EditRole).toBool();
+        checkBox->setChecked(checked);
+    }
+}
+
+void CheckBoxDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
+{
+    QCheckBox* checkBox = qobject_cast<QCheckBox*>(editor);
+    if (checkBox) {
+        model->setData(index, checkBox->isChecked(), Qt::EditRole);
+    }
+}
+
+void CheckBoxDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    painter->save();
+
+    // Fill the background with the specified color
+    QColor bgColor = m_color;
+    if (option.state & QStyle::State_Selected) {
+        bgColor = bgColor.darker(110);
+    }
+
+    painter->fillRect(option.rect, m_color);
+
+    // Draw the checkbox
+    QStyleOptionButton checkBoxOption;
+    checkBoxOption.rect = option.rect;
+    checkBoxOption.state = QStyle::State_Enabled;
+    if (index.data(Qt::EditRole).toBool()) {
+        checkBoxOption.state |= QStyle::State_On;
+    } else {
+        checkBoxOption.state |= QStyle::State_Off;
+    }
+
+    // Add hover effect
+    if (option.state & QStyle::State_MouseOver) {
+        checkBoxOption.state |= QStyle::State_MouseOver;
+    }
+
+    // Center the checkbox in the cell
+    QRect indicatorRect = QApplication::style()->subElementRect(QStyle::SE_CheckBoxIndicator, &checkBoxOption);
+    // checkBoxOption.rect.moveCenter(option.rect.center()); -- edited
+
+    // Calculate the centered position for the checkbox
+    QPoint center = option.rect.center();
+    checkBoxOption.rect = QRect(
+        center.x() - (indicatorRect.width() / 2),
+        center.y() - (indicatorRect.height() / 2),
+        indicatorRect.width(),
+        indicatorRect.height()
+        );
+
+
+    QApplication::style()->drawControl(QStyle::CE_CheckBox, &checkBoxOption, painter);
+
+    // Draw the focus rect if the item has focus
+    if (option.state & QStyle::State_HasFocus) {
+        QStyleOptionFocusRect focusOption;
+        focusOption.rect = option.rect;
+        focusOption.state = option.state | QStyle::State_KeyboardFocusChange | QStyle::State_Item;
+        focusOption.backgroundColor = option.palette.color(QPalette::Base);
+        QApplication::style()->drawPrimitive(QStyle::PE_FrameFocusRect, &focusOption, painter);
+    }
+
+    painter->restore();
+}
+
+bool CheckBoxDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index)
+{
+    if (event->type() == QEvent::MouseButtonRelease ||
+        event->type() == QEvent::MouseButtonDblClick)
+    {
+        bool currentState = index.data(Qt::EditRole).toBool();
+        model->setData(index, !currentState, Qt::EditRole);
+        return true;
+    }
+    return false;
+}
+
+CheckableComboBox::CheckableComboBox(QWidget* parent)
+    : QComboBox(parent)
+{
+    setModel(new QStandardItemModel(this));
+    connect(model(), &QAbstractItemModel::dataChanged, this, [this]() {
+        updateText();
+    });
+    setEditable(true);
+    lineEdit()->setReadOnly(true);
+    lineEdit()->setPlaceholderText("Select options");
+}
+
+QStringList CheckableComboBox::checkedItems() const {
+    QStringList selected;
+    for (int i = 0; i < count(); ++i) {
+        QStandardItem* item = qobject_cast<QStandardItemModel*>(model())->item(i);
+        if (item->checkState() == Qt::Checked) {
+            selected << item->text();
+        }
+    }
+    return selected;
+}
+
+void CheckableComboBox::setCheckedItems(const QStringList& items) {
+    for (int i = 0; i < count(); ++i) {
+        QStandardItem* item = qobject_cast<QStandardItemModel*>(model())->item(i);
+        if (items.contains(item->text())) {
+            item->setCheckState(Qt::Checked);
+        } else {
+            item->setCheckState(Qt::Unchecked);
+        }
+    }
+    updateText();
+}
+
+void CheckableComboBox::updateText() {
+    setEditText(checkedItems().join(";"));
+}
+
+
+CheckableComboBoxDelegate::CheckableComboBoxDelegate(const QStringList& options, QObject* parent)
+    : QStyledItemDelegate(parent), m_options(options)
+{
+}
+
+QWidget* CheckableComboBoxDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&,
+                                                 const QModelIndex& modelIndex) const {
+    CheckableComboBox* editor = new CheckableComboBox(parent);
+    editor->setEditable(true);
+    auto* model = (LazyLoadingModel* )(modelIndex.model());
+    QStringList opts;
+    if (model) {
+        opts = model->getDropdownCheckboxOpts();
+    }
+    for (const QString& option : opts) {
+        QStandardItem* item = new QStandardItem(option);
+        item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
+        item->setData(Qt::Unchecked, Qt::CheckStateRole);
+        static_cast<QStandardItemModel*>(editor->model())->appendRow(item);
+    }
+    QTimer::singleShot(100, editor, [editor]() {
+        if (editor) {
+            editor->showPopup();
+        }
+    });
+    return editor;
+}
+
+void CheckableComboBoxDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
+    CheckableComboBox* comboBox = qobject_cast<CheckableComboBox*>(editor);
+    if (!comboBox) return;
+
+    QString data = index.model()->data(index, Qt::EditRole).toString();
+    QStringList selectedItems = data.split(";", Qt::SkipEmptyParts);
+    comboBox->setCheckedItems(selectedItems);
+}
+
+void CheckableComboBoxDelegate::setModelData(QWidget* editor, QAbstractItemModel* model,
+                                             const QModelIndex& index) const {
+    CheckableComboBox* comboBox = qobject_cast<CheckableComboBox*>(editor);
+    if (!comboBox) return;
+
+    QStringList checked = comboBox->checkedItems();
+    model->setData(index, checked.join(";"), Qt::EditRole);
+}
+
+void CheckableComboBoxDelegate::updateEditorGeometry(QWidget* editor,
+                                                     const QStyleOptionViewItem& option,
+                                                     const QModelIndex&) const {
+    editor->setGeometry(option.rect);
 }

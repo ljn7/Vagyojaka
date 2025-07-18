@@ -1,4 +1,5 @@
 #include "editor.h"
+#include "utils/constants.h"
 #include <iostream>
 #include <qclipboard.h>
 #include <QJsonDocument>
@@ -62,8 +63,8 @@ Editor::Editor(QWidget *parent)
 
     // m_blocks.append(fromEditor(0));
     //    undoStack =  new QUndoStack(this);
-    QString iniPath = QApplication::applicationDirPath() + "/" + "config.ini";
-    settings = new QSettings(iniPath, QSettings::IniFormat);
+    // QString iniPath = QApplication::applicationDirPath() + "/" + "config.ini";
+    settings = new QSettings(Constants::Vagyojaka::CONFIG_INI, QSettings::IniFormat);
 
     if(settings->value("showTimeStamps").toString()=="") {
         showTimeStamp = true;
@@ -88,6 +89,7 @@ Editor::Editor(QWidget *parent)
     // debounceTimer->setInterval(debounceDelay);
 
     // connect(debounceTimer, &QTimer::timeout, this, &Editor::handleContentChanged);
+    REPLACED_TEXT_DICTONARY = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/replacedTextDictonary.json";
 }
 
 
@@ -567,7 +569,7 @@ void Editor::keyPressEvent(QKeyEvent *event)
                 //            qInfo()<<text;
                 QString val;
                 QFile file;
-                file.setFileName("replacedTextDictonary.json");
+                file.setFileName(REPLACED_TEXT_DICTONARY);
                 file.open(QIODevice::ReadOnly | QIODevice::Text);
                 val = file.readAll();
                 file.close();
@@ -705,7 +707,7 @@ void Editor::contextMenuEvent(QContextMenuEvent *event)
         //        qInfo()<<text;
         QString val;
         QFile file;
-        file.setFileName("replacedTextDictonary.json");
+        file.setFileName(REPLACED_TEXT_DICTONARY);
         file.open(QIODevice::ReadOnly | QIODevice::Text);
         val = file.readAll();
         file.close();
@@ -829,7 +831,7 @@ void Editor::transcriptSave()
         QFileInfo mapperFileInfo(mapper);
         QFile aligner(":/alignment.py");
         if(!aligner.open(QIODevice::OpenModeFlag::ReadOnly)){
-            qDebug() << "From myAlgn - 1";
+            // qDebug() << "From myAlgn - 1";
             QMessageBox::critical(this,"Error",aligner.errorString());
             return;
         }
@@ -838,7 +840,7 @@ void Editor::transcriptSave()
         aligner.close();
 
         if(!mapper.open(QIODevice::OpenModeFlag::WriteOnly | QIODevice::Truncate)){
-            qDebug() << "From myAlgn - 2";
+            // qDebug() << "From myAlgn - 2";
             QMessageBox::critical(this,"Error",mapper.errorString());
             return;
         }
@@ -850,10 +852,11 @@ void Editor::transcriptSave()
         system(makingexec.c_str());
 #endif
     }
-    if(!QFile::exists("replacedTextDictonary.json")){
-        QFile repDict("replacedTextDictonary.json");
+
+    if(!QFile::exists(REPLACED_TEXT_DICTONARY)){
+        QFile repDict(REPLACED_TEXT_DICTONARY);
         if(!repDict.open(QIODevice::OpenModeFlag::WriteOnly|QIODevice::Truncate)){
-            qDebug() << "From replacedTextDictonary - 1";
+            // qDebug() << "From replacedTextDictonary - 1";
             QMessageBox::critical(this,"Error",repDict.errorString());
             return;
         }
@@ -863,7 +866,7 @@ void Editor::transcriptSave()
     }
     QFile mapper("myalign.py");
     QFileInfo mapperFileInfo(mapper);
-    QFile repDict("replacedTextDictonary.json");
+    QFile repDict(REPLACED_TEXT_DICTONARY);
     QFileInfo repDictFileInfo(repDict);
     QFile finalFile(fileAfterSave);
     QFileInfo finalFileInfo(finalFile);
@@ -936,12 +939,12 @@ void Editor::transcriptClose()
 
 void Editor::showBlocksFromData()
 {
-    for (auto& m_block: std::as_const(m_blocks)) {
-        qDebug() << m_block.timeStamp << m_block.speaker << m_block.text << m_block.tagList;
-        for (auto& m_word: std::as_const(m_block.words)) {
-            qDebug() << "   " << m_word.timeStamp << m_word.text << m_word.tagList;
-        }
-    }
+    // for (auto& m_block: std::as_const(m_blocks)) {
+    //     // qDebug() << m_block.timeStamp << m_block.speaker << m_block.text << m_block.tagList;
+    //     for (auto& m_word: std::as_const(m_block.words)) {
+    //         qDebug() << "   " << m_word.timeStamp << m_word.text << m_word.tagList;
+    //     }
+    // }
 }
 
 void Editor::highlightTranscript(const QTime& elapsedTime)
@@ -2503,7 +2506,7 @@ void Editor::saveAsPDF()
 
     QFile final("pdf.txt");
     if(!final.open(QIODevice::OpenModeFlag::WriteOnly)){
-        qDebug() << "From PDF - 1";
+        // qDebug() << "From PDF - 1";
         QMessageBox::critical(this,"Error",final.errorString());
         return;
     }
@@ -2573,7 +2576,7 @@ void Editor::saveAsTXT()    // save the transcript as a text file
             out << txtContent;
             txtFile.close();
         } else {
-            qDebug() << "from txtSaveLocation";
+            // qDebug() << "from txtSaveLocation";
             QMessageBox::critical(this, "Error", txtFile.errorString());
         }
     }

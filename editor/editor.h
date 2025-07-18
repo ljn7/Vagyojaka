@@ -16,9 +16,11 @@
 #include <iostream>
 #include <ostream>
 #include <qcompleter.h>
+#include <qdir.h>
 #include <qmutex.h>
 #include <qrunnable.h>
 #include <qsemaphore.h>
+#include <qstandardpaths.h>
 #include <set>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -696,10 +698,11 @@ private:
     int m_saveInterval{20}; ///< Interval in seconds for auto-saving documents.
 
     // Clipboard management
+    QString APPDATA_BASE_DIR = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QStringList clipboardTexts; ///< List of text items in the clipboard.
-    QString fileBeforeSave = "initial.txt"; ///< File path for the initial state before saving.
-    QString fileAfterSave = "final.txt"; ///< File path for the final state after saving.
-    QString ComparedOutputFile = "ComparedDictonary.json"; ///< File path for compared dictionary output.
+    QString fileBeforeSave = APPDATA_BASE_DIR + QDir::separator() + "initial.txt"; ///< File path for the initial state before saving.
+    QString fileAfterSave = APPDATA_BASE_DIR + QDir::separator() + "final.txt"; ///< File path for the final state after saving.
+    QString ComparedOutputFile = APPDATA_BASE_DIR + QDir::separator() + "ComparedDictonary.json"; ///< File path for compared dictionary output.
 
     // Real-time data settings
     bool realTimeDataSaver = false; ///< Flag to indicate if real-time data saving is enabled.
@@ -717,6 +720,7 @@ private:
                      const QStringList& primaryDict,
                      const QStringList& englishDict,
                      const QString& transcriptLang);
+    QString REPLACED_TEXT_DICTONARY;
 
 
 public:

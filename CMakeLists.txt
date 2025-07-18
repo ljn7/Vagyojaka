@@ -69,6 +69,9 @@ file(GLOB PROJECT_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 file(GLOB PROJECT_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 file(GLOB PROJECT_RESOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc")
 
+file(GLOB UTILS_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/utils/*.cpp")
+file(GLOB UTILS_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/utils/*.h")
+
 # set(GUI_TYPE)
 # if (WIN32)
 #     set(GUI_TYPE WIN32)
@@ -105,6 +108,10 @@ add_executable(
         ${GIT_FORMS}
         ${GIT_SOURCE}
         ${GIT_HEADER}
+
+        ${UTILS_SOURCE}
+        ${UTILS_HEADER}
+
         tts/ttsannotator.h tts/ttsannotator.cpp tts/ttsannotator.ui
         tts/ttsrow.h
         audioplayer/audioplayerwidget.h

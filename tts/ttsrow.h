@@ -9,6 +9,9 @@ struct TTSRow {
     QString tag;
     int sound_quality;
     int asr_quality;
+    bool wordsEdited = false;
+    bool pronunciationEdited = false;
+    bool tagEdited = false;
 };
 
 #endif // TTSBLOCK_H

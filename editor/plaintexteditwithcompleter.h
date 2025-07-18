@@ -18,12 +18,12 @@ signals:
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
+    QCompleter* m_transliterationCompleter = nullptr;
 
 private:
     QCompleter* makeCompleter();
     void handleReply();
     void sendRequest(const QString& input, const QString& langCode);
-    QCompleter* m_transliterationCompleter = nullptr;
     void insertTransliterationCompletion(const QString& completion);
 
 

@@ -3,6 +3,7 @@
 #include "ui_ttsannotator.h"
 #include "lazyloadingmodel.h"
 #include "customdelegates.h"
+#include "utils/constants.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QStandardPaths>
@@ -23,8 +24,8 @@ TTSAnnotator::TTSAnnotator(QWidget *parent)
     setDefaultFontOnTableView();
     setupUI();
 
-    QString iniPath = QApplication::applicationDirPath() + "/" + "config.ini";
-    settings = std::make_unique<QSettings>(iniPath, QSettings::IniFormat);
+    // QString iniPath = QApplication::applicationDirPath() + "/" + "config.ini";
+    settings = std::make_unique<QSettings>(Constants::Vagyojaka::CONFIG_INI, QSettings::IniFormat);
 
     this->supportedFormats = {
         "xml Files (*.xml)",
@@ -62,12 +63,14 @@ void TTSAnnotator::setupUI()
     tableView->setItemDelegateForColumn(0, m_audioPlayerDelegate);
     ComboBoxDelegate* soundQualityDelegate = new ComboBoxDelegate(1, 5, SoundQualityColor.darker(105), this);
     ComboBoxDelegate* ttsQualityDelegate = new ComboBoxDelegate(0, 1, TTSQualityColor.darker(105), this);
+    CheckableComboBoxDelegate* checkableComboBoxDelegate = new CheckableComboBoxDelegate({"Tag1", "Tag2", "Tag3"}, this);
 
     // Add TextEditDelegate for text columns
     textDelegate = new TextEditDelegate(font(), this);
-    tableView->setItemDelegateForColumn(1, textDelegate); // Transcript column
+    // tableView->setItemDelegateForColumn(1, textDelegate); // Transcript column
     tableView->setItemDelegateForColumn(2, textDelegate); // Mispronounced words column
-    tableView->setItemDelegateForColumn(3, textDelegate); // Tags column
+    tableView->setItemDelegateForColumn(3, checkableComboBoxDelegate); // Tags column
+
 
     // soundQualityDelegate->
     tableView->setItemDelegateForColumn(4, soundQualityDelegate);
@@ -184,32 +187,58 @@ void TTSAnnotator::parseXML()
     QXmlStreamReader xmlReader(&file);
 
     while (!xmlReader.atEnd() && !xmlReader.hasError()) {
-        if (xmlReader.isStartElement() && xmlReader.name() == QString("row")) {
+        xmlReader.readNext();
+
+        if (xmlReader.isStartElement() && xmlReader.name() == QStringLiteral("row")) {
             TTSRow row;
-            while (!(xmlReader.isEndElement() && xmlReader.name() == QString("row"))) {
+
+            while (!(xmlReader.isEndElement() && xmlReader.name() == QStringLiteral("row"))) {
                 xmlReader.readNext();
+
                 if (xmlReader.isStartElement()) {
-                    QString elementName = QString::fromUtf8(xmlReader.name().toUtf8());
+                    QString elementName = xmlReader.name().toString();
+                    QXmlStreamAttributes attributes = xmlReader.attributes();
+
+                    // Read the text content after the start element
                     xmlReader.readNext();
-                    QString text = QString::fromUtf8(xmlReader.text().toUtf8());
-                    if (elementName == QString("words")) {
+                    QString text = xmlReader.text().toString();
+
+                    if (elementName == "words") {
                         row.words = text;
-                    } else if (elementName == QString("not-pronounced-properly")) {
+                        if (attributes.hasAttribute("isEdited"))
+                            row.wordsEdited = (attributes.value("isEdited").toString() == "1");
+                    } else if (elementName == "not-pronounced-properly") {
                         row.not_pronounced_properly = text;
-                    } else if (elementName == QString("sound-quality")) {
+                        if (attributes.hasAttribute("isEdited"))
+                            row.pronunciationEdited = (attributes.value("isEdited").toString() == "1");
+                    } else if (elementName == "sound-quality") {
                         row.sound_quality = text.toInt();
-                    } else if (elementName == QString("asr-quality")) {
+                    } else if (elementName == "asr-quality") {
                         row.asr_quality = text.toInt();
-                    } else if (elementName == QString("audio-filename")) {
+                    } else if (elementName == "audio-filename") {
                         row.audioFileName = text;
-                    } else if (elementName == QString("tag")) {
+                    } else if (elementName == "tag") {
                         row.tag = text;
+                        if (attributes.hasAttribute("isEdited"))
+                            row.tagEdited = (attributes.value("isEdited").toString() == "1");
                     }
                 }
             }
-            m_model->addRow(row);
+
+            int newRowIndex = m_model->addRow(row);
+
+            m_model->storeOriginalData(newRowIndex, row.words, row.not_pronounced_properly, row.tag);
+
+            if (row.pronunciationEdited) {
+                QModelIndex pronunciationIndex = m_model->index(newRowIndex, 2);
+                m_model->setData(pronunciationIndex, QBrush(Qt::yellow), Qt::BackgroundRole);
+            }
+
+            if (row.tagEdited) {
+                QModelIndex tagIndex = m_model->index(newRowIndex, 3);
+                m_model->setData(tagIndex, QBrush(Qt::yellow), Qt::BackgroundRole);
+            }
         }
-        xmlReader.readNext();
     }
     file.close();
     if (xmlReader.hasError()) {
@@ -252,12 +281,28 @@ void TTSAnnotator::saveToFile(const QString& fileName)
     const auto& rows = m_model->rows();
     for (const auto& row : rows) {
         xmlWriter.writeStartElement("row");
-        xmlWriter.writeTextElement("words", row.words);
-        xmlWriter.writeTextElement("not-pronounced-properly", row.not_pronounced_properly);
+
+        xmlWriter.writeStartElement("words");
+        xmlWriter.writeAttribute("isEdited", row.wordsEdited ? "1" : "0");
+        xmlWriter.writeCharacters(row.words);
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("not-pronounced-properly");
+        xmlWriter.writeAttribute("isEdited", row.pronunciationEdited ? "1" : "0");
+        xmlWriter.writeCharacters(row.not_pronounced_properly);
+        xmlWriter.writeEndElement();
+
         xmlWriter.writeTextElement("sound-quality", QString::number(row.sound_quality));
+
         xmlWriter.writeTextElement("asr-quality", QString::number(row.asr_quality));
+
         xmlWriter.writeTextElement("audio-filename", row.audioFileName);
-        xmlWriter.writeTextElement("tag", row.tag);
+
+        xmlWriter.writeStartElement("tag");
+        xmlWriter.writeAttribute("isEdited", row.tagEdited ? "1" : "0");
+        xmlWriter.writeCharacters(row.tag);
+        xmlWriter.writeEndElement();
+
         xmlWriter.writeEndElement(); // row
     }
 

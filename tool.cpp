@@ -18,6 +18,7 @@
 #include <git/git.h>
 #include "qmediadevices.h"
 #include "qaudiodevice.h"
+#include "utils/constants.h"
 #include <algorithm>
 
 // #include <config/settingsManager.h>
@@ -35,8 +36,8 @@ Tool::Tool(QWidget *parent)
     //     settings.saveActionState(ui->Show_Time_Stamps, "showTimeStamps");
     // });
 
-    QString iniPath = QApplication::applicationDirPath() + "/" + "config.ini";
-    settings = new QSettings(iniPath, QSettings::IniFormat);
+    // QString iniPath = QApplication::applicationDirPath() + "/" + "config.ini";
+    settings = new QSettings(Constants::Vagyojaka::CONFIG_INI, QSettings::IniFormat);
     if(settings->value("showTimeStamps").toString()=="") {
         ui->Show_Time_Stamps->setChecked(true);
     }
@@ -424,11 +425,21 @@ void Tool::setFontForElements()
 
 void Tool::setTransliterationLangCodes()
 {
-    QStringList languages = QString("ENGLISH AMHARIC ARABIC BENGALI CHINESE GREEK GUJARATI HINDI KANNADA MALAYALAM MARATHI NEPALI ORIYA PERSIAN PUNJABI RUSSIAN SANSKRIT SINHALESE SERBIAN TAMIL TELUGU TIGRINYA URDU").split(" ");
-    QStringList langCodes = QString("en am ar bn zh el gu hi kn ml mr ne or fa pa ru sa si sr ta te ti ur").split(" ");
+    // QStringList languages = QString("ENGLISH AMHARIC ARABIC BENGALI CHINESE GREEK GUJARATI HINDI KANNADA MALAYALAM MARATHI NEPALI ORIYA PERSIAN PUNJABI RUSSIAN SANSKRIT SINHALESE SERBIAN TAMIL TELUGU TIGRINYA URDU").split(" ");
+    // QStringList langCodes = QString("en am ar bn zh el gu hi kn ml mr ne or fa pa ru sa si sr ta te ti ur").split(" ");
 
-    for (int i = 0; i < languages.size(); i++)
-        m_transliterationLang.insert(languages[i], langCodes[i]);
+    static const QStringList indianLanguages = QString(
+                                      "Assamese Bengali Bodo Dogri Gujarati Hindi Kannada Kashmiri Konkani Maithili Malayalam "
+                                      "Manipuri Marathi Nepali Odia Punjabi Sanskrit Santhali Sindhi Tamil Telugu Urdu"
+                                      ).split(" ");
+
+    static const QStringList indianLangCodes = QString(
+                                      "NA bn NA NA gu hi kn NA NA NA ml NA mr ne or pa sa NA NA ta te ur"
+                                      ).split(" ");
+
+    for (int i = 0; i < indianLanguages.size(); i++) {
+        m_transliterationLang.insert(indianLanguages[i], indianLangCodes[i]);
+    }
 }
 
 void Tool::transliterationSelected(QAction* action)
@@ -441,7 +452,11 @@ void Tool::transliterationSelected(QAction* action)
 
 
     auto langCode = m_transliterationLang[action->text()];
-    qDebug() << langCode;
+    // qDebug() << langCode;
+    static const QString UnavailableLanguage = "NA";
+    if (langCode == "NA") {
+        langCode = "hi";
+    }
     ui->tableWidget->useTransliteration(true, langCode);
     ui->m_editor->useTransliteration(true, langCode);
 }

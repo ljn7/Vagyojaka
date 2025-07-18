@@ -3,6 +3,7 @@
 #include "qaudiodevice.h"
 #include "qmediametadata.h"
 #include "qmediadevices.h"
+#include "utils/constants.h"
 #include <iostream>
 
 MediaPlayer::MediaPlayer(QWidget *parent)
@@ -22,8 +23,8 @@ MediaPlayer::MediaPlayer(QWidget *parent)
 
         "All Files (*)"
     };
-    QString iniPath = QApplication::applicationDirPath() + "/" + "config.ini";
-    settings = new QSettings(iniPath, QSettings::IniFormat);
+    // QString iniPath = QApplication::applicationDirPath() + "/" + "config.ini";
+    settings = new QSettings(Constants::Vagyojaka::CONFIG_INI, QSettings::IniFormat);
     connect(&m_mediaDevices, &QMediaDevices::audioOutputsChanged, [this]() {
         setDefaultAudioOutputDevice();
     });

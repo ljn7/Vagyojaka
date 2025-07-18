@@ -4,6 +4,12 @@
 
 const int MaxLogLines = 10000;
 
+// Get the application-specific data directory
+static const QString logDirPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + "logs";
+
+// Generate new log file name (once per session)
+static const QString logFilePath = logDirPath + QDir::separator() + "logfile-" + QDateTime::currentDateTime().toString("yyyy-MM-dd_HH-mm-ss") + ".log";
+
 QMutex logMutex;  // Global mutex for thread safety
 
 static const QHash<QtMsgType, QString>& getMsgLevelHash() {
@@ -17,19 +23,13 @@ static const QHash<QtMsgType, QString>& getMsgLevelHash() {
     return hash;
 }
 
-
 void writeLogToFile(const QString &logText) {
-    // Get the application-specific data directory
-    QString logDirPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/logs";
 
     // Ensure the logs directory exists
     QDir dir;
     if (!dir.exists(logDirPath)) {
         dir.mkpath(logDirPath);
     }
-
-    // Generate new log file name (once per session)
-    static QString logFilePath = logDirPath + "/logfile-" + QDateTime::currentDateTime().toString("yyyy-MM-dd_HH-mm-ss") + ".log";
 
     logMutex.lock();  // Lock before accessing the file
 
@@ -53,7 +53,7 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
     QString logText = QString("%1 %2: %3 (%4)").arg(dateTimeText, logLevelName, msg, file);
 
     // Run log writing in a separate thread using QtConcurrent
-    QtConcurrent::run(writeLogToFile, logText);
+    [[maybe_unused]] auto _ = (QtConcurrent::run(writeLogToFile, logText));
 }
 
 int main(int argc, char *argv[])
