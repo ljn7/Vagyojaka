@@ -127,6 +127,22 @@ void AudioPlayerDelegate::setBaseDir(QString pBaseDir)
     }
 }
 
+AudioPlayerWidget* AudioPlayerDelegate::getActivePlayer(const QModelIndex& index) const {
+    if (m_activeEditors.contains(index)) {
+        return m_activeEditors[index];
+    }
+    return nullptr;
+}
+
+void AudioPlayerDelegate::stopActivePlayer(AudioPlayerWidget* currentPlayer) {
+    for (AudioPlayerWidget* player : m_activeEditors) {
+        if (player && player != currentPlayer && player->isPlaying() ) {
+            player->stop();
+            break;
+        }
+    }
+}
+
 ComboBoxDelegate::ComboBoxDelegate(int min, int max, const QColor& color, QObject* parent)
     : QStyledItemDelegate(parent), m_min(min), m_max(max), m_color(color)
 {
@@ -244,7 +260,7 @@ QWidget *TextEditDelegate::createEditor(QWidget *parent,
     if (!editor)
         return nullptr;
 
-    if (index.column() == 2) {
+    if (index.column() == 2 || index.column() == 4) {
         QVariant variant = index.model()->data(index, Qt::UserRole + 4);
         QVariantMap dataMap = variant.toMap();
 
@@ -255,7 +271,7 @@ QWidget *TextEditDelegate::createEditor(QWidget *parent,
     }
 
     editor->document()->setDefaultFont(m_font);
-    if (index.column() == 1) {
+    if (index.column() == 1 && index.column() == 5) {
         editor->setReadOnly(true);
     }
     // Set center alignment through the document's text option

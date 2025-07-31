@@ -885,6 +885,7 @@
     </property>
     <addaction name="actionOpen"/>
     <addaction name="actionFind_and_Replace"/>
+    <addaction name="validation_Auto_save"/>
    </widget>
    <widget class="QMenu" name="menuTransliteration">
     <property name="title">
@@ -1244,7 +1245,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Version 5.6.0</string>
+    <string>Version 5.6.7-aws</string>
    </property>
    <property name="toolTip">
     <string>Version</string>
@@ -1321,6 +1322,17 @@
   <action name="actionFind_and_Replace">
    <property name="text">
     <string>Find and Replace</string>
+   </property>
+  </action>
+  <action name="validation_Auto_save">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Auto save</string>
+   </property>
+   <property name="whatsThis">
+    <string extracomment="Automatically saves every 10 secs"/>
    </property>
   </action>
  </widget>

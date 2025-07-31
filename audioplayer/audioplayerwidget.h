@@ -19,6 +19,8 @@ public:
 
     QMediaPlayer::PlaybackState state() const;
     QString getAudioFileName(bool includeExtension = true) const;
+    bool isPlaying() const;
+    void togglePlayPause();
 
 public slots:
     void playClicked();

@@ -1,6 +1,34 @@
 #include "lazyloadingmodel.h"
 #include "qcolor.h"
 #include "tts/ttsannotator.h"
+#include "utils/constants.h"
+
+
+class LazyLoadingModel::EditCommand : public QUndoCommand {
+public:
+    EditCommand(LazyLoadingModel* model, const QModelIndex& index,
+                const QVariant& oldValue, const QVariant& newValue)
+        : m_model(model), m_index(index),
+        m_oldValue(oldValue), m_newValue(newValue) {}
+
+    void undo() override {
+        m_model->m_isUndoing = true;
+        m_model->setData(m_index, m_oldValue, Qt::EditRole);
+        m_model->m_isUndoing = false;
+    }
+
+    void redo() override {
+        m_model->m_isUndoing = true;
+        m_model->setData(m_index, m_newValue, Qt::EditRole);
+        m_model->m_isUndoing = false;
+    }
+
+private:
+    LazyLoadingModel* m_model;
+    QPersistentModelIndex m_index;
+    QVariant m_oldValue;
+    QVariant m_newValue;
+};
 
 LazyLoadingModel::LazyLoadingModel(QObject* parent)
     : QAbstractTableModel(parent)
@@ -10,10 +38,10 @@ LazyLoadingModel::LazyLoadingModel(QObject* parent)
 
 void LazyLoadingModel::init() {
     emptyOriginalData.words = "";
-    emptyOriginalData.notPronouncedProperly = "";
     emptyOriginalData.tags = "";
+    emptyOriginalData.comments = "";
 
-    chkbxDropdownOpts = QStringList({"Number", "Foreign Language", "Male", "Female", "Multi"});
+    chkbxDropdownOpts = QStringList({"Start Not Matching", "End Not Matching", "Resegment", "Divided Audio"});
 }
 int LazyLoadingModel::rowCount(const QModelIndex& parent) const
 {
@@ -38,34 +66,36 @@ QVariant LazyLoadingModel::data(const QModelIndex& index, int role) const
 
     if (role == Qt::BackgroundRole) {
 
-        if (index.column() >= 1 && index.column() <= 3) {
+        if (index.column() >= 0 && index.column() <= 6) {
             if (m_backgroundColors.contains(index)) {
                 return m_backgroundColors[index];
             }
             return QVariant(); // Default background
         }
-        switch (index.column()) {
-            case 4: // Sound Quality column
-                return TTSAnnotator::SoundQualityColor; // Light green
-            case 5: // TTS Quality column
-                return TTSAnnotator::TTSQualityColor; // Light red
-            default:
-                return QVariant(); // Default background
-        }
+        // switch (index.column()) {
+        //     case 4: // Sound Quality column
+        //         return TTSAnnotator::SoundQualityColor; // Light green
+        //     case 5: // TTS Quality column
+        //         return TTSAnnotator::TTSQualityColor; // Light red
+        //     default:
+        //         return QVariant(); // Default background
+        // }
     }
 
     if (role == Qt::DisplayRole || role == Qt::EditRole) {
         switch (index.column()) {
             case 0: return row.audioFileName;
-            case 1: return row.words;
-            case 2: return row.not_pronounced_properly;
-            case 3: return row.tag;
-            case 4: return row.sound_quality;
-            case 5: return row.asr_quality;
+            case 1: return row.hypothesis;
+            case 2: return row.words;
+            case 3: return row.tags;
+            case 4: return row.comments;
+            case 5: return row.wer;
+            // case 4: return row.sound_quality;
+            // case 5: return row.asr_quality;
         }
     }
 
-    if (role == Qt::UserRole + 4  && index.column() == 2) {
+    if (role == Qt::UserRole + 4  && (index.column() == 2 || index.column() == 4)) {
         QVariantMap result;
         result["transliterate"] = transliterate;
         result["transliterateLangCode"] = transliterateLangCode;
@@ -196,17 +226,17 @@ int LazyLoadingModel::calculateColumnEditedWords(int column) const {
         QString currentText;
 
         switch (column) {
-        case 1: // Words column
+        case 2: // Words column
             originalText = original.words;
             currentText = current.words;
             break;
-        case 2: // Not pronounced properly column
-            originalText = original.notPronouncedProperly;
-            currentText = current.not_pronounced_properly;
-            break;
-        case 3: // Tags column
+        case 3: // Not pronounced properly column
             originalText = original.tags;
-            currentText = current.tag;
+            currentText = current.tags;
+            break;
+        case 4: // Tags column
+            originalText = original.comments;
+            currentText = current.comments;
             break;
         default:
             continue;
@@ -219,12 +249,12 @@ int LazyLoadingModel::calculateColumnEditedWords(int column) const {
 }
 
 void LazyLoadingModel::storeOriginalData(int row, const QString& words,
-                                         const QString& notPronounced,
-                                         const QString& tags) {
+                                         const QString& tags,
+                                         const QString& comments) {
     OriginalData data;
     data.words = words;
-    data.notPronouncedProperly = notPronounced;
     data.tags = tags;
+    data.comments = comments;
     m_originalData[row] = data;
 }
 
@@ -266,9 +296,9 @@ void LazyLoadingModel::updateEditHistory(int row, int column, const QString& new
     QString originalText;
 
     switch(column) {
-        case 1: originalText = originalData.words; break;
-        case 2: originalText = originalData.notPronouncedProperly; break;
+        case 2: originalText = originalData.words; break;
         case 3: originalText = originalData.tags; break;
+        case 4: originalText = originalData.comments; break;
         default: return;
     }
 
@@ -294,9 +324,9 @@ void LazyLoadingModel::updateEditHistory(int row, int column, const QString& new
 bool LazyLoadingModel::isRevertedToOriginal(int row, int column, const QString& newText) {
     const OriginalData originalData = getOriginalData(row);
     switch(column) {
-        case 1: return newText == originalData.words;
-        case 2: return newText == originalData.notPronouncedProperly;
+        case 2: return newText == originalData.words;
         case 3: return newText == originalData.tags;
+        case 4: return newText == originalData.comments;
         default: return false;
     }
 }
@@ -315,42 +345,58 @@ bool LazyLoadingModel::setData(const QModelIndex& index, const QVariant& value, 
     TTSRow& ttsRow = m_rows[index.row()];
 
     // Handle the isEdited flags
-    if (role == Qt::UserRole + 1) {
+    if (role == Qt::UserRole + 2) {
         ttsRow.wordsEdited = value.toBool();
         emit dataChanged(index, index, {role});
         return true;
     }
-    if (role == Qt::UserRole + 2) {
-        ttsRow.pronunciationEdited = value.toBool();
+    if (role == Qt::UserRole + 3) {
+        ttsRow.tagsEdited = value.toBool();
         emit dataChanged(index, index, {role});
         return true;
     }
-    if (role == Qt::UserRole + 3) {
-        ttsRow.tagEdited = value.toBool();
+    if (role == Qt::UserRole + 4) {
+        ttsRow.commentsEdited = value.toBool();
         emit dataChanged(index, index, {role});
         return true;
     }
 
     if (role == Qt::EditRole) {
+
+        TTSRow& ttsRow = m_rows[index.row()];
+        QVariant oldValue;
+
+        switch (index.column()) {
+        case 2: oldValue = ttsRow.words; break;
+        case 3: oldValue = ttsRow.tags; break;
+        case 4: oldValue = ttsRow.comments; break;
+        default: return false;
+        }
+
+        // Create undo command if not in undo/redo operation
+        if (!m_isUndoing && m_undoStack) {
+            m_undoStack->push(new EditCommand(this, index, oldValue, value));
+        }
+
         QString newText = value.toString().trimmed();
         int row = index.row();
         int column = index.column();
 
-        if (column == 1) {
+        if (column <= 1 || column == 5) {
             return false;
         }
 
         // Only process text columns
-        if (column >= 2 && column <= 3) {
+        if (column >= 2 && column <= 4) {
             QString delimiter = (column == 3) ? ";" : " ";
             const OriginalData originalData = getOriginalData(row);
             // Get the appropriate original text based on column
             QString originalText;
 
             switch (column) {
-                case 1: originalText = originalData.words; break;
-                case 2: originalText = originalData.notPronouncedProperly; break;
+                case 2: originalText = originalData.words; break;
                 case 3: originalText = originalData.tags; break;
+                case 4: originalText = originalData.comments; break;
                 default: return false;
             }
             // Calculate word difference before updating the model
@@ -360,41 +406,51 @@ bool LazyLoadingModel::setData(const QModelIndex& index, const QVariant& value, 
             int wordDiff = 0;
             // Update edited flags and background colors
             if (isReverted) {
-                setData(index, QVariant(), Qt::BackgroundRole);
+                if (row < m_rows.size() && m_rows[row].markAsHighWER) {
+                    setData(index, Constants::Brush::Azalea, Qt::BackgroundRole);
+                } else {
+                    setData(index, Constants::Brush::Peppermint, Qt::BackgroundRole);
+                }
                 setData(index, false, Qt::UserRole + column);
 
                 // Signal negative word count to remove previous edits
                 switch (column) {
-                case 1:
+                case 2:
                     wordDiff = editedCounts[row].editedWords;
                     editedCounts[row].editedWords = 0;
                     if (wordDiff > 0) {
                         emit transcriptEditedWordsCount(-wordDiff);
                     }
                     break;
-                case 2:
-                    wordDiff = editedCounts[row].editedNotPronouncedProperlyWords;
-                    editedCounts[row].editedNotPronouncedProperlyWords = 0;
-                    if (wordDiff > 0) {
-                        emit mispronouncedEditedWordsCount(-wordDiff);
-                    }
-                    break;
                 case 3:
-                    wordDiff = editedCounts[row].edittedTaggedWords;
-                    editedCounts[row].edittedTaggedWords = 0;
+                    wordDiff = editedCounts[row].editedTaggedWords;
+                    editedCounts[row].editedTaggedWords = 0;
                     if (wordDiff > 0) {
                         emit taggedEditedWordsCount(-wordDiff);
+                    }
+                    break;
+                case 4:
+                    wordDiff = editedCounts[row].editedComments;
+                    editedCounts[row].editedComments = 0;
+                    if (wordDiff > 0) {
+                        emit commentsEditedWordsCount(-wordDiff);
                     }
                     break;
                 }
             } else {
                 wordDiff = calculateChangedWords(newText, originalText, delimiter);
-                setData(index, QBrush(Qt::yellow), Qt::BackgroundRole);
+                QString currentColor = m_backgroundColors.value(index, QBrush()).color().name();
+
+                if (currentColor == Constants::Colors::Azalea.name() || ttsRow.markAsHighWER >= 0.1) {
+                    setData(index, Constants::Brush::Froly, Qt::BackgroundRole);
+                } else {
+                    setData(index, Constants::Brush::Apple, Qt::BackgroundRole);
+                }
                 setData(index, true, Qt::UserRole + column);
 
                 // Signal positive word count for new edits
                 switch (column) {
-                case 1:
+                case 2:
                     if (editedCounts[row].editedWords != wordDiff)
                     {
                         int diff = wordDiff - editedCounts[row].editedWords;
@@ -402,18 +458,18 @@ bool LazyLoadingModel::setData(const QModelIndex& index, const QVariant& value, 
                         emit transcriptEditedWordsCount(diff);
                     }
                     break;
-                case 2:
-                    if (editedCounts[row].editedNotPronouncedProperlyWords != wordDiff) {
-                        int diff = wordDiff - editedCounts[row].editedNotPronouncedProperlyWords;
-                        editedCounts[row].editedNotPronouncedProperlyWords = wordDiff;
-                        emit mispronouncedEditedWordsCount(diff);
+                case 3:
+                    if (editedCounts[row].editedTaggedWords != wordDiff) {
+                        int diff = wordDiff - editedCounts[row].editedTaggedWords;
+                        editedCounts[row].editedTaggedWords = wordDiff;
+                        emit taggedEditedWordsCount(diff);
                     }
                     break;
-                case 3:
-                    if (editedCounts[row].edittedTaggedWords != wordDiff) {
-                        int diff = wordDiff - editedCounts[row].edittedTaggedWords;
-                        editedCounts[row].edittedTaggedWords = wordDiff;
-                        emit taggedEditedWordsCount(diff);
+                case 4:
+                    if (editedCounts[row].editedComments != wordDiff) {
+                        int diff = wordDiff - editedCounts[row].editedComments;
+                        editedCounts[row].editedComments = wordDiff;
+                        emit commentsEditedWordsCount(diff);
                     }
                     break;
                 }
@@ -421,20 +477,14 @@ bool LazyLoadingModel::setData(const QModelIndex& index, const QVariant& value, 
         }
         // Update the actual data in the model
         switch (index.column()) {
-        case 1:
+        case 2:
             ttsRow.words = newText;
             break;
-        case 2:
-            ttsRow.not_pronounced_properly = newText;
-            break;
         case 3:
-            ttsRow.tag = newText;
+            ttsRow.tags = newText;
             break;
         case 4:
-            ttsRow.sound_quality = value.toInt();
-            break;
-        case 5:
-            ttsRow.asr_quality = value.toInt();
+            ttsRow.comments = newText;
             break;
         default:
             return false;
@@ -467,4 +517,8 @@ int LazyLoadingModel::getTotalEditedWords(int column) const {
 
 QStringList &LazyLoadingModel::getDropdownCheckboxOpts()  {
     return chkbxDropdownOpts;
+}
+
+void LazyLoadingModel::setUndoStack(QUndoStack* stack) {
+    m_undoStack = stack;
 }

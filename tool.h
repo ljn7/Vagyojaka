@@ -381,6 +381,8 @@ private slots:
 
     void on_actionFind_and_Replace_triggered();
 
+    void closeEvent(QCloseEvent *event) override;
+
 private:
 
     /*!
@@ -540,4 +542,6 @@ private:
      * This variable provides access to changing speed of seeking.
     */
     int64_t seekSpeed = 0;
+
+    bool hasUnsavedChanges() const;
 };

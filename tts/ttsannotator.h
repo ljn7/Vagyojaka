@@ -2,10 +2,12 @@
 
 #include "qitemselectionmodel.h"
 #include "tts/customdelegates.h"
+#include "tts/lazyloadingmodel.h"
 #include <QWidget>
 #include <QUrl>
 #include <QSettings>
 #include <memory>
+#include <qundostack.h>
 
 namespace Ui {
 class TTSAnnotator;
@@ -29,6 +31,12 @@ public:
     TextEditDelegate* textDelegate = nullptr;
     void openFindReplaceDialog();
     void useTransliteration(bool flag, const QString& langCode = "en");
+    QUndoStack* undoStack() const { return m_undoStack.get(); }
+    void undo();
+    void redo();
+    bool hasUnsavedChanges() const { return m_undoStack && !m_undoStack->isClean(); }
+    void save();
+    void useAutoSave(bool value) {m_autoSave = value;}
 
 private slots:
     void on_saveAsTableButton_clicked();
@@ -40,6 +48,8 @@ private slots:
     void onCellClicked(const QModelIndex &index);
     void onItemSelectionChanged();
     void onHeaderResized(int logicalIndex, int oldSize, int newSize);
+    void onUndo();
+    void onRedo();
 
 protected:
     // void keyPressEvent(QKeyEvent* event) override;
@@ -47,12 +57,14 @@ protected:
 private:
     void parseXML();
     void setupUI();
-    void save();
     void saveAs();
     void saveToFile(const QString& fileName);
     void insertRow();
     void deleteRow();
     void setDefaultFontOnTableView();
+    void setupShortcuts();
+    void toggleCurrentAudioPlayer();
+    std::unique_ptr<QUndoStack> m_undoStack;
 
     Ui::TTSAnnotator* ui;
     std::unique_ptr<LazyLoadingModel> m_model;
@@ -61,4 +73,7 @@ private:
     std::unique_ptr<QSettings> settings = nullptr;
     QStringList supportedFormats;
     AudioPlayerDelegate* m_audioPlayerDelegate = nullptr;
+    bool m_autoSave {false};
+    int m_saveInterval {10};
+    QTimer* m_saveTimer = nullptr;
 };

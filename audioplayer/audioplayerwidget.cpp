@@ -177,3 +177,11 @@ void AudioPlayerWidget::stop() {
         m_mediaPlayer->stop();
     }
 }
+
+bool AudioPlayerWidget::isPlaying() const {
+    return m_playerState == QMediaPlayer::PlayingState;
+}
+
+void AudioPlayerWidget::togglePlayPause() {
+    playClicked();
+}

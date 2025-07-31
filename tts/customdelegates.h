@@ -25,6 +25,8 @@ public:
     void stopAllPlayers() const;
     void cleanupUnusedEditors() const;
     void setBaseDir(QString pBaseDir);
+    AudioPlayerWidget* getActivePlayer(const QModelIndex& index) const;
+    void stopActivePlayer(AudioPlayerWidget* currentPlayer);
 
 private:
     QString m_baseDir;

@@ -1,4 +1,5 @@
 #include "ttsannotator.h"
+#include "audioplayer/audioplayerwidget.h"
 #include "tts/utilities/findandreplacedialog.h"
 #include "ui_ttsannotator.h"
 #include "lazyloadingmodel.h"
@@ -9,6 +10,8 @@
 #include <QStandardPaths>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
+#include <qshortcut.h>
+#include <qtimer.h>
 
 const QColor TTSAnnotator::SoundQualityColor = QColor(230, 255, 230);
 const QColor TTSAnnotator::TTSQualityColor = QColor(255, 230, 230);
@@ -17,11 +20,14 @@ TTSAnnotator::TTSAnnotator(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::TTSAnnotator)
     , m_model(std::make_unique<LazyLoadingModel>())
+    , m_undoStack(std::make_unique<QUndoStack>(this))
+    , m_saveTimer(new QTimer(this))
 {
     ui->setupUi(this);
     tableView = ui->tableView;
     tableView->setModel(m_model.get());
     setDefaultFontOnTableView();
+    tableView->installEventFilter(this);
     setupUI();
 
     // QString iniPath = QApplication::applicationDirPath() + "/" + "config.ini";
@@ -31,19 +37,23 @@ TTSAnnotator::TTSAnnotator(QWidget *parent)
         "xml Files (*.xml)",
         "All Files (*)"
     };
+    m_model->setUndoStack(m_undoStack.get());
+    setupShortcuts();
 }
 
 TTSAnnotator::~TTSAnnotator() = default;
 
 void TTSAnnotator::onSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
-    for (const QModelIndex &index : deselected.indexes()) {
-        if (index.column() == 0) { // Assuming audio player is in the first column
+    const auto &deselectedIndexes = deselected.indexes();
+    for (const QModelIndex &index : deselectedIndexes) {
+        if (index.column() == 0) {
             tableView->closePersistentEditor(index);
         }
     }
-    for (const QModelIndex &index : selected.indexes()) {
-        if (index.column() == 0) { // Assuming audio player is in the first column
+    const auto &selectedIndexes = selected.indexes();
+    for (const QModelIndex &index : selectedIndexes) {
+        if (index.column() == 0) {
             tableView->openPersistentEditor(index);
         }
     }
@@ -51,9 +61,10 @@ void TTSAnnotator::onSelectionChanged(const QItemSelection &selected, const QIte
 
 void TTSAnnotator::setupUI()
 {
+    tableView->setFocusPolicy(Qt::StrongFocus);
     // Set headers for the model
     m_model->setHorizontalHeaderLabels({
-        "Audios", "Transcript", "Mispronounced words", "Tags", "Sound Quality", "ASR Quality"
+        "Audios", "Hypothesis", "Transcript", "Tags", "Comments", "WER"/*, "Sound Quality", "ASR Quality"*/
     });
 
     // Set up delegates
@@ -61,20 +72,20 @@ void TTSAnnotator::setupUI()
         m_audioPlayerDelegate = new AudioPlayerDelegate(xmlDirectory, this);
     }
     tableView->setItemDelegateForColumn(0, m_audioPlayerDelegate);
-    ComboBoxDelegate* soundQualityDelegate = new ComboBoxDelegate(1, 5, SoundQualityColor.darker(105), this);
-    ComboBoxDelegate* ttsQualityDelegate = new ComboBoxDelegate(0, 1, TTSQualityColor.darker(105), this);
-    CheckableComboBoxDelegate* checkableComboBoxDelegate = new CheckableComboBoxDelegate({"Tag1", "Tag2", "Tag3"}, this);
+    // ComboBoxDelegate* soundQualityDelegate = new ComboBoxDelegate(1, 5, SoundQualityColor.darker(105), this);
+    // ComboBoxDelegate* ttsQualityDelegate = new ComboBoxDelegate(0, 1, TTSQualityColor.darker(105), this);
+    CheckableComboBoxDelegate* checkableComboBoxDelegate = new CheckableComboBoxDelegate({"Start Not Matching", "End Not Matching", "Resegment", "Divided Audio"}, this);
 
     // Add TextEditDelegate for text columns
     textDelegate = new TextEditDelegate(font(), this);
-    // tableView->setItemDelegateForColumn(1, textDelegate); // Transcript column
-    tableView->setItemDelegateForColumn(2, textDelegate); // Mispronounced words column
+    tableView->setItemDelegateForColumn(1, textDelegate); // Hypothesis column
+    tableView->setItemDelegateForColumn(2, textDelegate); // Transcript column
     tableView->setItemDelegateForColumn(3, checkableComboBoxDelegate); // Tags column
-
+    tableView->setItemDelegateForColumn(4, textDelegate); // Comments column
 
     // soundQualityDelegate->
-    tableView->setItemDelegateForColumn(4, soundQualityDelegate);
-    tableView->setItemDelegateForColumn(5, ttsQualityDelegate);
+    // tableView->setItemDelegateForColumn(4, soundQualityDelegate);
+    // tableView->setItemDelegateForColumn(5, ttsQualityDelegate);
 
     // Set up table view properties
     tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -114,12 +125,6 @@ void TTSAnnotator::setupUI()
     // connect(tableView->horizontalHeader(), &QHeaderView::sectionResized,
     //         this, &TTSAnnotator::onHeaderResized);
 
-    // Set up button connections
-    // connect(ui->InsertRowButton, &QPushButton::clicked, this, &TTSAnnotator::insertRow);
-    // connect(ui->deleteRowButton, &QPushButton::clicked, this, &TTSAnnotator::deleteRow);
-    // connect(ui->saveAsTableButton, &QPushButton::clicked, this, &TTSAnnotator::saveAs);
-    // connect(ui->saveTableButton, &QPushButton::clicked, this, &TTSAnnotator::save);
-
     // Set initial focus
     tableView->setFocus();
 
@@ -129,6 +134,11 @@ void TTSAnnotator::setupUI()
     connect(tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &TTSAnnotator::onItemSelectionChanged);
 
+    connect(m_saveTimer, &QTimer::timeout, this, [this]() {
+        if (m_autoSave && fileUrl.isValid())
+            save();
+    });
+    m_saveTimer->start(m_saveInterval * 1000);
 }
 
 void TTSAnnotator::onHeaderResized(int logicalIndex, int oldSize, int newSize)
@@ -142,6 +152,7 @@ void TTSAnnotator::onHeaderResized(int logicalIndex, int oldSize, int newSize)
 void TTSAnnotator::onItemSelectionChanged()
 {
     tableView->viewport()->update();
+    tableView->setFocus();
 }
 
 void TTSAnnotator::openTTSTranscript()
@@ -173,6 +184,8 @@ void TTSAnnotator::openTTSTranscript()
         QFileInfo filedir(fileUrl.toLocalFile());
         QString dirInString = filedir.dir().path();
         settings->setValue("annotatorTranscriptDir", dirInString);
+        // Strech the columns to fit content
+        tableView->resizeColumnsToContents();
     }
 }
 
@@ -207,43 +220,75 @@ void TTSAnnotator::parseXML()
                         row.words = text;
                         if (attributes.hasAttribute("isEdited"))
                             row.wordsEdited = (attributes.value("isEdited").toString() == "1");
-                    } else if (elementName == "not-pronounced-properly") {
-                        row.not_pronounced_properly = text;
+                    } else if (elementName == "comments") {
+                        row.comments = text;
                         if (attributes.hasAttribute("isEdited"))
-                            row.pronunciationEdited = (attributes.value("isEdited").toString() == "1");
-                    } else if (elementName == "sound-quality") {
-                        row.sound_quality = text.toInt();
-                    } else if (elementName == "asr-quality") {
-                        row.asr_quality = text.toInt();
+                            row.commentsEdited = (attributes.value("isEdited").toString() == "1");
                     } else if (elementName == "audio-filename") {
                         row.audioFileName = text;
                     } else if (elementName == "tag") {
-                        row.tag = text;
+                        row.tags = text;
                         if (attributes.hasAttribute("isEdited"))
-                            row.tagEdited = (attributes.value("isEdited").toString() == "1");
+                            row.tagsEdited = (attributes.value("isEdited").toString() == "1");
+                    } else if (elementName == "wer") {
+                        row.wer = text;
+                        bool ok = false;
+                        double werValue = text.toDouble(&ok);
+                        if (ok && werValue >= 0.1) {
+                            row.markAsHighWER = true;
+                        }
+                    } else if (elementName == "hypothesis") {
+                        row.hypothesis = text;
                     }
                 }
             }
 
             int newRowIndex = m_model->addRow(row);
 
-            m_model->storeOriginalData(newRowIndex, row.words, row.not_pronounced_properly, row.tag);
+            m_model->storeOriginalData(newRowIndex, row.words, row.tags, row.comments);
 
-            if (row.pronunciationEdited) {
-                QModelIndex pronunciationIndex = m_model->index(newRowIndex, 2);
-                m_model->setData(pronunciationIndex, QBrush(Qt::yellow), Qt::BackgroundRole);
+            for (int col = 0; col < m_model->columnCount(); ++col) {
+                QModelIndex index = m_model->index(newRowIndex, col);
+                m_model->setData(index, Constants::Brush::Peppermint, Qt::BackgroundRole);
             }
 
-            if (row.tagEdited) {
-                QModelIndex tagIndex = m_model->index(newRowIndex, 3);
-                m_model->setData(tagIndex, QBrush(Qt::yellow), Qt::BackgroundRole);
+            const auto& yellowBrush = Constants::Brush::Yellow;
+            const auto& peppermintBursh = Constants::Brush::Peppermint;
+            const auto& appleBrush = Constants::Brush::Apple;
+            const auto& azelea = Constants::Brush::Azalea;
+            const auto& froly = Constants::Brush::Froly;
+
+            QBrush brush = appleBrush;
+            if (row.markAsHighWER) {
+                for (int col = 0; col < m_model->columnCount(); ++col) {
+                    QModelIndex index = m_model->index(newRowIndex, col);
+                    m_model->setData(index, azelea, Qt::BackgroundRole);
+                }
+                brush = froly;
             }
+
+            if (row.wordsEdited) {
+                QModelIndex wordsIndex = m_model->index(newRowIndex, 2);
+                m_model->setData(wordsIndex, brush, Qt::BackgroundRole);
+            }
+
+            if (row.tagsEdited) {
+                QModelIndex tagsIndex = m_model->index(newRowIndex, 3);
+                m_model->setData(tagsIndex, brush, Qt::BackgroundRole);
+            }
+
+            if (row.commentsEdited) {
+                QModelIndex commentsIndex = m_model->index(newRowIndex, 4);
+                m_model->setData(commentsIndex, brush, Qt::BackgroundRole);
+            }
+
         }
     }
     file.close();
     if (xmlReader.hasError()) {
         QMessageBox::warning(this, tr("XML Error"), tr("Error parsing XML: %1").arg(xmlReader.errorString()));
     }
+    m_undoStack->clear();
 }
 
 void TTSAnnotator::save()
@@ -282,26 +327,26 @@ void TTSAnnotator::saveToFile(const QString& fileName)
     for (const auto& row : rows) {
         xmlWriter.writeStartElement("row");
 
+        xmlWriter.writeTextElement("hypothesis", row.hypothesis);
+
         xmlWriter.writeStartElement("words");
         xmlWriter.writeAttribute("isEdited", row.wordsEdited ? "1" : "0");
         xmlWriter.writeCharacters(row.words);
         xmlWriter.writeEndElement();
 
-        xmlWriter.writeStartElement("not-pronounced-properly");
-        xmlWriter.writeAttribute("isEdited", row.pronunciationEdited ? "1" : "0");
-        xmlWriter.writeCharacters(row.not_pronounced_properly);
-        xmlWriter.writeEndElement();
-
-        xmlWriter.writeTextElement("sound-quality", QString::number(row.sound_quality));
-
-        xmlWriter.writeTextElement("asr-quality", QString::number(row.asr_quality));
-
         xmlWriter.writeTextElement("audio-filename", row.audioFileName);
 
         xmlWriter.writeStartElement("tag");
-        xmlWriter.writeAttribute("isEdited", row.tagEdited ? "1" : "0");
-        xmlWriter.writeCharacters(row.tag);
+        xmlWriter.writeAttribute("isEdited", row.tagsEdited ? "1" : "0");
+        xmlWriter.writeCharacters(row.tags);
         xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("comments");
+        xmlWriter.writeAttribute("isEdited", row.commentsEdited ? "1" : "0");
+        xmlWriter.writeCharacters(row.comments);
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeTextElement("wer", row.wer);
 
         xmlWriter.writeEndElement(); // row
     }
@@ -313,9 +358,10 @@ void TTSAnnotator::saveToFile(const QString& fileName)
 
     if (file.error() != QFile::NoError) {
         QMessageBox::warning(this, tr("Save Error"), tr("Error occurred while saving the file: %1").arg(file.errorString()));
-    } else {
+    } else if (!m_autoSave) {
         QMessageBox::information(this, tr("Save Successful"), tr("File saved successfully."));
     }
+    m_undoStack->setClean();
 }
 
 void TTSAnnotator::insertRow()
@@ -358,9 +404,10 @@ void TTSAnnotator::on_actionOpen_triggered()
 
 void TTSAnnotator::onCellClicked(const QModelIndex &index)
 {
-    if (index.column() == 0) {  // Assuming audio player is in the first column
+    if (index.column() == 0) {
         tableView->openPersistentEditor(index);
     }
+    tableView->setFocus();
 }
 
 void TTSAnnotator::openFindReplaceDialog()
@@ -404,4 +451,48 @@ void TTSAnnotator::setDefaultFontOnTableView()
     // tableView->setFont(defaultFont);
 
     // tableView->resizeRowsToContents();
+}
+
+void TTSAnnotator::setupShortcuts() {
+    QShortcut* playShortcut = new QShortcut(QKeySequence(Qt::SHIFT | Qt::Key_Space), this);
+    connect(playShortcut, &QShortcut::activated, this, &TTSAnnotator::toggleCurrentAudioPlayer);\
+
+    QShortcut* undoShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Z), this);
+    undoShortcut->setContext(Qt::WidgetWithChildrenShortcut);
+    connect(undoShortcut, &QShortcut::activated, this, &TTSAnnotator::onUndo);
+
+    QShortcut* redoShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Y), this);
+    redoShortcut->setContext(Qt::WidgetWithChildrenShortcut);
+    connect(redoShortcut, &QShortcut::activated, this, &TTSAnnotator::onRedo);
+}
+
+void TTSAnnotator::toggleCurrentAudioPlayer() {
+    QModelIndex current = tableView->currentIndex();
+    if (!current.isValid()) return;
+
+    QModelIndex audioIndex = current.siblingAtColumn(0);
+    tableView->openPersistentEditor(audioIndex);
+
+    if (AudioPlayerDelegate* delegate = qobject_cast<AudioPlayerDelegate*>(tableView->itemDelegateForColumn(0))) {
+        if (AudioPlayerWidget* player = delegate->getActivePlayer(audioIndex)) {
+            delegate->stopActivePlayer(player);
+            player->togglePlayPause();
+        }
+    }
+}
+
+void TTSAnnotator::undo() {
+    m_undoStack->undo();
+}
+
+void TTSAnnotator::redo() {
+    m_undoStack->redo();
+}
+
+void TTSAnnotator::onUndo() {
+    undo();
+}
+
+void TTSAnnotator::onRedo() {
+    redo();
 }

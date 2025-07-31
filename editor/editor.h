@@ -695,7 +695,7 @@ private:
 
     // Auto-saving configuration
     QTimer* m_saveTimer = nullptr; ///< Timer for managing save intervals.
-    int m_saveInterval{20}; ///< Interval in seconds for auto-saving documents.
+    int m_saveInterval{10}; ///< Interval in seconds for auto-saving documents.
 
     // Clipboard management
     QString APPDATA_BASE_DIR = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -721,6 +721,7 @@ private:
                      const QStringList& englishDict,
                      const QString& transcriptLang);
     QString REPLACED_TEXT_DICTONARY;
+    bool m_isModified = false;
 
 
 public:
@@ -730,6 +731,8 @@ public:
     // Q_INVOKABLE void processNextTask();
     // Q_INVOKABLE void processContentChange(int position, int charsRemoved, int charsAdded, int currentBlockNumber, int blockCount,
     //                           block currentBlockFromEditor, block currentBlockFromData);
+    bool isModified() const { return m_isModified; }
+    void setModified(bool modified) { m_isModified = modified; }
 };
 
 

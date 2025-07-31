@@ -281,7 +281,7 @@ Tool::Tool(QWidget *parent)
     // tableWidget = ui->tableWidget;
     connect(ui->tabWidget, &QTabWidget::currentChanged, this, &Tool::onTabChanged);
     connect(player, &MediaPlayer::sendMediaUrl, ui->widget, &AudioWaveForm::setMediaUrl);
-
+    connect(ui->validation_Auto_save, &QAction::triggered, ui->tableWidget, [this](){ui->tableWidget->useAutoSave(ui->validation_Auto_save->isChecked());});
 }
 
 Tool::~Tool()
@@ -923,3 +923,39 @@ void Tool::on_actionFind_and_Replace_triggered()
     ui->tableWidget->openFindReplaceDialog();
 }
 
+bool Tool::hasUnsavedChanges() const
+{
+    // Check all editors
+    return ui->m_editor->isModified() ||
+           ui->m_editor_2->isModified() ||
+           ui->m_editor_3->isModified() ||
+           ui->tableWidget->hasUnsavedChanges();
+}
+
+void Tool::closeEvent(QCloseEvent *event)
+{
+    if (hasUnsavedChanges()) {
+        QMessageBox::StandardButton reply = QMessageBox::question(
+            this,
+            "Unsaved Changes",
+            "You have unsaved changes. Do you want to save before closing?",
+            QMessageBox::SaveAll | QMessageBox::Discard | QMessageBox::Cancel
+            );
+
+        if (reply == QMessageBox::SaveAll) {
+            // Save all modified components
+            if (ui->m_editor->isModified()) ui->m_editor->transcriptSave();
+            if (ui->m_editor_2->isModified()) ui->m_editor_2->transcriptSave();
+            if (ui->m_editor_3->isModified()) ui->m_editor_3->transcriptSave();
+            if (ui->tableWidget->hasUnsavedChanges()) ui->tableWidget->save();
+            event->accept();
+        }
+        else if (reply == QMessageBox::Discard) {
+            event->accept();
+        } else {
+            event->ignore();
+        }
+    } else {
+        event->accept();
+    }
+}

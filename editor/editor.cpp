@@ -788,6 +788,7 @@ void Editor::transcriptOpen()
     if (fileDialog.exec() == QDialog::Accepted) {
         loadTranscriptFromUrl(new QUrl(fileDialog.selectedUrls().constFirst()));
     }
+    setModified(false);
 }
 
 void Editor::transcriptSave()
@@ -882,7 +883,7 @@ void Editor::transcriptSave()
         result = system(alignmentstr.c_str());
     }
     // qInfo()<<result; // Disabled debug
-
+    setModified(false);
 }
 
 void Editor::transcriptSaveAs()
@@ -927,7 +928,6 @@ void Editor::transcriptClose()
         return;
     }
 
-
     emit message("Closing file " + m_transcriptUrl.toLocalFile());
     m_transcriptUrl.clear();
     m_blocks.clear();
@@ -935,6 +935,7 @@ void Editor::transcriptClose()
 
     loadDictionary();
     clear();
+    setModified(false);
 }
 
 void Editor::showBlocksFromData()
@@ -1090,6 +1091,7 @@ void Editor::loadTranscriptFromUrl(QUrl *fileUrl)
     initial.close();
 
     //*********************************************************
+    setModified(false);
 
     if (m_transcriptLang != "")
         emit message("Opened transcript: " + fileUrl->fileName() + " Language: " + m_transcriptLang);
@@ -1229,9 +1231,11 @@ void Editor::loadTranscriptData(QFile& file)
                 else
                     reader.skipCurrentElement();
             }
+            setModified(false);
         }
-        else
+        else {
             reader.raiseError(QObject::tr("Incorrect file"));
+        }
     }
 }
 
@@ -1635,6 +1639,9 @@ void Editor::contentChanged(int position, int charsRemoved, int charsAdded)
     // If chars aren't added or deleted then return
     if (!(charsAdded || charsRemoved) || settingContent)
         return;
+
+    // Set modified flag since content has changed
+    setModified(true);
 
     if (m_blocks.isEmpty()) { // If block data is empty (i.e. no file opened) just fill them from editor
         for (int i = 0; i < document()->blockCount(); i++)

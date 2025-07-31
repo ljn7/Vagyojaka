@@ -5,13 +5,15 @@
 struct TTSRow {
     QString words;
     QString audioFileName;
-    QString not_pronounced_properly;
-    QString tag;
-    int sound_quality;
-    int asr_quality;
+    QString comments;
+    QString tags;
+    QString wer;
+    QString hypothesis;
+
     bool wordsEdited = false;
-    bool pronunciationEdited = false;
-    bool tagEdited = false;
+    bool commentsEdited = false;
+    bool tagsEdited = false;
+    bool markAsHighWER = false;
 };
 
 #endif // TTSBLOCK_H

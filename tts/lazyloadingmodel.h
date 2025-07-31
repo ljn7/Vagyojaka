@@ -4,18 +4,19 @@
 #include <QAbstractTableModel>
 #include <QVector>
 #include <QStringList>
+#include <qundostack.h>
 
 
 struct OriginalData {
     QString words;
-    QString notPronouncedProperly;
     QString tags;
+    QString comments;
 };
 
 struct EditedCount {
     int editedWords = 0;
-    int editedNotPronouncedProperlyWords = 0;
-    int edittedTaggedWords = 0;
+    int editedTaggedWords = 0;
+    int editedComments = 0;
 };
 
 class LazyLoadingModel : public QAbstractTableModel {
@@ -55,11 +56,12 @@ public:
     void clearEditHistory(int row, int column);
     int calculateColumnEditedWords(int column) const;
     QStringList& getDropdownCheckboxOpts();
+    void setUndoStack(QUndoStack* stack);
 
 signals:
     void transcriptEditedWordsCount(int64_t count);
-    void mispronouncedEditedWordsCount(int64_t count);
     void taggedEditedWordsCount(int64_t count);
+    void commentsEditedWordsCount(int64_t count);
 
 private:
     QVector<TTSRow> m_rows;
@@ -74,6 +76,10 @@ private:
     bool isRevertedToOriginal(int row, int column, const QString& newText);
     int calculateChangedWords(const QString& current, const QString& original, const QString& delimiter) const;
     void init();
+
+    class EditCommand;
+    QUndoStack* m_undoStack = nullptr;
+    bool m_isUndoing = false;
 
     QHash<int, EditedCount> editedCounts;
     OriginalData emptyOriginalData;
