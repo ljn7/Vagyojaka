@@ -1,0 +1,25 @@
+# Normalise line endings so Windows, Linux and macOS checkouts stop fighting.
+* text=auto eol=lf
+
+*.sln    text eol=crlf
+*.bat    text eol=crlf
+*.cmd    text eol=crlf
+*.ps1    text eol=crlf
+
+*.ico    binary
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.pdf    binary
+*.dll    binary
+*.so     binary
+*.dylib  binary
+
+# Vendored, do not count towards language statistics or show up in diffs by default.
+mediaplayer/qcustomplot.cpp linguist-vendored
+mediaplayer/qcustomplot.h   linguist-vendored
+mediaplayer/fftw3.h         linguist-vendored
+
+# Generated word lists. Large, and never worth reading in a diff.
+editor/wordlists/*.txt -diff linguist-generated

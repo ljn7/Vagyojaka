@@ -61,3 +61,13 @@ build/
 # Clion
 .idea
 .cache
+
+# Generated Doxygen output
+docs/html/
+docs/latex/
+
+# CMake presets user overrides
+CMakeUserPresets.json
+
+# vcpkg
+vcpkg_installed/
