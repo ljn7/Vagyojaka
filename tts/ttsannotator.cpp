@@ -1,4 +1,5 @@
 #include "ttsannotator.h"
+#include "config/settingsmanager.h"
 #include "qfontdatabase.h"
 #include "ui_ttsannotator.h"
 #include "lazyloadingmodel.h"
@@ -22,9 +23,6 @@ TTSAnnotator::TTSAnnotator(QWidget *parent)
     tableView->setModel(m_model.get());
     setDefaultFontOnTableView();
     setupUI();
-
-    QString iniPath = QApplication::applicationDirPath() + "/" + "config.ini";
-    settings = std::make_unique<QSettings>(iniPath, QSettings::IniFormat);
 
     this->supportedFormats = {
         "xml Files (*.xml)",
@@ -153,10 +151,10 @@ void TTSAnnotator::openTTSTranscript()
     fileDialog.setWindowTitle(tr("Open File"));
     fileDialog.setNameFilters(supportedFormats);
 
-    if(settings->value("annotatorTranscriptDir").toString().isEmpty())
+    if(SettingsManager::getInstance().getValue<QString>("annotatorTranscriptDir").isEmpty())
         fileDialog.setDirectory(QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).value(0, QDir::homePath()));
     else
-        fileDialog.setDirectory(settings->value("annotatorTranscriptDir").toString());
+        fileDialog.setDirectory(SettingsManager::getInstance().getValue<QString>("annotatorTranscriptDir"));
 
     if (fileDialog.exec() == QDialog::Accepted) {
         m_model->clear();
@@ -169,7 +167,7 @@ void TTSAnnotator::openTTSTranscript()
 
         QFileInfo filedir(fileUrl.toLocalFile());
         QString dirInString = filedir.dir().path();
-        settings->setValue("annotatorTranscriptDir", dirInString);
+        SettingsManager::getInstance().setValue<QString>("annotatorTranscriptDir", dirInString);
     }
 }
 

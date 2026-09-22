@@ -11,13 +11,18 @@
 // Initialize static constants
 const QString SettingsManager::KEY_VERSION = "General/Version";
 const QString SettingsManager::KEY_FIRST_RUN = "General/FirstRun";
-const QString SettingsManager::KEY_SHOW_TIMESTAMPS = "Interface/ShowTimeStamps";
 const QString SettingsManager::TOGGLE_PREFIX = "UI/Toggles/";
-const QString SettingsManager::KEY_MEDIA_DIR = "Directory/Media";
-const QString SettingsManager::KEY_EXPORT_DIR = "Directory/Export";
-const QString SettingsManager::KEY_TRANSCRIPTS_DIR = "Directories/Transcripts";
 const QString SettingsManager::KEY_RECENT_FILES = "Files/RecentFiles";
 const QString SettingsManager::KEY_WINDOW_PREFIX = "Windows/";
+
+// These four are the keys the application has always written. They are kept flat and
+// unprefixed so that a config.ini from an earlier build is read as-is after migration.
+const QString SettingsManager::KEY_SHOW_TIMESTAMPS = "showTimeStamps";
+const QString SettingsManager::KEY_MEDIA_DIR = "mediaDir";
+const QString SettingsManager::KEY_TRANSCRIPTS_DIR = "transcriptDir";
+const QString SettingsManager::KEY_SEEK_SPEED = "seekSpeed";
+const QString SettingsManager::KEY_EXPORT_DIR = "exportDir";
+const QString SettingsManager::CUSTOM_DICTIONARY_PREFIX = "customDictionaries/";
 
 SettingsManager& SettingsManager::getInstance() {
     static SettingsManager instance;
@@ -28,9 +33,18 @@ SettingsManager::SettingsManager()
     : m_maxRecentFiles(10)
     , m_currentVersion("1.0.0") {
 
-    QString iniPath = QApplication::applicationDirPath() +
-                      QDir::separator() + "config.ini";
+    // Settings live in the per-user configuration directory, not next to the
+    // executable. The old location is not writable when the application is installed
+    // under Program Files, inside a macOS bundle or from an AppImage, so settings
+    // silently failed to persist for anyone who installed it properly.
+    const QString configDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    QDir().mkpath(configDir);
+    const QString iniPath = configDir + QDir::separator() + "config.ini";
+
     m_settings = std::make_unique<QSettings>(iniPath, QSettings::IniFormat);
+
+    migrateLegacySettings(iniPath);
+
     if (isFirstRun()) {
         initializeDefaults();
         m_settings->setValue(KEY_FIRST_RUN, false);
@@ -106,9 +120,11 @@ QString SettingsManager::getMediaDirectory() {
 }
 
 void SettingsManager::setMediaDirectory(const QString& dir) {
-    if (isValidDirectory(dir)) {
-        setValue(KEY_MEDIA_DIR, dir);
+    if (!isValidDirectory(dir)) {
+        qWarning() << "Ignoring media directory that does not exist:" << dir;
+        return;
     }
+    setValue(KEY_MEDIA_DIR, dir);
 }
 
 QString SettingsManager::getTranscriptsDirectory() {
@@ -116,9 +132,51 @@ QString SettingsManager::getTranscriptsDirectory() {
 }
 
 void SettingsManager::setTranscriptsDirectory(const QString& dir) {
-    if (isValidDirectory(dir)) {
-        setValue(KEY_TRANSCRIPTS_DIR, dir);
+    if (!isValidDirectory(dir)) {
+        qWarning() << "Ignoring transcript directory that does not exist:" << dir;
+        return;
     }
+    setValue(KEY_TRANSCRIPTS_DIR, dir);
+}
+
+void SettingsManager::migrateLegacySettings(const QString& newPath) {
+    // Earlier versions wrote config.ini beside the executable, through three separate
+    // QSettings instances. Import it once so nobody loses their preferences.
+    const QString legacyPath =
+        QApplication::applicationDirPath() + QDir::separator() + "config.ini";
+
+    if (legacyPath == newPath || !QFileInfo::exists(legacyPath))
+        return;
+
+    if (m_settings->contains(KEY_FIRST_RUN))
+        return; // Already migrated, or already configured here.
+
+    QSettings legacy(legacyPath, QSettings::IniFormat);
+    const QStringList keys = legacy.allKeys();
+    if (keys.isEmpty())
+        return;
+
+    for (const QString& key : keys)
+        m_settings->setValue(key, legacy.value(key));
+
+    m_settings->sync();
+    qInfo() << "Imported settings from" << legacyPath << "into" << newPath;
+}
+
+int SettingsManager::getSeekSpeed() {
+    return getValue<int>(KEY_SEEK_SPEED, 1);
+}
+
+void SettingsManager::setSeekSpeed(int speed) {
+    setValue(KEY_SEEK_SPEED, speed);
+}
+
+QStringList SettingsManager::getCustomDictionaries(const QString& language) {
+    return getValue<QStringList>(CUSTOM_DICTIONARY_PREFIX + language);
+}
+
+void SettingsManager::setCustomDictionaries(const QString& language, const QStringList& paths) {
+    setValue(CUSTOM_DICTIONARY_PREFIX + language, paths);
 }
 
 bool SettingsManager::isValidDirectory(const QString& dir) const {
@@ -183,8 +241,12 @@ bool SettingsManager::isValidDirectory(const QString& dir) const {
 // }
 
 void SettingsManager::resetToDefaults() {
-    QMutexLocker locker(&m_mutex);
-    m_settings->clear();
+    {
+        // Scoped, because initializeDefaults() takes the same non-recursive mutex.
+        // Holding it across that call deadlocked the caller.
+        QMutexLocker locker(&m_mutex);
+        m_settings->clear();
+    }
     initializeDefaults();
     // emit settingsReset();
 }

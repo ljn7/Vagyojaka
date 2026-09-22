@@ -509,7 +509,6 @@ private:
      *
      * This object manages user preferences and settings using QSettings.
      */
-    QSettings* settings;
 
     /*!
      * \brief Pointer to the keyboard shortcut guide.

@@ -16,6 +16,7 @@
 #include<QVector>
 #include"mediaplayer/fftw3.h"
 #include<QAudioFormat>
+#include<QProcess>
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -87,6 +88,23 @@ private:
     void addUtteranceNumber();
     bool isAudioFile(const QString& filePath);
 
+    /*!
+     * rief Decodes the media to PCM with ffmpeg, without blocking the UI.
+     *
+     * Standard output is drained as it arrives. The previous implementation called
+     * waitForFinished() and only read the pipe once the process had exited, so any
+     * file whose decoded audio exceeded the operating system pipe buffer, roughly
+     * 64 KB, deadlocked: ffmpeg blocked writing, nothing drained it, and the 30 second
+     * default timeout eventually elapsed and the waveform silently gave up.
+     */
+    void startFfmpegDecode(const QString& filePath);
+
+    /*! rief Hands the decoded PCM to the plot and starts the player. */
+    void finishWaveform(const QByteArray& audioData);
+
+    /*! rief Stops any decode still in flight, for instance when the media changes. */
+    void cancelDecode();
+
     QBuffer mInputBuffer;
     qint64 tot_duration;
 
@@ -125,6 +143,8 @@ private:
     QString blockText;
 
     QUrl mUrl;
+    QProcess* mFfmpegProcess = nullptr; ///< Running decode, if any. Owned through the Qt parent.
+    QByteArray mDecodedAudio;           ///< Accumulates ffmpeg output while it streams in.
     QMediaPlayer* mPlayer = nullptr;
     QBuffer mAudioBuffer;
     QString mMediaFileName;

@@ -18,6 +18,8 @@
 #include <git/git.h>
 #include "qmediadevices.h"
 #include "qaudiodevice.h"
+#include "util/scriptrunner.h"
+#include "config/settingsmanager.h"
 #include <algorithm>
 
 // #include <config/settingsManager.h>
@@ -35,16 +37,9 @@ Tool::Tool(QWidget *parent)
     //     settings.saveActionState(ui->Show_Time_Stamps, "showTimeStamps");
     // });
 
-    QString iniPath = QApplication::applicationDirPath() + "/" + "config.ini";
-    settings = new QSettings(iniPath, QSettings::IniFormat);
-    if(settings->value("showTimeStamps").toString()=="") {
-        ui->Show_Time_Stamps->setChecked(true);
-    }
-    else {
-        ui->Show_Time_Stamps->setChecked(settings->value("showTimeStamps").toString() == "true");
-    }
-
-    seekSpeed = std::clamp(settings->value("seekSpeed").toInt(), 1, 5);
+    auto& settings = SettingsManager::getInstance();
+    ui->Show_Time_Stamps->setChecked(settings.getShowTimeStamps());
+    seekSpeed = std::clamp(settings.getSeekSpeed(), 1, 5);
 
     player = new MediaPlayer(this);
     player->setVideoOutput(ui->m_videoWidget);
@@ -510,26 +505,10 @@ void Tool::on_btn_translate_clicked()
     progressBar.raise();
     progressBar.activateWindow();
 
-    if(!QFile::exists("Translate.py")){
-        QFile mapper("Translate.py");
-        QFileInfo mapperFileInfo(mapper);
-        QFile aligner(":/Translate.py");
-        if(!aligner.open(QIODevice::OpenModeFlag::ReadOnly)){
-            return;
-        }
-        aligner.seek(0);
-        QString cp=aligner.readAll();
-        aligner.close();
-
-        if(!mapper.open(QIODevice::OpenModeFlag::WriteOnly|QIODevice::Truncate)){
-
-            return;
-        }
-        mapper.write(QByteArray(cp.toUtf8()));
-        mapper.close();
-        std::string makingexec="chmod +x "+mapperFileInfo.absoluteFilePath().replace(" ", "\\ ").toStdString();
-        int result = system(makingexec.c_str());
-        // qInfo()<<result; Disabled Debug
+    QString extractError;
+    if (!ScriptRunner::ensureExtracted(":/Translate.py", "Translate.py", &extractError)) {
+        QMessageBox::critical(this, tr("Error"), extractError);
+        return;
     }
 
 
@@ -564,39 +543,30 @@ void Tool::on_btn_translate_clicked()
 
 
 
-    QFile mapper("Translate.py");
-    QFileInfo mapperFileInfo(mapper);
+    const QStringList translateArgs{
+        QFileInfo(translate).absoluteFilePath(),
+        QFileInfo("HindiTranslated.txt").absoluteFilePath(),
+        QFileInfo(translatedFile).absoluteFilePath(),
+        QFileInfo(ui->m_editor_2->m_transcriptUrl.toLocalFile()).absoluteFilePath(),
+        QFileInfo("temp.xml").absoluteFilePath(),
+    };
 
-    QFile finalFile(translatedFile);
-    QFileInfo finalFileInfo(finalFile);
-    QFile HindiTranslated("HindiTranslated.txt");
-    QFileInfo HindiTranslate(HindiTranslated);
-    QFileInfo initialDictFileInfo(translate);
-    int result;
-    QFile transcriptFileToTranslate(ui->m_editor_2->m_transcriptUrl.toLocalFile());
-    QFileInfo FromTranscriptFileToTranslate(transcriptFileToTranslate);
-
-    QFile tempXML("temp.xml");
-    QFileInfo tempXMLinfo(tempXML);
-
-    std::string translatorStr="python3 "  +mapperFileInfo.absoluteFilePath().toStdString()
-                                +" "+ '\"'+initialDictFileInfo.absoluteFilePath().toStdString()+ '\"'
-                                +" "+ '\"'+HindiTranslate.absoluteFilePath().toStdString()+ '\"'
-                                +" "+ '\"'+finalFileInfo.absoluteFilePath().toStdString()+ '\"'
-                                +" "+ '\"'+FromTranscriptFileToTranslate.absoluteFilePath().toStdString()+ '\"'
-                                +" "+ '\"'+tempXMLinfo.absoluteFilePath().toStdString()+ '\"';
-
-    // qInfo()<<translatorStr.c_str(); // Disabled debug
-
-    int result2 = system(translatorStr.c_str());
-    // qInfo()<<result2; // Disabled debug
-
-    // qInfo()<<"Save Pressed"; // Disabled debug
-    bool fileExists = QFileInfo::exists(filepaths2+"/HindiTranslated.xml") && QFileInfo(filepaths2+"/HindiTranslated.xml").isFile();
-    while(!fileExists){
-        fileExists = QFileInfo::exists(filepaths2+"/HindiTranslated.xml") && QFileInfo(filepaths2+"/HindiTranslated.xml").isFile();
+    const auto translation = ScriptRunner::runPython("Translate.py", translateArgs, this,
+                                                     tr("Translating transcript..."));
+    if (!translation.ok) {
+        QMessageBox::critical(this, tr("Translation failed"), translation.error);
+        return;
     }
-    // qInfo()<<"path exists now"; // Disabled debug
+
+    // Translate.py has exited, so its output either exists by now or never will.
+    // The old code spun on QFileInfo::exists() here and hung the application forever
+    // whenever the script failed.
+    if (!QFileInfo(filepaths2 + "/HindiTranslated.xml").isFile()) {
+        QMessageBox::critical(this, tr("Translation failed"),
+                              tr("Translate.py finished without producing %1.")
+                                  .arg(filepaths2 + "/HindiTranslated.xml"));
+        return;
+    }
     QFile transcriptFile3(filepaths2+"/HindiTranslated.xml");
     if (!transcriptFile3.open(QIODevice::ReadOnly)) {
         qInfo()<<(transcriptFile3.errorString());
@@ -884,7 +854,7 @@ void Tool::on_actionOpen_triggered()
 void Tool::on_actionIncrease_speed_by_1_triggered()
 {
     seekSpeed = std::min(seekSpeed + 1, (int64_t)5);
-    settings->setValue("seekSpeed", QVariant::fromValue(seekSpeed));
+    SettingsManager::getInstance().setSeekSpeed(seekSpeed);
 
     QString message = QString("Speed increased to %1").arg(seekSpeed);
     QToolTip::showText(QCursor::pos(), message, this, QRect(), 1500);
@@ -894,7 +864,7 @@ void Tool::on_actionIncrease_speed_by_1_triggered()
 void Tool::on_actionDecrease_speed_by_1_triggered()
 {
     seekSpeed = std::max(seekSpeed - 1, (int64_t)1);
-    settings->setValue("seekSpeed", QVariant::fromValue(seekSpeed));
+    SettingsManager::getInstance().setSeekSpeed(seekSpeed);
 
     QString message = QString("Speed decreased to %1").arg(seekSpeed);
     QToolTip::showText(QCursor::pos(), message, this, QRect(), 1500);

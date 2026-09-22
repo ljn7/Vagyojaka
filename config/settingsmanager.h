@@ -37,6 +37,14 @@ public:
     QString getTranscriptsDirectory();
     void setTranscriptsDirectory(const QString& dir);
 
+    // Playback
+    int getSeekSpeed();
+    void setSeekSpeed(int speed);
+
+    // Custom dictionaries, per transcript language
+    QStringList getCustomDictionaries(const QString& language);
+    void setCustomDictionaries(const QString& language, const QStringList& paths);
+
     // Window state management
     // void saveWindowGeometry(const QString& windowName, const QRect& geometry);
     // QRect loadWindowGeometry(const QString& windowName);
@@ -92,6 +100,13 @@ private:
     // Initialization
     void initializeDefaults();
     void migrateSettings();
+
+    /*!
+     * \brief Imports a config.ini written beside the executable by an earlier version.
+     *
+     * Runs once, before any defaults are applied.
+     */
+    void migrateLegacySettings(const QString& newPath);
     // void setupConnections();
 
     // Version management
@@ -118,6 +133,8 @@ private:
     static const QString KEY_TRANSCRIPTS_DIR;
     static const QString KEY_RECENT_FILES;
     static const QString KEY_WINDOW_PREFIX;
+    static const QString KEY_SEEK_SPEED;
+    static const QString CUSTOM_DICTIONARY_PREFIX;
     static const QString TOGGLE_PREFIX;
 };
 

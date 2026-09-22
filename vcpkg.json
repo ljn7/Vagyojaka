@@ -1,0 +1,28 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "vagyojaka",
+  "version": "5.5.5",
+  "description": "Post-editing tool for ASR generated transcripts",
+  "homepage": "https://github.com/ljn7/Transcriptor",
+  "builtin-baseline": "afeb285c9e2e015292985856b9382ea1d82a4492",
+  "dependencies": [
+    "libgit2",
+    "fftw3"
+  ],
+  "features": {
+    "ffmpeg": {
+      "description": "Build FFmpeg from source through vcpkg. Slow. Prefer setting FFMPEG_ROOT to a prebuilt FFmpeg instead.",
+      "dependencies": [
+        {
+          "name": "ffmpeg",
+          "default-features": false,
+          "features": [
+            "avcodec",
+            "avformat",
+            "avdevice"
+          ]
+        }
+      ]
+    }
+  }
+}

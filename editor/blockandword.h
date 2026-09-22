@@ -1,28 +1,50 @@
 #pragma once
 
-#include <QVector>
+#include <QStringList>
 #include <QTime>
+#include <QVector>
 
+#include <utility>
+
+/*!
+ * \brief One word of a transcript, with the time it starts at.
+ *
+ * Comparison deliberately ignores \c tagList: two words are the same word whether or
+ * not a tag has been attached to them. That was the behaviour of the original
+ * hand-written operator== and the diffing in Editor::contentChanged relies on it.
+ */
 struct word
 {
     QTime timeStamp;
     QString text;
     QStringList tagList;
-    QString isEdited;
+    QString isEdited{QStringLiteral("false")};
 
-    word(QTime timeStamp, QString text, QStringList tagList, QString isEdited = "false")
-        : timeStamp(timeStamp), text(text), tagList(tagList), isEdited(isEdited) {}
+    word() = default;
 
-    word() : timeStamp(), text(), tagList(), isEdited("false") {}
-
-    inline bool operator==(word w) const
+    word(QTime timeStamp, QString text, QStringList tagList,
+         QString isEdited = QStringLiteral("false"))
+        : timeStamp(timeStamp)
+        , text(std::move(text))
+        , tagList(std::move(tagList))
+        , isEdited(std::move(isEdited))
     {
-        if (w.timeStamp == timeStamp && w.text == text && w.isEdited == isEdited)
-            return true;
-        return false;
+    }
+
+    // Taken by reference rather than by value. These hold a QString and a QStringList,
+    // so the old by-value signature deep copied both on every comparison, and the word
+    // diff in contentChanged compares in nested loops.
+    bool operator==(const word& other) const
+    {
+        return timeStamp == other.timeStamp && text == other.text && isEdited == other.isEdited;
     }
 };
 
+/*!
+ * \brief One line of a transcript: a speaker, a timestamp and the words that follow.
+ *
+ * As with \c word, comparison ignores \c tagList.
+ */
 struct block
 {
     QTime timeStamp;
@@ -31,16 +53,21 @@ struct block
     QStringList tagList;
     QVector<word> words;
 
-    block() : timeStamp(), text(), speaker(), tagList(), words() {};
+    block() = default;
 
     block(QTime timeStamp, QString text, QString speaker, QStringList tagList, QVector<word> words)
-        : timeStamp(timeStamp), text(text), speaker(speaker), tagList(tagList), words(words) {};
-
-    inline bool operator==(block b) const
+        : timeStamp(timeStamp)
+        , text(std::move(text))
+        , speaker(std::move(speaker))
+        , tagList(std::move(tagList))
+        , words(std::move(words))
     {
-        if(b.timeStamp==timeStamp && b.text==text && b.speaker==speaker && b.words==words)
-            return true;
-        return false;
+    }
+
+    bool operator==(const block& other) const
+    {
+        return timeStamp == other.timeStamp && text == other.text && speaker == other.speaker
+               && words == other.words;
     }
 };
 

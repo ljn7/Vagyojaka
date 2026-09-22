@@ -9,6 +9,7 @@
 #include<QMessageBox>
 #include "tool.h"
 #include "./ui_tool.h"
+#include "util/scriptrunner.h"
 TranscriptGenerator::TranscriptGenerator(QObject *parent,    QUrl *fileUr)
     : QObject{parent}
 {
@@ -40,42 +41,32 @@ void TranscriptGenerator::Upload_and_generate_Transcript()
     QString filepaths=fileInfo.dir().path();
     QString filepaths2=filepaths;
 
-    if(!QFile::exists("client.py")){
-        QFile mapper("client.py");
-        QFileInfo mapperFileInfo(mapper);
-        QFile aligner(":/client.py");
-        if(!aligner.open(QIODevice::OpenModeFlag::ReadOnly)){
-            return;
-        }
-        aligner.seek(0);
-        QString cp=aligner.readAll();
-        aligner.close();
-
-        if(!mapper.open(QIODevice::OpenModeFlag::WriteOnly|QIODevice::Truncate)){
-
-            return;
-        }
-        mapper.write(QByteArray(cp.toUtf8()));
-        mapper.close();
-        std::string makingexec="chmod +x "+mapperFileInfo.absoluteFilePath().replace(" ", "\\ ").toStdString();
-        int result = system(makingexec.c_str());
-        // qInfo()<<result; // Disabled debug
+    QString extractError;
+    if (!ScriptRunner::ensureExtracted(":/client.py", "client.py", &extractError)) {
+        QMessageBox::critical(nullptr, QObject::tr("Error"), extractError);
+        return;
     }
-    QFile client_script("client.py");
-    QFileInfo client_script_info(client_script);
-    std::string client="python3 "
-        +client_script_info.absoluteFilePath().replace(" ", "\\ ").toStdString()
-        +" "
-        +fileInfo.absoluteFilePath().replace(" ", "\\ ").toStdString()
-        +" "
-        +filepaths.replace(" ", "\\ ").toStdString()
-        +"/transcript.xml";
-    int result = system(client.c_str());
-    qInfo()<<result;
 
-    bool fileExists = QFileInfo::exists(filepaths2+"/transcript.xml") && QFileInfo(filepaths2+"/transcript.xml").isFile();
-    while(!fileExists){
-        fileExists = QFileInfo::exists(filepaths2+"/transcript.xml") && QFileInfo(filepaths2+"/transcript.xml").isFile();
+    const QStringList clientArgs{
+        fileInfo.absoluteFilePath(),
+        filepaths + "/transcript.xml",
+    };
+
+    const auto generation = ScriptRunner::runPython("client.py", clientArgs, nullptr,
+                                                    QObject::tr("Generating transcript..."),
+                                                    600000);
+    if (!generation.ok) {
+        QMessageBox::critical(nullptr, QObject::tr("Transcript generation failed"), generation.error);
+        return;
+    }
+
+    // client.py has exited, so the transcript either exists by now or never will.
+    // The old code spun here and hung the application forever whenever it failed.
+    if (!QFileInfo(filepaths2 + "/transcript.xml").isFile()) {
+        QMessageBox::critical(nullptr, QObject::tr("Transcript generation failed"),
+                              QObject::tr("client.py finished without producing %1.")
+                                  .arg(filepaths2 + "/transcript.xml"));
+        return;
     }
 
 

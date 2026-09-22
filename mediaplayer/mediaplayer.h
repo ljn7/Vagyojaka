@@ -66,7 +66,6 @@ private:
     static QTime getTimeFromPosition(const qint64& position);
     void setDefaultAudioOutputDevice();
     QString m_mediaFileName;
-    QSettings* settings;
 
     bool isAudioFile(const QString& filePath);
     bool isVideoFile(const QString& filePath);

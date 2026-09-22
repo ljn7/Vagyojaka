@@ -9,6 +9,52 @@ on:
     branches: [ main, master ]
 
 jobs:
+  lint:
+    name: Lint (advisory)
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake ninja-build pkg-config clang-tidy clang-format \
+        libgit2-dev libfftw3-dev \
+        libavcodec-dev libavformat-dev libavutil-dev libavdevice-dev
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.8.*'
+        host: 'linux'
+        target: 'desktop'
+        arch: 'gcc_64'
+        modules: 'qtmultimedia'
+        cache: true
+
+    # Advisory for now. This codebase predates any linting, so making these blocking
+    # today would fail every pull request on pre-existing findings. Tighten once the
+    # backlog behind each enabled check is cleared.
+    - name: clang-format
+      continue-on-error: true
+      run: |
+        git ls-files '*.cpp' '*.h' \
+          | grep -vE 'qcustomplot|fftw3' \
+          | xargs clang-format --dry-run --Werror
+
+    - name: clang-tidy
+      continue-on-error: true
+      env:
+        QTDIR: ${{ env.QT_ROOT_DIR }}
+      run: |
+        # Building first, because clang-tidy needs the generated ui_*.h and moc output.
+        cmake --preset linux
+        cmake --build --preset linux -j$(nproc)
+        git ls-files '*.cpp' \
+          | grep -vE 'qcustomplot|fftw3|^tools/' \
+          | xargs clang-tidy -p build/linux --quiet
+
   build-windows:
     runs-on: windows-latest
     
@@ -22,12 +68,20 @@ jobs:
         git clone https://github.com/microsoft/vcpkg.git C:/vcpkg
         cd C:/vcpkg
         ./bootstrap-vcpkg.bat
-        ./vcpkg integrate install
+
+    # Without this, vcpkg rebuilds libgit2 (and openssl beneath it) from source on
+    # every run, which dominates the job time.
+    - name: Cache vcpkg binaries
+      uses: actions/cache@v4
+      with:
+        path: ~/AppData/Local/vcpkg/archives
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        restore-keys: vcpkg-${{ runner.os }}-
     
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
-        version: '6.6.1'
+        version: '6.8.*'
         host: 'windows'
         target: 'desktop'
         arch: 'win64_mingw'
@@ -35,33 +89,34 @@ jobs:
         modules: 'qtmultimedia'
         cache: true
     
-    - name: Install dependencies with vcpkg
-      run: |
-        C:/vcpkg/vcpkg install libgit2 fftw3 --triplet=x64-mingw-dynamic
-    
     - name: Download FFmpeg
       run: |
         Invoke-WebRequest -Uri "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip" -OutFile "ffmpeg.zip"
         Expand-Archive -Path "ffmpeg.zip" -DestinationPath "C:/"
         Rename-Item -Path "C:/ffmpeg-master-latest-win64-gpl-shared" -NewName "C:/ffmpeg"
-    
+
+    # vcpkg installs libgit2 and fftw3 during configure, driven by vcpkg.json.
     - name: Configure and Build
+      env:
+        VCPKG_ROOT: C:/vcpkg
+        FFMPEG_ROOT: C:/ffmpeg
+        QTDIR: ${{ env.QT_ROOT_DIR }}
       run: |
-        mkdir build
-        cd build
-        cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DQT_DEBUG_FIND_PACKAGE=ON
-        cmake --build . --config Release -j4
-    
+        cmake --preset windows-mingw
+        cmake --build --preset windows-mingw -j4
+        ctest --preset windows-mingw
+
     - name: Prepare distribution
       run: |
         mkdir dist
-        copy build\output\Vagyojaka.exe dist\
+        copy build\windows-mingw\output\Vagyojaka.exe dist\
         windeployqt --release --no-translations --no-system-d3d-compiler --no-opengl-sw dist\Vagyojaka.exe
         # Copy FFmpeg DLLs
         copy C:\ffmpeg\bin\*.dll dist\
-        # Copy libgit2 and fftw3 DLLs
-        copy C:\vcpkg\installed\x64-mingw-dynamic\bin\git2.dll dist\
-        copy C:\vcpkg\installed\x64-mingw-dynamic\bin\fftw3.dll dist\
+        # Copy libgit2 and fftw3 DLLs built by vcpkg in manifest mode
+        copy build\windows-mingw\vcpkg_installed\x64-mingw-dynamic\bin\*.dll dist\
+        # Dictionaries are generated at build time and loaded from disk, not from the binary
+        xcopy /E /I /Y build\windows-mingw\output\wordlists dist\wordlists
     
     - name: Create ZIP archive
       run: |
@@ -74,7 +129,7 @@ jobs:
         path: Vagyojaka-Windows.zip
     
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: Vagyojaka-Windows.zip
@@ -96,66 +151,36 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
-        version: '6.6.1'
+        version: '6.8.*'
         host: 'mac'
         target: 'desktop'
         modules: 'qtmultimedia'
         cache: true
     
     - name: Configure and Build
+      env:
+        QTDIR: ${{ env.QT_ROOT_DIR }}
       run: |
-        mkdir build
-        cd build
-        cmake .. -DCMAKE_PREFIX_PATH="$Qt6_DIR" -DCMAKE_BUILD_TYPE=Release -DQT_DEBUG_FIND_PACKAGE=ON
-        cmake --build . --config Release -j4
-    
+        cmake --preset macos
+        cmake --build --preset macos -j4
+        ctest --preset macos
+
     - name: Create App Bundle
       run: |
-        cd build/output
+        cd build/macos/output
         macdeployqt Vagyojaka.app -dmg
-    
-    - name: Install appimagetool
-      run: |
-        mkdir -p $HOME/tools
-        wget -O $HOME/tools/appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
-        chmod +x $HOME/tools/appimagetool
-    
-    - name: Create AppImage
-      run: |
-        mkdir -p AppDir/usr/bin
-        mkdir -p AppDir/usr/lib
-        mkdir -p AppDir/usr/share/applications
-        mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
-        cp build/output/Vagyojaka.app/Contents/MacOS/Vagyojaka AppDir/usr/bin/
-        # Create desktop file
-        echo "[Desktop Entry]
-        Name=Vagyojaka
-        Exec=Vagyojaka
-        Icon=vagyojaka
-        Type=Application
-        Categories=Utility;" > AppDir/usr/share/applications/vagyojaka.desktop
-        # Use AppIcon as the application icon
-        cp AppIcon.ico AppDir/usr/share/icons/hicolor/256x256/apps/vagyojaka.png
-        # Copy libraries
-        cp -R build/output/Vagyojaka.app/Contents/Frameworks/* AppDir/usr/lib/
-        # Create AppImage
-        $HOME/tools/appimagetool AppDir Vagyojaka-macOS.AppImage
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: Vagyojaka-macOS
-        path: |
-          build/output/Vagyojaka.dmg
-          Vagyojaka-macOS.AppImage
+        path: build/macos/output/Vagyojaka.dmg
     
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: |
-          build/output/Vagyojaka.dmg
-          Vagyojaka-macOS.AppImage
+        files: build/macos/output/Vagyojaka.dmg
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -170,14 +195,15 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake libgit2-dev libfftw3-dev \
+        sudo apt-get install -y build-essential cmake ninja-build pkg-config \
+        libgit2-dev libfftw3-dev \
         libavcodec-dev libavformat-dev libavutil-dev libavdevice-dev \
         libfuse2 # For AppImage
-    
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
-        version: '6.6.1'
+        version: '6.8.*'
         host: 'linux'
         target: 'desktop'
         arch: 'gcc_64'
@@ -185,11 +211,12 @@ jobs:
         cache: true
     
     - name: Configure and Build
+      env:
+        QTDIR: ${{ env.QT_ROOT_DIR }}
       run: |
-        mkdir build
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DQT_DEBUG_FIND_PACKAGE=ON
-        cmake --build . --config Release -j$(nproc)
+        cmake --preset linux
+        cmake --build --preset linux -j$(nproc)
+        ctest --preset linux
     
     - name: Install appimagetool
       run: |
@@ -203,7 +230,9 @@ jobs:
         mkdir -p AppDir/usr/lib
         mkdir -p AppDir/usr/share/applications
         mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
-        cp build/output/vagyojaka AppDir/usr/bin/
+        cp build/linux/output/vagyojaka AppDir/usr/bin/
+        # Dictionaries are generated at build time and loaded from disk, not from the binary
+        cp -r build/linux/output/wordlists AppDir/usr/bin/
         # Create desktop file
         echo "[Desktop Entry]
         Name=Vagyojaka
@@ -211,14 +240,15 @@ jobs:
         Icon=vagyojaka
         Type=Application
         Categories=Utility;" > AppDir/usr/share/applications/vagyojaka.desktop
-        # Use AppIcon as the application icon
-        cp AppIcon.ico AppDir/usr/share/icons/hicolor/256x256/apps/vagyojaka.png
+        # A real 256x256 PNG. This used to copy AppIcon.ico under a .png name,
+        # which most icon loaders refuse to read.
+        cp AppIcon.png AppDir/usr/share/icons/hicolor/256x256/apps/vagyojaka.png
         # Copy Qt dependencies
         cp -r $Qt6_DIR/../../../lib/libQt6*.so* AppDir/usr/lib/
         cp -r $Qt6_DIR/../../../plugins AppDir/usr/
         cp -r $Qt6_DIR/../../../qml AppDir/usr/
         # Copy other dependencies
-        ldd build/output/vagyojaka | grep "=> /" | awk '{print $3}' | sort | uniq | xargs -I{} cp -v {} AppDir/usr/lib/
+        ldd build/linux/output/vagyojaka | grep "=> /" | awk '{print $3}' | sort | uniq | xargs -I{} cp -v {} AppDir/usr/lib/
         # Create AppImage
         $HOME/tools/appimagetool AppDir Vagyojaka-Linux.AppImage
     
@@ -229,7 +259,7 @@ jobs:
         path: Vagyojaka-Linux.AppImage
     
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: Vagyojaka-Linux.AppImage

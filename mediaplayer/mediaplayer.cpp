@@ -1,4 +1,5 @@
 #include "mediaplayer.h"
+#include "config/settingsmanager.h"
 #include "qapplication.h"
 #include "qaudiodevice.h"
 #include "qmediametadata.h"
@@ -22,8 +23,6 @@ MediaPlayer::MediaPlayer(QWidget *parent)
 
         "All Files (*)"
     };
-    QString iniPath = QApplication::applicationDirPath() + "/" + "config.ini";
-    settings = new QSettings(iniPath, QSettings::IniFormat);
     connect(&m_mediaDevices, &QMediaDevices::audioOutputsChanged, [this]() {
         setDefaultAudioOutputDevice();
     });
@@ -88,7 +87,7 @@ void MediaPlayer::loadMediaFromUrl(QUrl *fileUrl)
     // filepath = fileUrl->toLocalFile();
     QFileInfo filedir(MediaFile);
     QString dirInString=filedir.dir().path();
-    settings->setValue("mediaDir",dirInString);
+    SettingsManager::getInstance().setMediaDirectory(dirInString);
     QString slash = "/";
         // (_WIN32)? ("/"): ("\\");
     m_mediaFileName = dirInString + slash + fileUrl->fileName();
@@ -207,10 +206,10 @@ void MediaPlayer::open()
 
 
     fileDialog.setNameFilters(supportedFormats);
-    if(settings->value("mediaDir").toString()=="")
+    if(SettingsManager::getInstance().getMediaDirectory().isEmpty())
         fileDialog.setDirectory(QStandardPaths::standardLocations(QStandardPaths::MoviesLocation).value(0, QDir::homePath()));
     else
-        fileDialog.setDirectory(settings->value("mediaDir").toString());
+        fileDialog.setDirectory(SettingsManager::getInstance().getMediaDirectory());
     if (fileDialog.exec() == QDialog::Accepted) {
         QUrl *fileUrl = new QUrl(fileDialog.selectedUrls().constFirst());
         loadMediaFromUrl(fileUrl);

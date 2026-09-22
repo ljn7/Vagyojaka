@@ -1,6 +1,8 @@
 #pragma once
 
 #include "blockandword.h"
+#include "dictionary.h"
+#include "highlighter.h"
 #include "texteditor.h"
 #include "wordeditor.h"
 #include "utilities/changespeakerdialog.h"
@@ -28,7 +30,6 @@
 #include <QSettings>
 // #include <QQueue>
 
-class Highlighter;
 // class TaskRunner;
 
 /**
@@ -116,8 +117,6 @@ public:
      * @return QList<QTime> A list of timestamps from the blocks.
      */
     QList<QTime> getTimeStamps();
-
-    friend class Highlighter; ///< Grants Highlighter access to private members.
 
     /**
      * @brief Loads transcript data from a given URL.
@@ -527,6 +526,14 @@ private slots:
     void insertTransliterationCompletion(const QString &completion);
 
     /**
+     * @brief Shows the completer popup for the currently selected completer.
+     *
+     * Called directly for the offline completers, and from handleReply() once the
+     * transliteration response has arrived.
+     */
+    void showCompleterPopup();
+
+    /**
      * @brief Processes the response received from a network reply and extracts tokens.
      *
      * Reads the data from `m_reply`, parses the response string to extract meaningful
@@ -588,17 +595,6 @@ private:
      */
     QCompleter* makeCompleter();
 
-    /**
-     * @brief Saves the current transcript data to an XML file.
-     *
-     * This function writes the contents of `m_blocks` to an XML file, with each block
-     * represented as a "line" element containing a timestamp, speaker, and a list of words.
-     * Words within each line are nested as "word" elements with associated timestamps, tags,
-     * and edit status.
-     *
-     * @param file A pointer to the QFile where the XML content will be written.
-     */
-    void saveXml(QFile* file);
 
     /**
      * @brief Sends the current text block to the \c MediaPlayer, allowing a jump to the relevant timestamp with \c MediaPlayer::setPositionToTime.
@@ -661,7 +657,6 @@ private:
     QString m_punctuation{",.!;:?"}; ///< Default punctuation characters used in the editor.
 
     // UI and settings components
-    QSettings* settings; ///< Pointer to application settings.
     Highlighter* m_highlighter = nullptr; ///< Pointer to the syntax highlighter.
 
     // Highlighting information
@@ -678,10 +673,11 @@ private:
     QCompleter *m_speakerCompleter = nullptr; ///< Completer for speaker names.
     QCompleter *m_textCompleter = nullptr; ///< Completer for text suggestions.
     QCompleter *m_transliterationCompleter = nullptr; ///< Completer for transliteration suggestions.
+    QCompleter *m_completer = nullptr; ///< Completer chosen for the current keystroke. Not owned.
 
     // Dictionaries
-    QStringList m_dictionary; ///< List of user-defined dictionary entries.
-    QStringList m_english_dictionary; ///< List of English dictionary entries.
+    Dictionary m_dictionary; ///< Dictionary for the current transcript language.
+    Dictionary m_english_dictionary; ///< English dictionary, used as a fallback for other languages.
     QString m_customDictonaryPath = nullptr; ///< Path to the custom dictionary file.
     std::set<QString> m_correctedWords; ///< Set of words that have been corrected.
     QString m_transliterateLangCode; ///< Language code for transliteration.
@@ -713,10 +709,16 @@ private:
     // const int debounceDelay = 300;
 
 private:
-    bool isWordValid(const QString& wordText,
-                     const QStringList& primaryDict,
-                     const QStringList& englishDict,
-                     const QString& transcriptLang);
+    /*!
+     * \brief Custom dictionary files the user has added for the current language.
+     *
+     * Stored as a list of paths in the settings file. Earlier versions instead wrote a
+     * combined copy of the whole dictionary to disk on every change.
+     */
+    QStringList customDictionaryPaths() const;
+
+    /*! \brief Records another custom dictionary path for the current language. */
+    void addCustomDictionaryPath(const QString& path);
 
 
 public:
@@ -730,73 +732,6 @@ public:
 
 
 
-
-class Highlighter : public QSyntaxHighlighter
-{
-    Q_OBJECT
-public:
-    explicit Highlighter(QTextDocument *parent = nullptr) : QSyntaxHighlighter(parent) {};
-
-    void clearHighlight()
-    {
-        blockToHighlight = -1;
-        wordToHighlight = -1;
-    }
-    void setBlockToHighlight(qint64 blockNumber)
-    {
-        blockToHighlight = blockNumber;
-        rehighlight();
-    }
-    void setWordToHighlight(int wordNumber)
-    {
-        wordToHighlight = wordNumber;
-        rehighlight();
-    }
-    void setInvalidBlocks(const QList<int>& invalidBlocks)
-    {
-        invalidBlockNumbers = invalidBlocks;
-        rehighlight();
-    }
-    void setTaggedBlocks(const QList<int>& taggedBlock)
-    {
-        taggedBlockNumbers = taggedBlock;
-        rehighlight();
-    }
-    void clearTaggedBlocks()
-    {
-        taggedBlockNumbers.clear();
-    }
-    void setInvalidWords(const QMultiMap<int, int>& invalidWordsMap)
-    {
-        invalidWords = invalidWordsMap;
-        rehighlight();
-    }
-    void setTaggedWords(const QMultiMap<int, int>& taggedWordsMap)
-    {
-        taggedWords = taggedWordsMap;
-        rehighlight();
-    }
-    void setEditedWords(const QMultiMap<int, int>& editedWordsMap) {
-        editedWords = editedWordsMap;
-        rehighlight();
-    }
-    void clearInvalidBlocks()
-    {
-        invalidBlockNumbers.clear();
-    }
-
-    void highlightBlock(const QString&) override;
-
-private:
-    int blockToHighlight{-1};
-    int wordToHighlight{-1};
-    QList<int> invalidBlockNumbers;
-    QList<int> taggedBlockNumbers;
-
-    QMultiMap<int, int> invalidWords;
-    QMultiMap<int, int> taggedWords;
-    QMultiMap<int, int> editedWords;
-};
 
 // class TaskRunner : public QRunnable {
 // public:

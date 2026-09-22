@@ -54,7 +54,6 @@ private:
     std::unique_ptr<LazyLoadingModel> m_model;
     QUrl fileUrl;
     QString xmlDirectory;
-    std::unique_ptr<QSettings> settings = nullptr;
     QStringList supportedFormats;
     AudioPlayerDelegate* m_audioPlayerDelegate = nullptr;
 };

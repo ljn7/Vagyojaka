@@ -118,6 +118,7 @@ AudioWaveForm::AudioWaveForm(QWidget *parent)
 
 AudioWaveForm::~AudioWaveForm()
 {
+    cancelDecode();
     delete ui;
     fftw_free(mFftIn);
     fftw_free(mFftOut);
@@ -126,43 +127,82 @@ AudioWaveForm::~AudioWaveForm()
 
 void AudioWaveForm::showWaveForm() {
 
-    QFile MediaFile(mUrl.toLocalFile());
-    QByteArray audioData;
-    QString filePath = mUrl.toLocalFile();
-    QFileInfo filedir(MediaFile);
-    QString dirInString=filedir.dir().path();
-    QString slash = "/";
-    mMediaFileName = dirInString + slash + mUrl.fileName();
+    cancelDecode();
 
-    if(!MediaFile.open(QIODevice::ReadOnly))
-    {
-        // qInfo()<<"Not open for readonly\n";
+    const QString filePath = mUrl.toLocalFile();
+    QFile MediaFile(filePath);
+    QFileInfo filedir(MediaFile);
+    mMediaFileName = filedir.dir().path() + QStringLiteral("/") + mUrl.fileName();
+
+    if (!MediaFile.exists()) {
+        qWarning() << "Media file does not exist:" << filePath;
         return;
     }
-    if(isAudioFile(filePath)){
-        // qInfo()<<"File id audio file\n";
-        audioData = MediaFile.readAll();
-    } else {
-        // qInfo()<<"File is video file\n";
-        QString ffmpegPath = "ffmpeg";
-        QProcess ffmpegProcess;
-        QStringList ffmpegArgs = {"-i", filePath, "-vn", "-f", "wav", "-"};
-        ffmpegProcess.start(ffmpegPath, ffmpegArgs);
-        if (ffmpegProcess.waitForStarted() && ffmpegProcess.waitForFinished()) {
-            audioData += ffmpegProcess.readAllStandardOutput();
-        } else {
-            qWarning() << "FFmpeg process failed:" << ffmpegProcess.errorString();
 
+    if (isAudioFile(filePath)) {
+        if (!MediaFile.open(QIODevice::ReadOnly)) {
+            qWarning() << "Cannot read media file:" << MediaFile.errorString();
             return;
         }
+        const QByteArray audioData = MediaFile.readAll();
+        MediaFile.close();
+        finishWaveform(audioData);
+        return;
     }
 
-    // mAudioBuffer.open(QIODevice::ReadWrite | QIODevice::Truncate);
-    // mAudioBuffer.buffer().clear();
-    // mAudioBuffer.seek(0);
-    // mAudioBuffer.write(audioData);
-    // mAudioBuffer.close();
+    startFfmpegDecode(filePath);
+}
 
+void AudioWaveForm::startFfmpegDecode(const QString& filePath)
+{
+    mDecodedAudio.clear();
+
+    mFfmpegProcess = new QProcess(this);
+    mFfmpegProcess->setProgram(QStringLiteral("ffmpeg"));
+    mFfmpegProcess->setArguments({QStringLiteral("-i"), filePath, QStringLiteral("-vn"),
+                                  QStringLiteral("-f"), QStringLiteral("wav"), QStringLiteral("-")});
+
+    // Drain stdout continuously. This is the part that matters: ffmpeg writes the
+    // decoded stream to a pipe, and if nobody reads it the pipe fills and ffmpeg blocks
+    // forever. Reading only after the process exits, as the old code did, could
+    // therefore never work for anything longer than a few seconds of audio.
+    connect(mFfmpegProcess, &QProcess::readyReadStandardOutput, this, [this] {
+        mDecodedAudio += mFfmpegProcess->readAllStandardOutput();
+    });
+
+    connect(mFfmpegProcess, &QProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
+        qWarning() << "FFmpeg process failed:" << error << mFfmpegProcess->errorString();
+        mFfmpegProcess->deleteLater();
+        mFfmpegProcess = nullptr;
+        mDecodedAudio.clear();
+        emit samplingStatus(false);
+    });
+
+    connect(mFfmpegProcess, &QProcess::finished, this,
+            [this](int exitCode, QProcess::ExitStatus exitStatus) {
+                mDecodedAudio += mFfmpegProcess->readAllStandardOutput();
+                const QByteArray stdErr = mFfmpegProcess->readAllStandardError();
+
+                mFfmpegProcess->deleteLater();
+                mFfmpegProcess = nullptr;
+
+                if (exitStatus != QProcess::NormalExit || exitCode != 0) {
+                    qWarning() << "FFmpeg exited with code" << exitCode << stdErr.trimmed();
+                    mDecodedAudio.clear();
+                    emit samplingStatus(false);
+                    return;
+                }
+
+                const QByteArray audioData = mDecodedAudio;
+                mDecodedAudio.clear();
+                finishWaveform(audioData);
+            });
+
+    mFfmpegProcess->start();
+}
+
+void AudioWaveForm::finishWaveform(const QByteArray& audioData)
+{
     mInputBuffer.open(QIODevice::ReadWrite | QIODevice::Truncate);
     mInputBuffer.buffer().clear();
     mInputBuffer.seek(0);
@@ -170,6 +210,22 @@ void AudioWaveForm::showWaveForm() {
     mInputBuffer.close();
 
     mPlayer->setSource(mUrl);
+}
+
+void AudioWaveForm::cancelDecode()
+{
+    if (!mFfmpegProcess)
+        return;
+
+    QProcess* process = mFfmpegProcess;
+    mFfmpegProcess = nullptr;
+
+    process->disconnect(this);
+    process->kill();
+    process->waitForFinished(2000);
+    process->deleteLater();
+
+    mDecodedAudio.clear();
 }
 
 void AudioWaveForm::processSampleRate()
